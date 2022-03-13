@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/main.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+    <style>
+        .messages_block {
+            border: 1px black solid;
+            border-radius: 10px;
+            padding: 3%;
+            margin-top: 20px;
+            overflow: auto;
+        }
+        .message_block {
+            width: fit-content;
+            border: 1px black solid;
+            border-radius: 10px;
+            padding: 4px;
+        }
+        .message_not_own {
+            float: right;
+        }
+        .message_own {
+            float: left;
+        }
+        .block_messages_from_person .new_line {
+            overflow: auto;
+            width: 100%;
+            padding: 5px;
+        }
+
+        .sent_from {
+            border: 1px black solid;
+            text-align: center;
+            margin: 5px 30% 5px 30%;
+            padding: 2px;
+        }
+    </style>
+</head>
+<body>
+<div id="main-content" class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="connect">WebSocket connection:</label>
+                    <button id="connect" class="btn btn-default" type="submit">Connect</button>
+                    <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
+                    </button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="userId">Enter user id</label><br>
+                    <input type="text" id="userId" class="form-control" placeholder="Your user id here..."><br>
+                    <label for="chatId">Enter chat id</label><br>
+                    <input type="text" id="chatId" class="form-control" placeholder="Your chat id here..."><br>
+                    <label for="text">Enter your message</label><br>
+                    <input type="text" id="text" class="form-control" placeholder="Your message here..."><br>
+                </div>
+                <button id="send" class="btn btn-default" type="submit">Send</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="messages_block" class="messages_block">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
