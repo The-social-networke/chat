@@ -1,9 +1,7 @@
 package com.socialnetwork.chat.service.impl;
 
 import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.exception.ChatNotFoundException;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,11 +43,10 @@ public class MessageService {
         }
         if(isLike) {
             message.getMessageLikes().add(userId);
-            return message;
         }
         else {
             message.getMessageLikes().remove(userId);
-            return message;
         }
+        return messageRepository.save(message);
     }
 }

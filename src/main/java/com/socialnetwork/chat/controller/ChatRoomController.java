@@ -5,7 +5,6 @@ import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
-import com.socialnetwork.chat.validation.On;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
