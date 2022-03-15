@@ -31,7 +31,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
             "   JOIN chat_room cr" +
             "       ON cr.id = ucr1.chat_room_id",
         nativeQuery = true)
-    boolean getChatRoomByUsers(@Param("users") Set<String> users);
+    Optional<ChatRoom> findChatRoomByUsers(@Param("users") Set<String> users);
 
     @Query(value =
         "SELECT * FROM chat_room " +

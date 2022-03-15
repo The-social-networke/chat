@@ -44,6 +44,14 @@ public class ChatRoomController {
         return chatRoomService.createChatRoom(dto);
     }
 
+    @PostMapping("/get-chat")
+    public ChatRoom findChatRoomByUsersOrElseCreate(
+        @Valid
+        @RequestBody ChatRoomCreateDto dto
+    ) {
+        return chatRoomService.findChatRoomByUsersOrElseCreate(dto);
+    }
+
     @Validated
     @DeleteMapping
     public boolean deleteChatRoom(
@@ -67,8 +75,8 @@ public class ChatRoomController {
         return chatRoomService.findMessagesByChatId(chatId, userId, pageable);
     }
 
-    @MessageMapping("/chat/sendMessage")
     @SendTo("/chat/messages")
+    @MessageMapping("/chat/sendMessage")
     public Message sendMessage(
         @Valid
         @RequestBody MessageCreateDto dto
@@ -76,8 +84,8 @@ public class ChatRoomController {
         return chatRoomService.sendMessage(dto);
     }
 
-    @MessageMapping("/chat/deleteMessage")
     @SendTo("/chat/messages")
+    @MessageMapping("/chat/deleteMessage")
     public Message deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto
@@ -85,8 +93,8 @@ public class ChatRoomController {
         return chatRoomService.deleteMessage(dto);
     }
 
-    @MessageMapping("/chat/likeMessage")
     @SendTo("/chat/messages")
+    @MessageMapping("/chat/likeMessage")
     public Message likeMessage(
         @Valid
         @RequestBody MessageLikeDto dto
@@ -94,8 +102,8 @@ public class ChatRoomController {
         return chatRoomService.toggleLikeMessage(dto);
     }
 
-    @MessageMapping("/chat/readMessage")
     @SendTo("/chat/messages")
+    @MessageMapping("/chat/readMessage")
     public Message readMessage(
         @Valid
         @RequestBody MessageReadDto dto

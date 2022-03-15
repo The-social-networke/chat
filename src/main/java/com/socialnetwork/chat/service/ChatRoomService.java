@@ -25,4 +25,6 @@ public interface ChatRoomService {
     Message toggleLikeMessage(MessageLikeDto dto);
 
     Message readMessage(MessageReadDto dto);
+
+    ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 }

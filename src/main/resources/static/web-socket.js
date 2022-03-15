@@ -1,5 +1,7 @@
-var stompClient = null;
+let stompClient = null;
 let meId = null;
+let otherUserId = null;
+let chatId = null;
 let currentMessages = null;
 
 function setConnected(connected) {
@@ -24,6 +26,7 @@ async function connect() {
             showLoadingMessage();
         });
     });
+    await init();
     await showLoadingMessage();
 }
 
@@ -35,22 +38,39 @@ function disconnect() {
     console.log("Disconnected");
 }
 
+async function init() {
+    meId = $("#userIdOne").val();
+    otherUserId = $("#userIdTwo").val();
+    let chat = await fetch("http://localhost:8081/chat/get-chat",
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'users': [meId, otherUserId]
+            })
+        })
+        .then(response => response.json())
+    console.log(chat);
+    chatId = chat.id;
+}
+
 function sendText() {
     stompClient.send("/app/chat/sendMessage", {}, JSON.stringify(
         {
             'text': $("#text").val(),
-            'userId': $("#userId").val(),
-            'chatRoomId' : $("#chatId").val()
+            'userId': meId,
+            'chatRoomId' : chatId
         }
     ));
 }
 
 function likeMessage(messageId,  isLike) {
-    console.log(isLike);
     stompClient.send("/app/chat/likeMessage", {}, JSON.stringify(
         {
             'isLike': isLike,
-            'userId': $("#userId").val(),
+            'userId': meId,
             'messageId' : messageId
         }
     ));
@@ -59,7 +79,7 @@ function likeMessage(messageId,  isLike) {
 function readMessage(messageId) {
     stompClient.send("/app/chat/readMessage", {}, JSON.stringify(
         {
-            'userId': $("#userId").val(),
+            'userId': meId,
             'messageId' : messageId
         }
     ));
@@ -68,19 +88,17 @@ function readMessage(messageId) {
 function deleteMessage(messageId) {
     stompClient.send("/app/chat/deleteMessage", {}, JSON.stringify(
         {
-            'userId': $("#userId").val(),
+            'userId': meId,
             'messageId' : messageId
         }
     ));
 }
 
-function showMessage(message) {
-    $("#messages_block").append("<tr><td>" + message + "</td></tr>");
-}
-
 async function showLoadingMessage() {
-    meId = $("#userId").val();
-    let messages = await fetch("http://localhost:8081/chat/all-messages?userId=" + meId + "&chatId=" + $("#chatId").val())
+    console.log("meId        = " + meId);
+    console.log("otherUserId = " + otherUserId);
+    console.log("chatId      = " + chatId);
+    let messages = await fetch("http://localhost:8081/chat/all-messages?userId=" + meId + "&chatId=" + chatId)
         .then(response => response.json())
         .then(response => response.content);
     console.log(messages);

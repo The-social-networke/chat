@@ -31,6 +31,40 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomMapper chatRoomMapper;
 
+
+    @Override
+    public Optional<ChatRoom> findChatRoomById(String id) {
+        log.info("Find chat room");
+
+        return chatRoomRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
+        log.info("Find chat room by users");
+
+        var chat = chatRoomRepository.findChatRoomByUsers(dto.getUsers());
+        if(chat.isEmpty()) {
+            var entity = chatRoomMapper.toEntity(dto)
+                .toBuilder()
+                .id(UUID.randomUUID().toString())
+                .build();
+            return chatRoomRepository.save(entity);
+        }
+        return chat.get();
+    }
+
+    @Override
+    public Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable) {
+        log.info("Find chat room");
+
+        var chatRoom = getChatRoomOrElseThrow(chatId);
+        checkIfUserMemberOfChat(chatRoom, userId);
+
+        return messageService.findMessagesByChatId(chatId, pageable);
+    }
+
     @Override
     @Transactional
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
@@ -57,23 +91,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         chatRoomRepository.deleteById(chatId);
 
         return true;
-    }
-
-    @Override
-    public Optional<ChatRoom> findChatRoomById(String id) {
-        log.info("Find chat room");
-
-        return chatRoomRepository.findById(id);
-    }
-
-    @Override
-    public Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable) {
-        log.info("Find chat room");
-
-        var chatRoom = getChatRoomOrElseThrow(chatId);
-        checkIfUserMemberOfChat(chatRoom, userId);
-
-        return messageService.findMessagesByChatId(chatId, pageable);
     }
 
     @Override
