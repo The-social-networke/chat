@@ -2,6 +2,8 @@ package com.socialnetwork.chat.service.impl;
 
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
+import com.socialnetwork.chat.dto.MessageLikeDto;
+import com.socialnetwork.chat.dto.MessageReadDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatNotFoundException;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,6 +35,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomMapper chatRoomMapper;
 
     @Override
+    @Transactional
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
         log.info("Create chat room");
         if(chatRoomRepository.existsChatRoomByUsers(dto.getUsers())) {
@@ -46,11 +50,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public boolean deleteChatRoom(String chatId, String userId) {
-        log.info("Deleted chat room with chat id '{}' by user '{}'", chatId, userId);
+        log.info("Deleted chat room");
 
-        checkIfChatExists(chatId);
-        checkIfUserMemberOfChat(chatId, userId);
+        var chatRoom = getChatRoomOrElseThrow(chatId);
+        checkIfUserMemberOfChat(chatRoom, userId);
 
         chatRoomRepository.deleteById(chatId);
 
@@ -59,45 +64,61 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public Optional<ChatRoom> findChatRoomById(String id) {
-        log.info("Find chat room with id '{}'", id);
+        log.info("Find chat room");
 
         return chatRoomRepository.findById(id);
     }
 
     @Override
     public Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable) {
-        log.info("Find chat room with chatId '{}' and userId '{}'", chatId, userId);
-        checkIfChatExists(chatId);
-        checkIfUserMemberOfChat(chatId, userId);
+        log.info("Find chat room");
+
+        var chatRoom = getChatRoomOrElseThrow(chatId);
+        checkIfUserMemberOfChat(chatRoom, userId);
 
         return messageService.findMessagesByChatId(chatId, pageable);
     }
 
     @Override
+    @Transactional
     public Message sendMessage(MessageCreateDto dto) {
         log.info("Send message");
 
-        checkIfChatExists(dto.getChatRoomId());
-        checkIfUserMemberOfChat(dto.getChatRoomId(), dto.getUserId());
+        var chatRoom = getChatRoomOrElseThrow(dto.getChatRoomId());
+        checkIfUserMemberOfChat(chatRoom, dto.getUserId());
 
         return messageService.sendMessage(dto);
     }
 
-    public Message toggleLike(String userId, String messageId, boolean isLike) {
-        ChatRoom chatRoomOfMessage = chatRoomRepository.getChatRoomByMessageId(messageId);
-        if(chatRoomOfMessage == null) {
+    @Override
+    @Transactional
+    public Message toggleLikeMessage(MessageLikeDto dto) {
+        log.info("Like message {}", dto.getIsLike());
+
+        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
+        if(chatRoomOfMessage.isEmpty()) {
             throw new ChatNotFoundException();
         }
+        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
 
-        checkIfUserMemberOfChat(userId, chatRoomOfMessage.getId());
-
-        return messageService.toggleLike(userId, messageId, isLike);
+        return messageService.toggleLikeMessage(dto);
     }
 
-    private void checkIfUserMemberOfChat(String chatId, String userId) throws DeniedAccessNotMemberOfChatException {
-        ChatRoom chatRoom = chatRoomRepository.findById(chatId)
-            .orElseThrow(ChatNotFoundException::new);
+    @Override
+    @Transactional
+    public Message readMessage(MessageReadDto dto) {
+        log.info("Read message");
 
+        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
+        if(chatRoomOfMessage.isEmpty()) {
+            throw new ChatNotFoundException();
+        }
+        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
+
+        return messageService.readMessage(dto);
+    }
+
+    private void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws DeniedAccessNotMemberOfChatException {
         boolean isMemberOfChat = chatRoom.getUsers()
             .stream()
             .anyMatch(u -> u.equals(userId));
@@ -106,9 +127,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
     }
 
-    private void checkIfChatExists(String chatId) throws ChatNotFoundException {
-        if(!chatRoomRepository.existsById(chatId)) {
-            throw new ChatNotFoundException();
-        }
+    private ChatRoom getChatRoomOrElseThrow(String chatId) throws ChatNotFoundException {
+        var chatRoom = chatRoomRepository.findById(chatId);
+        return chatRoom.orElseThrow(ChatNotFoundException::new);
     }
 }

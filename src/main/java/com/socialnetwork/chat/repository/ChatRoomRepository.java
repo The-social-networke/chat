@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
@@ -38,5 +39,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
             "   (SELECT chat_room_id FROM message" +
             "       WHERE id = :messageId)",
         nativeQuery = true)
-    ChatRoom getChatRoomByMessageId(@Param("messageId") String messageId);
+    Optional<ChatRoom> findChatRoomByMessageId(@Param("messageId") String messageId);
 }

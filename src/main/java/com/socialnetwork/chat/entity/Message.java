@@ -40,7 +40,7 @@ public class Message implements Serializable {
     private LocalDateTime updatedAt;
 
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
     private ChatRoom chatRoom;
 
     @ElementCollection(fetch = FetchType.EAGER)

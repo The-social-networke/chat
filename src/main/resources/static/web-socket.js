@@ -1,6 +1,6 @@
 var stompClient = null;
-let lastMessageFromId = null;
 let meId = null;
+let currentMessages = null;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -45,6 +45,27 @@ function sendText() {
     ));
 }
 
+function likeMessage(messageId,  isLike) {
+    console.log(isLike);
+    stompClient.send("/app/chat/likeMessage", {}, JSON.stringify(
+        {
+            'isLike': isLike,
+            'userId': $("#userId").val(),
+            'messageId' : messageId
+        }
+    ));
+}
+
+function readMessage(messageId) {
+    console.log(isLike);
+    stompClient.send("/app/chat/readMessage", {}, JSON.stringify(
+        {
+            'userId': $("#userId").val(),
+            'messageId' : messageId
+        }
+    ));
+}
+
 async function showLoadingMessage() {
     meId = $("#userId").val();
     let messages = await fetch("http://localhost:8081/chat/all-messages?userId=" + meId + "&chatId=" + $("#chatId").val())
@@ -57,6 +78,7 @@ async function showLoadingMessage() {
     let append = (str) => {
         text += str;
     }
+    currentMessages = messages;
     messages.forEach(message => {
         if (createdBlock === true && (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"])) {
             append("</div>");
@@ -73,15 +95,18 @@ async function showLoadingMessage() {
             createdBlock = true;
         }
         let isOwnStyle = meId === message["userId"] ? "message_own" : "message_not_own";
-        console.log(meId + " == " + message["userId"] + " r = ")
-        console.log(meId === message["userId"])
+
+        let isLiked = message.messageLikes.length === 0 ? "" : "color:red;";
+        let isRead = message.messageReads.length === 0 ? "" : "border-style: inset;";
+        let style = "style=\" " + isLiked + isRead + " \"";
+
         append(
-            "<div class=\"new_line\">" +
+            "<div class=\"new_line\" id=\"" + message.id  + "\" " + style + ">" +
             "<div class=\"" + isOwnStyle + " message_block\">"
         )
         append(message.text);
         append(
-            "<div class=\"sent_at\">" + message["sentAt"] + "</div>"
+            "<div class=\"sent_at\" style='font-size: 0.5em'>" + message["sentAt"].substring(0,19) + "</div>"
         )
         append(
             "</div>" +
@@ -90,6 +115,21 @@ async function showLoadingMessage() {
         lastMessageFromIdLoading = message["userId"];
     })
     $("#messages_block").empty().append(text)
+    currentMessages.forEach(message => {
+        if(message.userId !== meId) {
+            $("#" + message.id)
+                // .mouseup(function () {
+                //     likeMessage(message.id, message.messageLikes.length === 0);
+                // })
+                .click(function () {
+                    console.log("D1");
+                    if(!message.messageReads.includes(meId)) {
+                        console.log("D2");
+                        likeMessage(message.id, message.messageLikes.length === 0);
+                    }
+                })
+        }
+    })
 }
 
 function showMessage(message) {

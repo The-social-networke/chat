@@ -2,6 +2,8 @@ package com.socialnetwork.chat.service;
 
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
+import com.socialnetwork.chat.dto.MessageLikeDto;
+import com.socialnetwork.chat.dto.MessageReadDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import org.springframework.data.domain.Page;
@@ -20,4 +22,8 @@ public interface ChatRoomService {
     Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
 
     Message sendMessage(MessageCreateDto dto);
+
+    Message toggleLikeMessage(MessageLikeDto dto);
+
+    Message readMessage(MessageReadDto dto);
 }
