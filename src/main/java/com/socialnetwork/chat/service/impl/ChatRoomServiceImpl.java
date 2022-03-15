@@ -1,9 +1,6 @@
 package com.socialnetwork.chat.service.impl;
 
-import com.socialnetwork.chat.dto.ChatRoomCreateDto;
-import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.dto.MessageLikeDto;
-import com.socialnetwork.chat.dto.MessageReadDto;
+import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatNotFoundException;
@@ -88,6 +85,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         checkIfUserMemberOfChat(chatRoom, dto.getUserId());
 
         return messageService.sendMessage(dto);
+    }
+
+    @Override
+    @Transactional
+    public Message deleteMessage(MessageDeleteDto dto) {
+        log.info("Delete message");
+
+        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
+        if(chatRoomOfMessage.isEmpty()) {
+            throw new ChatNotFoundException();
+        }
+        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
+
+        return messageService.deleteMessage(dto);
     }
 
     @Override

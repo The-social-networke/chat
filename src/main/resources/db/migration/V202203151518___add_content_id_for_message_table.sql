@@ -1,0 +1,2 @@
+ALTER TABLE message
+    ADD COLUMN content_id   VARCHAR(36) DEFAULT NULL;

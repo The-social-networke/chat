@@ -1,9 +1,6 @@
 package com.socialnetwork.chat.controller;
 
-import com.socialnetwork.chat.dto.ChatRoomCreateDto;
-import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.dto.MessageLikeDto;
-import com.socialnetwork.chat.dto.MessageReadDto;
+import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
@@ -77,6 +74,15 @@ public class ChatRoomController {
         @RequestBody MessageCreateDto dto
     ) {
         return chatRoomService.sendMessage(dto);
+    }
+
+    @MessageMapping("/chat/deleteMessage")
+    @SendTo("/chat/messages")
+    public Message deleteMessage(
+        @Valid
+        @RequestBody MessageDeleteDto dto
+    ) {
+        return chatRoomService.deleteMessage(dto);
     }
 
     @MessageMapping("/chat/likeMessage")

@@ -57,13 +57,25 @@ function likeMessage(messageId,  isLike) {
 }
 
 function readMessage(messageId) {
-    console.log(isLike);
     stompClient.send("/app/chat/readMessage", {}, JSON.stringify(
         {
             'userId': $("#userId").val(),
             'messageId' : messageId
         }
     ));
+}
+
+function deleteMessage(messageId) {
+    stompClient.send("/app/chat/deleteMessage", {}, JSON.stringify(
+        {
+            'userId': $("#userId").val(),
+            'messageId' : messageId
+        }
+    ));
+}
+
+function showMessage(message) {
+    $("#messages_block").append("<tr><td>" + message + "</td></tr>");
 }
 
 async function showLoadingMessage() {
@@ -97,12 +109,12 @@ async function showLoadingMessage() {
         let isOwnStyle = meId === message["userId"] ? "message_own" : "message_not_own";
 
         let isLiked = message.messageLikes.length === 0 ? "" : "color:red;";
-        let isRead = message.messageReads.length === 0 ? "" : "border-style: inset;";
+        let isRead = message.messageReads.length === 0 ? "" : "border-style: dotted;";
         let style = "style=\" " + isLiked + isRead + " \"";
 
         append(
-            "<div class=\"new_line\" id=\"" + message.id  + "\" " + style + ">" +
-            "<div class=\"" + isOwnStyle + " message_block\">"
+            "<div class=\"new_line\" id=\"" + message.id  + "\">" +
+            "<div class=\"" + isOwnStyle + " message_block\" " + style + ">"
         )
         append(message.text);
         append(
@@ -118,22 +130,24 @@ async function showLoadingMessage() {
     currentMessages.forEach(message => {
         if(message.userId !== meId) {
             $("#" + message.id)
-                // .mouseup(function () {
-                //     likeMessage(message.id, message.messageLikes.length === 0);
-                // })
                 .click(function () {
-                    console.log("D1");
-                    if(!message.messageReads.includes(meId)) {
-                        console.log("D2");
-                        likeMessage(message.id, message.messageLikes.length === 0);
+                    likeMessage(message.id, message.messageLikes.length === 0);
+                })
+                .mouseover(function () {
+                    if(message.messageReads.length === 0) {
+                        if (!message.messageReads.includes(meId)) {
+                            readMessage(message.id);
+                        }
                     }
                 })
         }
+        else {
+            $("#" + message.id)
+                .click(function () {
+                    deleteMessage(message.id)
+                })
+        }
     })
-}
-
-function showMessage(message) {
-    $("#messages_block").append("<tr><td>" + message + "</td></tr>");
 }
 
 $(function () {
@@ -144,30 +158,3 @@ $(function () {
     $( "#disconnect" ).click(function() { disconnect(); });
     $( "#send" ).click(function() { sendText(); });
 });
-
-// example
-// <div className="block_messages_from_person">
-//     <div className="new_line">
-//         <div className="message_own message_block">
-//             sda_me
-//             <div className="sent_at">12.12.12</div>
-//         </div>
-//     </div>
-// </div>
-// <div className="block_messages_from_person">
-//     <div className="sent_from">
-//         Person
-//     </div>
-//     <div className="new_line">
-//         <div className="message_not_own message_block">
-//             sda_not_me
-//             <div className="sent_at">12.12.12</div>
-//         </div>
-//     </div>
-//     <div className="new_line">
-//         <div className="message_not_own message_block">
-//             sda_not_me
-//             <div className="sent_at">12.12.13</div>
-//         </div>
-//     </div>
-// </div>

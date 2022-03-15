@@ -8,17 +8,11 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class MessageCreateDto {
+public class MessageDeleteDto {
 
-    private String text;
-
-    @NotNull(message = "chat room id should not be null")
-    private String chatRoomId;
+    @NotNull(message = "message id should not be null")
+    private String messageId;
 
     @NotNull(message = "user id should not be null")
     private String userId;
-
-    private Byte[] photo;
-
-    private String contentId;
 }

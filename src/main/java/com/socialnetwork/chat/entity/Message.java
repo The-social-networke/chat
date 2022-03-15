@@ -31,6 +31,9 @@ public class Message implements Serializable {
 
     private Byte[] photo;
 
+    @Column(name = "content_id")
+    private String contentId;
+
     @CreationTimestamp
     @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
@@ -40,7 +43,7 @@ public class Message implements Serializable {
     private LocalDateTime updatedAt;
 
     @JsonIgnore
-    @ManyToOne(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER)
     private ChatRoom chatRoom;
 
     @ElementCollection(fetch = FetchType.EAGER)

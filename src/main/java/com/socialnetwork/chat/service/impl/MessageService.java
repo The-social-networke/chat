@@ -1,11 +1,13 @@
 package com.socialnetwork.chat.service.impl;
 
 import com.socialnetwork.chat.dto.MessageCreateDto;
+import com.socialnetwork.chat.dto.MessageDeleteDto;
 import com.socialnetwork.chat.dto.MessageLikeDto;
 import com.socialnetwork.chat.dto.MessageReadDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatNotFoundException;
+import com.socialnetwork.chat.exception.UserDeleteNotOwnMessageException;
 import com.socialnetwork.chat.exception.UserLikeHisMessageException;
 import com.socialnetwork.chat.exception.UserReadHisMessageException;
 import com.socialnetwork.chat.mapper.MessageMapper;
@@ -29,10 +31,10 @@ public class MessageService {
 
     private final MessageMapper messageMapper;
 
+
     public Page<Message> findMessagesByChatId(String chatId, Pageable pageable) {
         return messageRepository.findAllByChatRoomId(chatId, pageable);
     }
-
 
     public Message sendMessage(MessageCreateDto dto) {
         var entity = messageMapper.toEntity(dto)
@@ -40,6 +42,17 @@ public class MessageService {
             .id(UUID.randomUUID().toString())
             .build();
         return messageRepository.save(entity);
+    }
+
+    public Message deleteMessage(MessageDeleteDto dto) {
+        Message message = messageRepository.findById(dto.getMessageId()).get();
+
+        if(!message.getUserId().equals(dto.getUserId())) {
+            throw new UserDeleteNotOwnMessageException();
+        }
+
+        messageRepository.delete(message);
+        return message;
     }
 
     public Message toggleLikeMessage(MessageLikeDto dto) {
