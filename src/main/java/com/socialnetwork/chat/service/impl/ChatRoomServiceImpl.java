@@ -33,7 +33,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final ChatRoomMapper chatRoomMapper;
 
-    private String systemUserId = "8a744b81-38fd-4fe1-a032-33836e7a0221";
+    @Value( "${app.system-user-id}" )
+    private String systemUserId;
 
 
     @Override
