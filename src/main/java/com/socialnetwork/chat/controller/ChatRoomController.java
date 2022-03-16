@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
 
@@ -50,6 +51,15 @@ public class ChatRoomController {
         @RequestBody ChatRoomCreateDto dto
     ) {
         return chatRoomService.findChatRoomByUsersOrElseCreate(dto);
+    }
+
+    @Validated
+    @PostMapping("/get-system-chat")
+    public ChatRoom findSystemChatRoomByUserOrElseCreate(
+        @NotNull(message = "userId should not be null")
+        @RequestBody String userId
+    ) {
+        return chatRoomService.findSystemChatRoomByUserOrElseCreate(userId);
     }
 
     @Validated

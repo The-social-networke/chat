@@ -12,12 +12,14 @@ import com.socialnetwork.chat.service.ChatRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -30,6 +32,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final MessageService messageService;
 
     private final ChatRoomMapper chatRoomMapper;
+
+    private String systemUserId = "8a744b81-38fd-4fe1-a032-33836e7a0221";
 
 
     @Override
@@ -51,6 +55,23 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .id(UUID.randomUUID().toString())
                 .build();
             return chatRoomRepository.save(entity);
+        }
+        return chat.get();
+    }
+
+    @Override
+    @Transactional
+    public ChatRoom findSystemChatRoomByUserOrElseCreate(String userId) {
+        log.info("Find system chat room by users");
+
+        var chat = chatRoomRepository.findChatRoomByUsers(Set.of(userId, systemUserId));
+        if(chat.isEmpty()) {
+            var newChatRoom = new ChatRoom()
+                .toBuilder()
+                .id(UUID.randomUUID().toString())
+                .users(Set.of(userId, systemUserId))
+                .build();
+            return chatRoomRepository.save(newChatRoom);
         }
         return chat.get();
     }

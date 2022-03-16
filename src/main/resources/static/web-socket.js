@@ -43,18 +43,30 @@ function disconnect() {
 async function init() {
     meId = $("#userIdOne").val();
     otherUserId = $("#userIdTwo").val();
-    let chat = await fetch("http://localhost:8081/chat/get-chat",
-        {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                'users': [meId, otherUserId]
+    let chat = null;
+    if(otherUserId) {
+        chat = await fetch("http://localhost:8081/chat/get-chat",
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    'users': [meId, otherUserId]
+                })
             })
-        })
-        .then(response => response.json())
-    console.log(chat);
+            .then(response => response.json())
+    } else {
+        chat = await fetch("http://localhost:8081/chat/get-system-chat",
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: meId
+            })
+            .then(response => response.json())
+    }
     chatId = chat.id;
     changeCurrentData()
 }
@@ -103,6 +115,7 @@ function deleteMessage(messageId) {
         }
     ));
 }
+
 function updateMessage() {
     if(messageToChangeId === null) {
         alert("select message!")

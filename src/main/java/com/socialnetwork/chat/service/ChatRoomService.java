@@ -14,6 +14,8 @@ public interface ChatRoomService {
 
     ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
+    ChatRoom findSystemChatRoomByUserOrElseCreate(String userId);
+
     Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
 
     ChatRoom createChatRoom(ChatRoomCreateDto chatRoomDto);
