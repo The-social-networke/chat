@@ -3,6 +3,8 @@ let meId = null;
 let otherUserId = null;
 let chatId = null;
 let currentMessages = null;
+let messageToChangeId = null;
+let messageText = null;
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -54,6 +56,14 @@ async function init() {
         .then(response => response.json())
     console.log(chat);
     chatId = chat.id;
+    changeCurrentData()
+}
+
+function changeCurrentData() {
+    $("#userIdOneShow").text(meId);
+    $("#userIdTwoShow").text(otherUserId);
+    $("#chatIdShow").text(chatId);
+    $("#messageToChangeIdShow").text(messageToChangeId + " [" + messageText + "] ");
 }
 
 function sendText() {
@@ -90,6 +100,19 @@ function deleteMessage(messageId) {
         {
             'userId': meId,
             'messageId' : messageId
+        }
+    ));
+}
+function updateMessage() {
+    if(messageToChangeId === null) {
+        alert("select message!")
+        return;
+    }
+    stompClient.send("/app/chat/updateMessage", {}, JSON.stringify(
+        {
+            'text': $("#text").val(),
+            'userId': meId,
+            'messageId' : messageToChangeId
         }
     ));
 }
@@ -134,9 +157,12 @@ async function showLoadingMessage() {
             "<div class=\"new_line\" id=\"" + message.id  + "\">" +
             "<div class=\"" + isOwnStyle + " message_block\" " + style + ">"
         )
-        append(message.text);
+        append(message.text + "<br>");
+        if(message.updated === true) {
+            append("<b style='font-size: 0.5em;'>updated</b>")
+        }
         append(
-            "<div class=\"sent_at\" style='font-size: 0.5em'>" + message["sentAt"].substring(0,19) + "</div>"
+            "<div class=\"sent_at\" style=\"font-size: 0.5em\">" + message["sentAt"].substring(0,19) + "</div>"
         )
         append(
             "</div>" +
@@ -164,6 +190,11 @@ async function showLoadingMessage() {
                 .click(function () {
                     deleteMessage(message.id)
                 })
+                .mouseover(function () {
+                    messageToChangeId = message.id
+                    messageText = message.text
+                    changeCurrentData()
+                })
         }
     })
 }
@@ -175,4 +206,5 @@ $(function () {
     $( "#connect" ).click(function() { connect(); });
     $( "#disconnect" ).click(function() { disconnect(); });
     $( "#send" ).click(function() { sendText(); });
+    $( "#update" ).click(function() { updateMessage(); });
 });

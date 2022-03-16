@@ -94,6 +94,15 @@ public class ChatRoomController {
     }
 
     @SendTo("/chat/messages")
+    @MessageMapping("/chat/updateMessage")
+    public Message updateMessage(
+        @Valid
+        @RequestBody MessageUpdateDto dto
+    ) {
+        return chatRoomService.updateMessage(dto);
+    }
+
+    @SendTo("/chat/messages")
     @MessageMapping("/chat/likeMessage")
     public Message likeMessage(
         @Valid

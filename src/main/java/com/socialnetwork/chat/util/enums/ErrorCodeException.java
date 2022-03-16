@@ -16,7 +16,8 @@ public enum ErrorCodeException {
     CHAT_WITH_THESE_USERS_ALREADY_EXISTS(1002, "chat with these users already exits"),
     USER_CANNOT_LIKE_HIS_MESSAGE(1003, "user cannot like himself"),
     USER_CANNOT_READ_HIS_MESSAGE(1004, "user cannot read his message"),
-    USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1005, "user cnnot delete not own message");
+    USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1005, "user cannot delete not own message"),
+    USER_CANNOT_UPDATE_NOT_OWN_MESSAGE(1006, "user cannot update not own message");
 
     @JsonValue
     private final long code;

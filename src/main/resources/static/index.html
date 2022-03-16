@@ -65,7 +65,15 @@
                     <label for="text">Enter your message</label><br>
                     <input type="text" id="text" class="form-control" placeholder="Your message here..."><br>
                 </div>
-                <button id="send" class="btn btn-default" type="submit">Send</button>
+                <div class="form-group" style="border: darkgrey 1px solid; padding: 5px; font-size: 0.8em">
+                    <b style="padding-left: 45%">Status</b><br/>
+                    userOneId (me) = <label id="userIdOneShow"></label><br/>
+                    userTwoId = <label id="userIdTwoShow"></label><br/>
+                    chatId = <label id="chatIdShow"></label><br/>
+                    message to change id = <label id="messageToChangeIdShow"></label><br/>
+                </div>
+                <button id="send" class="btn btn-default" type="submit" style="border: darkgrey 1px solid; margin-top: 20px">Send</button>
+                <button id="update" class="btn btn-default" style="border: darkgrey 1px solid; margin-top: 20px">Update</button>
             </form>
         </div>
     </div>

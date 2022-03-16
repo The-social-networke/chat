@@ -61,7 +61,7 @@ class MessageServiceTest {
                 )
                 .text("Hello")
                 .sentAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .isUpdated(false)
                 .build(),
             new Message()
                 .toBuilder()
@@ -75,7 +75,7 @@ class MessageServiceTest {
                 )
                 .text("hi")
                 .sentAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
+                .isUpdated(false)
                 .build()
         );
     }

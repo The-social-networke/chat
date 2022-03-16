@@ -120,6 +120,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
+    public Message updateMessage(MessageUpdateDto dto) {
+        log.info("Update message");
+
+        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
+        if(chatRoomOfMessage.isEmpty()) {
+            throw new ChatNotFoundException();
+        }
+        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
+
+        return messageService.updateMessage(dto);
+    }
+
+    @Override
+    @Transactional
     public Message toggleLikeMessage(MessageLikeDto dto) {
         log.info("Like message {}", dto.getIsLike());
 

@@ -308,7 +308,7 @@ class ChatRoomServiceTest {
             .toBuilder()
             .id("3bb05f77-2b8f-4bf6-969d-8179cb298e69")
             .sentAt(LocalDateTime.now())
-            .updatedAt(LocalDateTime.now())
+            .isUpdated(false)
             .chatRoom(chatRoomExpect)
             .userId(userId)
             .text("some text")

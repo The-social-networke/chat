@@ -1,15 +1,9 @@
 package com.socialnetwork.chat.service.impl;
 
-import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.dto.MessageDeleteDto;
-import com.socialnetwork.chat.dto.MessageLikeDto;
-import com.socialnetwork.chat.dto.MessageReadDto;
+import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.exception.ChatNotFoundException;
-import com.socialnetwork.chat.exception.UserDeleteNotOwnMessageException;
-import com.socialnetwork.chat.exception.UserLikeHisMessageException;
-import com.socialnetwork.chat.exception.UserReadHisMessageException;
+import com.socialnetwork.chat.exception.*;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,6 +49,35 @@ public class MessageService {
         return message;
     }
 
+    public Message readMessage(MessageReadDto dto) {
+        Message message = messageRepository.findById(dto.getMessageId()).get();
+
+        if(message.getUserId().equals(dto.getUserId())) {
+            throw new UserReadHisMessageException();
+        }
+
+        boolean isAlreadyRead = message.getMessageReads().contains(dto.getUserId());
+        if(isAlreadyRead) {
+            return message;
+        }
+        message.getMessageReads().add(dto.getUserId());
+        return messageRepository.save(message);
+    }
+
+    public Message updateMessage(MessageUpdateDto dto) {
+        Message message = messageRepository.findById(dto.getMessageId()).get();
+
+        if(!message.getUserId().equals(dto.getUserId())) {
+            throw new UserUpdateNotOwnMessageException();
+        }
+
+        message = message.toBuilder()
+            .isUpdated(true)
+            .text(dto.getText())
+            .build();
+        return messageRepository.save(message);
+    }
+
     public Message toggleLikeMessage(MessageLikeDto dto) {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
@@ -73,21 +96,6 @@ public class MessageService {
         else {
             message.getMessageLikes().remove(dto.getUserId());
         }
-        return messageRepository.save(message);
-    }
-
-    public Message readMessage(MessageReadDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
-
-        if(message.getUserId().equals(dto.getUserId())) {
-            throw new UserReadHisMessageException();
-        }
-
-        boolean isAlreadyRead = message.getMessageReads().contains(dto.getUserId());
-        if(isAlreadyRead) {
-            return message;
-        }
-        message.getMessageReads().add(dto.getUserId());
         return messageRepository.save(message);
     }
 }

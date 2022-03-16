@@ -38,9 +38,8 @@ public class Message implements Serializable {
     @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+    @Column(name = "is_updated")
+    private boolean isUpdated;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)

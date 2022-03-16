@@ -10,13 +10,17 @@ import java.util.Optional;
 
 public interface ChatRoomService {
 
+    Optional<ChatRoom> findChatRoomById(String id);
+
+    ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
+
+    Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
+
     ChatRoom createChatRoom(ChatRoomCreateDto chatRoomDto);
 
     boolean deleteChatRoom(String chatId, String userId);
 
-    Optional<ChatRoom> findChatRoomById(String id);
-
-    Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
+    Message updateMessage(MessageUpdateDto dto);
 
     Message sendMessage(MessageCreateDto dto);
 
@@ -25,6 +29,4 @@ public interface ChatRoomService {
     Message toggleLikeMessage(MessageLikeDto dto);
 
     Message readMessage(MessageReadDto dto);
-
-    ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 }
