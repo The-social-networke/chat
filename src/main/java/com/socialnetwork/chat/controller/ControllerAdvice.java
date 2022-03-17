@@ -2,7 +2,7 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.dto.ErrorDto;
 import com.socialnetwork.chat.dto.ErrorViolationDto;
-import com.socialnetwork.chat.exception.EntityException;
+import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.util.FieldViolationsError;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import org.springframework.http.HttpStatus;
@@ -59,8 +59,8 @@ public class ControllerAdvice {
     }
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(EntityException.class)
-    public ErrorDto handleNotFoundError(EntityException ex) {
+    @ExceptionHandler(ChatException.class)
+    public ErrorDto handleNotFoundError(ChatException ex) {
 
         return ErrorDto.builder()
             .message(ex.getMessage())

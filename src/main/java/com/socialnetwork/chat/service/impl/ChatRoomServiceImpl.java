@@ -3,12 +3,11 @@ package com.socialnetwork.chat.service.impl;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.exception.ChatNotFoundException;
-import com.socialnetwork.chat.exception.ChatWithTheseUsersAlreadyExists;
-import com.socialnetwork.chat.exception.DeniedAccessNotMemberOfChatException;
+import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.ChatRoomMapper;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
+import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,7 +91,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
         log.info("Create chat room");
         if(chatRoomRepository.existsChatRoomByUsers(dto.getUsers())) {
-            throw new ChatWithTheseUsersAlreadyExists();
+            throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
 
         var entity = chatRoomMapper.toEntity(dto)
@@ -133,7 +132,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
         if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatNotFoundException();
+            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
 
@@ -147,7 +146,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
         if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatNotFoundException();
+            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
 
@@ -161,7 +160,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
         if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatNotFoundException();
+            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
 
@@ -175,24 +174,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
         if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatNotFoundException();
+            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
 
         return messageService.readMessage(dto);
     }
 
-    private void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws DeniedAccessNotMemberOfChatException {
+    private void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
         boolean isMemberOfChat = chatRoom.getUsers()
             .stream()
             .anyMatch(u -> u.equals(userId));
         if(!isMemberOfChat) {
-            throw new DeniedAccessNotMemberOfChatException(userId);
+            throw new ChatException(ErrorCodeException.NOT_MEMBER_OF_CHAT);
         }
     }
 
-    private ChatRoom getChatRoomOrElseThrow(String chatId) throws ChatNotFoundException {
+    private ChatRoom getChatRoomOrElseThrow(String chatId) throws ChatException {
         var chatRoom = chatRoomRepository.findById(chatId);
-        return chatRoom.orElseThrow(ChatNotFoundException::new);
+        return chatRoom.orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
     }
 }

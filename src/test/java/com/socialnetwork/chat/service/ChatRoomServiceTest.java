@@ -4,9 +4,6 @@ import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.exception.ChatNotFoundException;
-import com.socialnetwork.chat.exception.ChatWithTheseUsersAlreadyExists;
-import com.socialnetwork.chat.exception.DeniedAccessNotMemberOfChatException;
 import com.socialnetwork.chat.mapper.ChatRoomMapperImpl;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
@@ -30,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;

@@ -6,6 +6,7 @@ import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.*;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
+import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class MessageService {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
         if(!message.getUserId().equals(dto.getUserId())) {
-            throw new UserDeleteNotOwnMessageException();
+            throw new ChatException(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE);
         }
 
         messageRepository.delete(message);
@@ -53,7 +54,7 @@ public class MessageService {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
         if(message.getUserId().equals(dto.getUserId())) {
-            throw new UserReadHisMessageException();
+            throw new ChatException(ErrorCodeException.USER_CANNOT_READ_HIS_MESSAGE);
         }
 
         boolean isAlreadyRead = message.getMessageReads().contains(dto.getUserId());
@@ -68,7 +69,7 @@ public class MessageService {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
         if(!message.getUserId().equals(dto.getUserId())) {
-            throw new UserUpdateNotOwnMessageException();
+            throw new ChatException(ErrorCodeException.USER_CANNOT_UPDATE_NOT_OWN_MESSAGE);
         }
 
         message = message.toBuilder()
@@ -82,7 +83,7 @@ public class MessageService {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
         if(message.getUserId().equals(dto.getUserId())) {
-            throw new UserLikeHisMessageException();
+            throw new ChatException(ErrorCodeException.USER_CANNOT_LIKE_HIS_MESSAGE);
         }
 
         boolean isAlreadyLiked = message.getMessageLikes().contains(dto.getUserId());
