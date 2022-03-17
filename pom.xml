@@ -62,6 +62,11 @@
 			<version>2.6.2</version>
 		</dependency>
 		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>2.14.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-envers</artifactId>
 			<version>5.6.5.Final</version>
@@ -74,7 +79,7 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>8.5.1</version>
+			<version>8.5.2</version>
 		</dependency>
 
 		<!-- Web -->

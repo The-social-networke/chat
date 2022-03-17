@@ -21,11 +21,12 @@ import java.util.Set;
 public class ChatRoom implements Serializable {
 
     @Id
+    @Column(nullable = false, updatable = false)
     private String id;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="user__chat_room", joinColumns=@JoinColumn(name="chat_room_id"))
-    @Column(name="user_id")
+    @Column(name="user_id", nullable = false)
     private Set<String> users;
 
     @JsonIgnore

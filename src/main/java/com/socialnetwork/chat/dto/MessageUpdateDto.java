@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.dto;
 
+import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -17,4 +18,10 @@ public class MessageUpdateDto {
 
     @NotNull(message = "user id should not be null")
     private String userId;
+
+    private Byte[] photo;
+
+    private String forwardId;
+
+    private ForwardType forwardType;
 }

@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.dto;
 
+import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -20,5 +21,7 @@ public class MessageCreateDto {
 
     private Byte[] photo;
 
-    private String contentId;
+    private String forwardId;
+
+    private ForwardType forwardType;
 }
