@@ -39,10 +39,10 @@ public class MessageService {
         return messageRepository.save(entity);
     }
 
-    public Message deleteMessage(MessageDeleteDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
+    public Message deleteMessage(String userId, String messageId) {
+        Message message = messageRepository.findById(messageId).get();
 
-        if(!message.getUserId().equals(dto.getUserId())) {
+        if(!message.getUserId().equals(userId)) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE);
         }
 

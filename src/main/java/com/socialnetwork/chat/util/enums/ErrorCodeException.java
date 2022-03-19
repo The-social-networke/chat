@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 public enum ErrorCodeException {
     MISSING_ARGUMENT(500, "missing argument"),
     NOT_VALID_PARAM(501, "not valid"),
+    FORBIDDEN(502, "forbidden"),
 
     CHAT_NOT_FOUND(1000, "chat not found"),
     NOT_MEMBER_OF_CHAT(1001, "not member of chat"),

@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+//todo delete it
 public class MessageDeleteDto {
 
     @NotNull(message = "message id should not be null")

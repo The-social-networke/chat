@@ -4,6 +4,7 @@ import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.ChatRoomMapperImpl;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
@@ -21,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@ActiveProfiles("dev")
 @RunWith(MockitoJUnitRunner.class)
 class ChatRoomServiceTest {
 
@@ -135,38 +138,28 @@ class ChatRoomServiceTest {
     @Test
     void testCreateChatRoomIfNotExists() {
         ChatRoom expectChatRoom = chatRooms.get(0);
-        ChatRoomCreateDto dto = new ChatRoomCreateDto()
-            .toBuilder()
-            .users(Set.of(users.get(0), users.get(1)))
-            .build();
 
-        when(repository.existsChatRoomByUsers(Set.of(users.get(0), users.get(1)))).thenReturn(false);
+        when(repository.existsChatRoomByUsers(users.get(0), users.get(1))).thenReturn(false);
         when(repository.save(any(ChatRoom.class))).thenReturn(expectChatRoom);
 
-        ChatRoom chatRoomResult = service.createChatRoom(dto);
+        ChatRoom chatRoomResult = service.createChatRoom(users.get(0), users.get(1));
 
         Assertions.assertEquals(chatRoomResult, expectChatRoom);
-        verify(repository).existsChatRoomByUsers(Set.of(users.get(0), users.get(1)));
+        verify(repository).existsChatRoomByUsers(users.get(0), users.get(1));
         verify(repository).save(any(ChatRoom.class));
     }
 
     @Test
     void testCreateChatRoomIfExists() {
-        ChatRoom expectChatRoom = chatRooms.get(0);
-        ChatRoomCreateDto dto = new ChatRoomCreateDto()
-            .toBuilder()
-            .users(Set.of(users.get(0), users.get(1)))
-            .build();
+        when(repository.existsChatRoomByUsers(users.get(0), users.get(1))).thenReturn(true);
 
-        when(repository.existsChatRoomByUsers(Set.of(users.get(0), users.get(1)))).thenReturn(true);
-
-        ChatWithTheseUsersAlreadyExists thrown = assertThrows(
-            ChatWithTheseUsersAlreadyExists.class,
-            () -> service.createChatRoom(dto)
+        ChatException thrown = assertThrows(
+            ChatException.class,
+            () -> service.createChatRoom(users.get(0), users.get(1))
         );
 
         Assertions.assertEquals(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS, thrown.getErrorCodeException());
-        verify(repository).existsChatRoomByUsers(Set.of(users.get(0), users.get(1)));
+        verify(repository).existsChatRoomByUsers(users.get(0), users.get(1));
     }
 
     @Test
@@ -194,8 +187,8 @@ class ChatRoomServiceTest {
         when(repository.existsById(chatId)).thenReturn(true);
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
 
-        DeniedAccessNotMemberOfChatException thrown = assertThrows(
-            DeniedAccessNotMemberOfChatException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.deleteChatRoom(chatId, userId)
         );
 
@@ -211,8 +204,8 @@ class ChatRoomServiceTest {
 
         when(repository.existsById(chatId)).thenReturn(false);
 
-        ChatNotFoundException thrown = assertThrows(
-            ChatNotFoundException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.deleteChatRoom(chatId, userId)
         );
 
@@ -262,8 +255,8 @@ class ChatRoomServiceTest {
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
 
         var pageable = Pageable.ofSize(4);
-        DeniedAccessNotMemberOfChatException thrown = assertThrows(
-            DeniedAccessNotMemberOfChatException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.findMessagesByChatId(chatId, userId, pageable)
         );
 
@@ -280,8 +273,8 @@ class ChatRoomServiceTest {
         when(repository.existsById(chatId)).thenReturn(false);
 
         var pageable = Pageable.ofSize(4);
-        ChatNotFoundException thrown = assertThrows(
-            ChatNotFoundException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.findMessagesByChatId(chatId, userId, pageable)
         );
 
@@ -337,8 +330,8 @@ class ChatRoomServiceTest {
         when(repository.existsById(chatId)).thenReturn(true);
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
 
-        DeniedAccessNotMemberOfChatException thrown = assertThrows(
-            DeniedAccessNotMemberOfChatException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 
@@ -360,8 +353,8 @@ class ChatRoomServiceTest {
 
         when(repository.existsById(chatId)).thenReturn(false);
 
-        ChatNotFoundException thrown = assertThrows(
-            ChatNotFoundException.class,
+        ChatException thrown = assertThrows(
+            ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 

@@ -4,6 +4,7 @@ import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 
 @Data
 @NoArgsConstructor
@@ -16,7 +17,7 @@ public class MessageCreateDto {
     @NotNull(message = "chat room id should not be null")
     private String chatRoomId;
 
-    @NotNull(message = "user id should not be null")
+    @Null(message = "user id should be null")
     private String userId;
 
     private Byte[] photo;

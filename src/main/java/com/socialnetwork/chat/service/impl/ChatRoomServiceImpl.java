@@ -45,13 +45,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
+    public ChatRoom findChatRoomByUsersOrElseCreate(String currentUserId, String anotherUser) {
         log.info("Find chat room by users");
 
-        var chat = chatRoomRepository.findChatRoomByUsers(dto.getUsers());
+        var chat = chatRoomRepository.findChatRoomByUsers(currentUserId, anotherUser);
         if(chat.isEmpty()) {
-            var entity = chatRoomMapper.toEntity(dto)
+            var entity = new ChatRoom()
                 .toBuilder()
+                .users(Set.of(currentUserId, anotherUser))
                 .id(UUID.randomUUID().toString())
                 .build();
             return chatRoomRepository.save(entity);
@@ -64,7 +65,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom findSystemChatRoomByUserOrElseCreate(String userId) {
         log.info("Find system chat room by users");
 
-        var chat = chatRoomRepository.findChatRoomByUsers(Set.of(userId, systemUserId));
+        var chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
         if(chat.isEmpty()) {
             var newChatRoom = new ChatRoom()
                 .toBuilder()
@@ -88,14 +89,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
+    public ChatRoom createChatRoom(String currentUserId, String anotherUser) {
         log.info("Create chat room");
-        if(chatRoomRepository.existsChatRoomByUsers(dto.getUsers())) {
+        if(chatRoomRepository.existsChatRoomByUsers(currentUserId, anotherUser)) {
             throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
 
-        var entity = chatRoomMapper.toEntity(dto)
+        var entity = new ChatRoom()
             .toBuilder()
+            .users(Set.of(currentUserId, anotherUser))
             .id(UUID.randomUUID().toString())
             .build();
         return chatRoomRepository.save(entity);
@@ -127,16 +129,16 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public Message deleteMessage(MessageDeleteDto dto) {
+    public Message deleteMessage(String userId, String messageId) {
         log.info("Delete message");
 
-        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
+        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(messageId);
         if(chatRoomOfMessage.isEmpty()) {
             throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
         }
-        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getUserId());
+        checkIfUserMemberOfChat(chatRoomOfMessage.get(), userId);
 
-        return messageService.deleteMessage(dto);
+        return messageService.deleteMessage(userId, messageId);
     }
 
     @Override

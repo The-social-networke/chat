@@ -17,21 +17,21 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
             "   FROM user__chat_room ucr1" +
             "       JOIN user__chat_room ucr2 " +
             "           ON ucr1.chat_room_id = ucr2.chat_room_id" +
-            "           AND (ucr1.user_id, ucr2.user_id) = :users" +
+            "           AND (ucr1.user_id, ucr2.user_id) = (:userOne, :userTwo)" +
             ")",
         nativeQuery = true)
-    boolean existsChatRoomByUsers(@Param("users") Set<String> users);
+    boolean existsChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
     @Query(value =
         "SELECT cr.* " +
             "FROM user__chat_room ucr1" +
             "   JOIN user__chat_room ucr2" +
             "       ON ucr1.chat_room_id = ucr2.chat_room_id" +
-            "       AND (ucr1.user_id, ucr2.user_id) = :users" +
+            "       AND (ucr1.user_id, ucr2.user_id) = (:userOne, :userTwo)" +
             "   JOIN chat_room cr" +
             "       ON cr.id = ucr1.chat_room_id",
         nativeQuery = true)
-    Optional<ChatRoom> findChatRoomByUsers(@Param("users") Set<String> users);
+    Optional<ChatRoom> findChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
     @Query(value =
         "SELECT * FROM chat_room " +
