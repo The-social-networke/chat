@@ -1,9 +1,9 @@
 package com.socialnetwork.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +17,6 @@ public class MessageLikeDto {
     @NotNull(message = "message id should not be null")
     private String messageId;
 
-    @Null(message = "user id should not be null")
-    private String userId;
+    @JsonIgnore
+    private String currentUserId;
 }

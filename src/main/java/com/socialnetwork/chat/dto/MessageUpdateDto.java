@@ -1,10 +1,10 @@
 package com.socialnetwork.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 
 @Data
 @NoArgsConstructor
@@ -17,8 +17,8 @@ public class MessageUpdateDto {
     @NotNull(message = "message id should not be null")
     private String messageId;
 
-    @Null(message = "user id should be null")
-    private String userId;
+    @JsonIgnore
+    private String currentUserId;
 
     private Byte[] photo;
 

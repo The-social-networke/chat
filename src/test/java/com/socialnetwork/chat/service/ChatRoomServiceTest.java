@@ -1,6 +1,7 @@
 package com.socialnetwork.chat.service;
 
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
+import com.socialnetwork.chat.dto.ChatDeleteDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
@@ -137,12 +138,17 @@ class ChatRoomServiceTest {
 
     @Test
     void testCreateChatRoomIfNotExists() {
+        ChatRoomCreateDto dto = new ChatRoomCreateDto()
+            .toBuilder()
+            .currentUserId(users.get(0))
+            .userId(users.get(1))
+            .build();
         ChatRoom expectChatRoom = chatRooms.get(0);
 
         when(repository.existsChatRoomByUsers(users.get(0), users.get(1))).thenReturn(false);
         when(repository.save(any(ChatRoom.class))).thenReturn(expectChatRoom);
 
-        ChatRoom chatRoomResult = service.createChatRoom(users.get(0), users.get(1));
+        ChatRoom chatRoomResult = service.createChatRoom(dto);
 
         Assertions.assertEquals(chatRoomResult, expectChatRoom);
         verify(repository).existsChatRoomByUsers(users.get(0), users.get(1));
@@ -151,11 +157,16 @@ class ChatRoomServiceTest {
 
     @Test
     void testCreateChatRoomIfExists() {
+        ChatRoomCreateDto dto = new ChatRoomCreateDto()
+            .toBuilder()
+            .currentUserId(users.get(0))
+            .userId(users.get(1))
+            .build();
         when(repository.existsChatRoomByUsers(users.get(0), users.get(1))).thenReturn(true);
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.createChatRoom(users.get(0), users.get(1))
+            () -> service.createChatRoom(dto)
         );
 
         Assertions.assertEquals(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS, thrown.getErrorCodeException());
@@ -166,12 +177,16 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatExistsAndUserIsMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
+        ChatDeleteDto dto = ChatDeleteDto.builder()
+            .currentUserId(userId)
+            .chatId(chatId)
+            .build();
         ChatRoom chatRoomExpect = chatRooms.get(0);
 
         when(repository.existsById(chatId)).thenReturn(true);
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
 
-        boolean result = service.deleteChatRoom(chatId, userId);
+        boolean result = service.deleteChatRoom(dto);
 
         Assertions.assertTrue(result);
         verify(repository).existsById(chatId);
@@ -182,6 +197,10 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatExistsAndUserNotMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
+        ChatDeleteDto dto = ChatDeleteDto.builder()
+            .currentUserId(userId)
+            .chatId(chatId)
+            .build();
         ChatRoom chatRoomExpect = chatRooms.get(1);
 
         when(repository.existsById(chatId)).thenReturn(true);
@@ -189,7 +208,7 @@ class ChatRoomServiceTest {
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.deleteChatRoom(chatId, userId)
+            () -> service.deleteChatRoom(dto)
         );
 
         Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
@@ -201,12 +220,16 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatNotExistsAndUserNotMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
+        ChatDeleteDto dto = ChatDeleteDto.builder()
+            .currentUserId(userId)
+            .chatId(chatId)
+            .build();
 
         when(repository.existsById(chatId)).thenReturn(false);
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.deleteChatRoom(chatId, userId)
+            () -> service.deleteChatRoom(dto)
         );
 
         Assertions.assertEquals(ErrorCodeException.CHAT_NOT_FOUND, thrown.getErrorCodeException());
@@ -290,7 +313,7 @@ class ChatRoomServiceTest {
         MessageCreateDto messageCreateDto = new MessageCreateDto()
             .toBuilder()
             .chatRoomId(chatRoomExpect.getId())
-            .userId(userId)
+            .currentUserId(userId)
             .text("some text")
             .build();
         Message messageExpect = new Message()
@@ -323,7 +346,7 @@ class ChatRoomServiceTest {
         MessageCreateDto messageCreateDto = new MessageCreateDto()
             .toBuilder()
             .chatRoomId(chatRoomExpect.getId())
-            .userId(userId)
+            .currentUserId(userId)
             .text("some text")
             .build();
 
@@ -347,7 +370,7 @@ class ChatRoomServiceTest {
         MessageCreateDto messageCreateDto = new MessageCreateDto()
             .toBuilder()
             .chatRoomId(chatRooms.get(1).getId())
-            .userId(userId)
+            .currentUserId(userId)
             .text("some text")
             .build();
 

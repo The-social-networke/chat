@@ -1,9 +1,9 @@
 package com.socialnetwork.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -11,6 +11,9 @@ import java.util.Set;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatRoomCreateDto {
 
-    @NotEmpty(message = "users should be present")
-    private Set<String> users;
+    @NotEmpty(message = "user should be present")
+    private String userId;
+
+    @JsonIgnore
+    private String currentUserId;
 }

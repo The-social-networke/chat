@@ -9,10 +9,10 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class MessageDeleteDto {
+public class ChatDeleteDto {
 
     @NotNull(message = "id should not be null")
-    private String messageId;
+    private String chatId;
 
     @JsonIgnore
     private String currentUserId;

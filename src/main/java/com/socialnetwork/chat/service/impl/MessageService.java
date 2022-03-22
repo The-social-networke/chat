@@ -1,9 +1,8 @@
 package com.socialnetwork.chat.service.impl;
 
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.exception.*;
+import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -39,10 +37,10 @@ public class MessageService {
         return messageRepository.save(entity);
     }
 
-    public Message deleteMessage(String userId, String messageId) {
-        Message message = messageRepository.findById(messageId).get();
+    public Message deleteMessage(MessageDeleteDto dto) {
+        Message message = messageRepository.findById(dto.getMessageId()).get();
 
-        if(!message.getUserId().equals(userId)) {
+        if(!message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE);
         }
 
@@ -53,22 +51,22 @@ public class MessageService {
     public Message readMessage(MessageReadDto dto) {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
-        if(message.getUserId().equals(dto.getUserId())) {
+        if(message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_READ_HIS_MESSAGE);
         }
 
-        boolean isAlreadyRead = message.getMessageReads().contains(dto.getUserId());
+        boolean isAlreadyRead = message.getMessageReads().contains(dto.getCurrentUserId());
         if(isAlreadyRead) {
             return message;
         }
-        message.getMessageReads().add(dto.getUserId());
+        message.getMessageReads().add(dto.getCurrentUserId());
         return messageRepository.save(message);
     }
 
     public Message updateMessage(MessageUpdateDto dto) {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
-        if(!message.getUserId().equals(dto.getUserId())) {
+        if(!message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_UPDATE_NOT_OWN_MESSAGE);
         }
 
@@ -82,20 +80,20 @@ public class MessageService {
     public Message toggleLikeMessage(MessageLikeDto dto) {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
-        if(message.getUserId().equals(dto.getUserId())) {
+        if(message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_LIKE_HIS_MESSAGE);
         }
 
-        boolean isAlreadyLiked = message.getMessageLikes().contains(dto.getUserId());
+        boolean isAlreadyLiked = message.getMessageLikes().contains(dto.getCurrentUserId());
         boolean isLikeDto = Boolean.TRUE.equals(dto.getIsLike());
         if(isLikeDto == isAlreadyLiked) {
             return message;
         }
         if(isLikeDto) {
-            message.getMessageLikes().add(dto.getUserId());
+            message.getMessageLikes().add(dto.getCurrentUserId());
         }
         else {
-            message.getMessageLikes().remove(dto.getUserId());
+            message.getMessageLikes().remove(dto.getCurrentUserId());
         }
         return messageRepository.save(message);
     }

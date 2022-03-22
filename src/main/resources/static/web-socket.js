@@ -1,5 +1,6 @@
 let stompClient = null;
-let meId = null;
+let meToken = null;
+let meUserId = null;
 let otherUserId = null;
 let chatId = null;
 let currentMessages = null;
@@ -19,9 +20,12 @@ function setConnected(connected) {
 }
 
 async function connect() {
-    let socket = new SockJS('/ws-chat');
+    meToken = $("#userToken").val();
+    let socket = new SockJS('/ws-chat', null, {});
     stompClient = Stomp.over(socket);
-    stompClient.connect({}, frame => {
+    stompClient.connect({
+        'Authorization': 'Bearer ' + meToken
+    }, frame => {
         setConnected(true);
         console.log('Connected: ' + frame);
         stompClient.subscribe('/chat/messages', obj => {
@@ -41,7 +45,7 @@ function disconnect() {
 }
 
 async function init() {
-    meId = $("#userIdOne").val();
+    meToken = $("#userToken").val();
     otherUserId = $("#userIdTwo").val();
     let chat = null;
     if(otherUserId) {
@@ -49,10 +53,11 @@ async function init() {
             {
                 method: 'POST',
                 headers: {
+                    'Authorization': 'Bearer ' + meToken,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    'users': [meId, otherUserId]
+                    'userId': otherUserId
                 })
             })
             .then(response => response.json())
@@ -61,18 +66,20 @@ async function init() {
             {
                 method: 'POST',
                 headers: {
+                    'Authorization': 'Bearer ' + meToken,
                     'Content-Type': 'application/json',
-                },
-                body: meId
+                }
             })
             .then(response => response.json())
     }
-    chatId = chat.id;
+    console.log(chat)
+    chatId = chat.id
+    meUserId = chat.users.filter(item => item !== $("#userIdTwo").val())
     changeCurrentData()
 }
 
 function changeCurrentData() {
-    $("#userIdOneShow").text(meId);
+    $("#userIdOneShow").text(meUserId);
     $("#userIdTwoShow").text(otherUserId);
     $("#chatIdShow").text(chatId);
     $("#messageToChangeIdShow").text(messageToChangeId + " [" + messageText + "] ");
@@ -82,8 +89,7 @@ function sendText() {
     stompClient.send("/app/chat/sendMessage", {}, JSON.stringify(
         {
             'text': $("#text").val(),
-            'userId': meId,
-            'chatRoomId' : chatId
+            'chatRoomId': chatId
         }
     ));
 }
@@ -92,7 +98,6 @@ function likeMessage(messageId,  isLike) {
     stompClient.send("/app/chat/likeMessage", {}, JSON.stringify(
         {
             'isLike': isLike,
-            'userId': meId,
             'messageId' : messageId
         }
     ));
@@ -101,7 +106,6 @@ function likeMessage(messageId,  isLike) {
 function readMessage(messageId) {
     stompClient.send("/app/chat/readMessage", {}, JSON.stringify(
         {
-            'userId': meId,
             'messageId' : messageId
         }
     ));
@@ -110,7 +114,6 @@ function readMessage(messageId) {
 function deleteMessage(messageId) {
     stompClient.send("/app/chat/deleteMessage", {}, JSON.stringify(
         {
-            'userId': meId,
             'messageId' : messageId
         }
     ));
@@ -124,20 +127,25 @@ function updateMessage() {
     stompClient.send("/app/chat/updateMessage", {}, JSON.stringify(
         {
             'text': $("#text").val(),
-            'userId': meId,
             'messageId' : messageToChangeId
         }
     ));
 }
 
 async function showLoadingMessage() {
-    console.log("meId        = " + meId);
+    console.log("meUserId        = " + meUserId);
     console.log("otherUserId = " + otherUserId);
     console.log("chatId      = " + chatId);
-    let messages = await fetch("http://localhost:8081/chat/all-messages?userId=" + meId + "&chatId=" + chatId)
+    let messages = await fetch("http://localhost:8081/chat/all-messages?chatId=" + chatId, {
+        headers: {
+            'Authorization': 'Bearer ' + meToken,
+            'Content-Type': 'application/json',
+        },
+    })
         .then(response => response.json())
         .then(response => response.content);
     console.log(messages);
+    console.log("meId" + meUserId)
     let createdBlock = false;
     let lastMessageFromIdLoading = null;
     let text = "";
@@ -151,7 +159,7 @@ async function showLoadingMessage() {
             createdBlock = false;
         }
         if (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"]) {
-            let username = message["userId"] === meId ? "Me" : "user" + message["userId"];
+            let username = message["userId"] == meUserId ? "Me" : "user " + message["userId"];
             append(
                 "<div class=\"block_messages_from_person\">" +
                 "<div class=\"sent_from\">" +
@@ -160,7 +168,7 @@ async function showLoadingMessage() {
             )
             createdBlock = true;
         }
-        let isOwnStyle = meId === message["userId"] ? "message_own" : "message_not_own";
+        let isOwnStyle = meUserId == message["userId"] ? "message_own" : "message_not_own";
 
         let isLiked = message.messageLikes.length === 0 ? "" : "color:red;";
         let isRead = message.messageReads.length === 0 ? "" : "border-style: dotted;";
@@ -185,14 +193,14 @@ async function showLoadingMessage() {
     })
     $("#messages_block").empty().append(text)
     currentMessages.forEach(message => {
-        if(message.userId !== meId) {
+        if(message.userId != meUserId) {
             $("#" + message.id)
                 .click(function () {
                     likeMessage(message.id, message.messageLikes.length === 0);
                 })
                 .mouseover(function () {
                     if(message.messageReads.length === 0) {
-                        if (!message.messageReads.includes(meId)) {
+                        if (!message.messageReads.includes(meUserId)) {
                             readMessage(message.id);
                         }
                     }

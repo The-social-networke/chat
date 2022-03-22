@@ -12,21 +12,21 @@ public interface ChatRoomService {
 
     Optional<ChatRoom> findChatRoomById(String id);
 
-    ChatRoom findChatRoomByUsersOrElseCreate(String currentUserId, String anotherUser);
+    ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
     ChatRoom findSystemChatRoomByUserOrElseCreate(String userId);
 
     Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
 
-    ChatRoom createChatRoom(String currentUserId, String anotherUser);
+    ChatRoom createChatRoom(ChatRoomCreateDto dto);
 
-    boolean deleteChatRoom(String chatId, String userId);
+    boolean deleteChatRoom(ChatDeleteDto dto);
 
     Message updateMessage(MessageUpdateDto dto);
 
     Message sendMessage(MessageCreateDto dto);
 
-    Message deleteMessage(String userId, String messageId);
+    Message deleteMessage(MessageDeleteDto dto);
 
     Message toggleLikeMessage(MessageLikeDto dto);
 

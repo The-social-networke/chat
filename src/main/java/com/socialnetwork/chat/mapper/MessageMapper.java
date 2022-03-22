@@ -9,7 +9,6 @@ import org.mapstruct.Mapping;
 public interface MessageMapper {
 
     @Mapping(source = "chatRoomId", target = "chatRoom.id")
+    @Mapping(source = "currentUserId", target = "userId")
     Message toEntity(MessageCreateDto dto);
-
-    MessageCreateDto toDto(Message dto);
 }

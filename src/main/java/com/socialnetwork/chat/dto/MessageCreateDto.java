@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
@@ -17,8 +18,8 @@ public class MessageCreateDto {
     @NotNull(message = "chat room id should not be null")
     private String chatRoomId;
 
-    @Null(message = "user id should be null")
-    private String userId;
+    @JsonIgnore
+    private String currentUserId;
 
     private Byte[] photo;
 
