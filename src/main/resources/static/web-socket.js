@@ -7,6 +7,9 @@ let currentMessages = null;
 let messageToChangeId = null;
 let messageText = null;
 
+let port = "http://198.211.110.141:8002";
+//let port = "http://localhost:8081";
+
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
     $("#disconnect").prop("disabled", !connected);
@@ -49,7 +52,7 @@ async function init() {
     otherUserId = $("#userIdTwo").val();
     let chat = null;
     if(otherUserId) {
-        chat = await fetch("http://localhost:8081/chat/get-chat",
+        chat = await fetch(port + "/chat/get-chat",
             {
                 method: 'POST',
                 headers: {
@@ -62,7 +65,7 @@ async function init() {
             })
             .then(response => response.json())
     } else {
-        chat = await fetch("http://localhost:8081/chat/get-system-chat",
+        chat = await fetch(port + "/chat/get-system-chat",
             {
                 method: 'POST',
                 headers: {
@@ -136,7 +139,7 @@ async function showLoadingMessage() {
     console.log("meUserId        = " + meUserId);
     console.log("otherUserId = " + otherUserId);
     console.log("chatId      = " + chatId);
-    let messages = await fetch("http://localhost:8081/chat/all-messages?chatId=" + chatId, {
+    let messages = await fetch(port + "/chat/all-messages?chatId=" + chatId, {
         headers: {
             'Authorization': 'Bearer ' + meToken,
             'Content-Type': 'application/json',

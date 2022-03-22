@@ -5,7 +5,6 @@ import com.socialnetwork.chat.util.enums.ForwardType;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Null;
 
 @Data
 @NoArgsConstructor
