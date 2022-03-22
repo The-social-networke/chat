@@ -13,7 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity(debug = false)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -29,8 +29,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // dont authenticate this particular request
             .authorizeRequests().antMatchers("/").permitAll()
             // dont authenticate system endpoints
-            .antMatchers("/",
-                "/v2/api-docs",
+            .antMatchers("/v2/api-docs",
                 "/configuration/ui",
                 "/swagger-resources/**",
                 "/configuration/security",
