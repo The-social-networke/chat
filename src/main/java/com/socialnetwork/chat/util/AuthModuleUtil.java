@@ -3,7 +3,9 @@ package com.socialnetwork.chat.util;
 import org.springframework.http.*;
 import org.springframework.web.client.RestTemplate;
 
-public class JwtTokenUtil {
+public class AuthModuleUtil {
+
+    private static final String getTokenByIdEndpoint = "/user/by_token";
 
     public static String getUserIdFromToken(String bearToken, String url) {
         //get token
@@ -16,7 +18,7 @@ public class JwtTokenUtil {
 
         //get user id from auth service
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> result = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> result = restTemplate.exchange(url + getTokenByIdEndpoint, HttpMethod.GET, entity, String.class);
         return result.getBody();
     }
 }

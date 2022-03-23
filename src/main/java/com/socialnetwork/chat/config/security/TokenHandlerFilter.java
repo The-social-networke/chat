@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.config.security;
 
 import com.socialnetwork.chat.exception.ChatException;
-import com.socialnetwork.chat.util.JwtTokenUtil;
+import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
 
     private final HandlerExceptionResolver resolver;
 
-    @Value("${app.auth.url-get-id-by-toke}")
+    @Value("${app.auth.url}")
     private String url;
 
 
@@ -50,7 +50,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
         //get chat from auth service
         String userId;
         try {
-            userId = JwtTokenUtil.getUserIdFromToken(header, url);
+            userId = AuthModuleUtil.getUserIdFromToken(header, url);
         }
         catch (Exception ex) {
             log.error(ex.getMessage());

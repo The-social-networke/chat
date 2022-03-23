@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.config.security;
 
 import com.socialnetwork.chat.exception.ChatException;
-import com.socialnetwork.chat.util.JwtTokenUtil;
+import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
@@ -41,7 +41,7 @@ public class UserInterceptor implements ChannelInterceptor {
                     throw new ChatException(ErrorCodeException.FORBIDDEN);
                 }
                 List<String> auth = headers.get("Authorization");
-                String userIdFromToken = JwtTokenUtil.getUserIdFromToken(auth.get(0), url);
+                String userIdFromToken = AuthModuleUtil.getUserIdFromToken(auth.get(0), url);
                 UserSecurity userSecurity = new UserSecurity(userIdFromToken);
                 UsernamePasswordAuthenticationToken authReq
                     = new UsernamePasswordAuthenticationToken(userSecurity, null, null);
