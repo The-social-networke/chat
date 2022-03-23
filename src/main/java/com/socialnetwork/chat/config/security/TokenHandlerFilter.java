@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.stream.Stream;
 
 @Slf4j
 @Order(1)
@@ -39,13 +40,6 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //allow endpoint for test
-        String path = request.getRequestURI();
-
-        if (!path.matches("/chat/.*")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
         //get token from
         String header = request.getHeader("Authorization");
         //check if token exists
@@ -72,5 +66,24 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
         authReq.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         doFilter(request, response, filterChain);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getRequestURI();
+        String[] inauthenticationEndpoints = new String[]{
+            "/v2/api-docs",
+            "/configuration/ui",
+            "/swagger-resources/.*",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/.*",
+            "/ws-chat/.*",
+            "/index.html",
+            "/main.css",
+            "/web-socket.js",
+            "/"
+        };
+        return Stream.of(inauthenticationEndpoints).anyMatch(path::matches);
     }
 }

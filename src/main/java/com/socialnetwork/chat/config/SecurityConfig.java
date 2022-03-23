@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -23,12 +24,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        // We don't need CSRF for this example
-        http.csrf().disable()
-            // dont authenticate this particular request
-            .authorizeRequests().antMatchers("/").permitAll()
-            // dont authenticate system endpoints
+    public void configure(WebSecurity web) throws Exception {
+        web.ignoring()
             .antMatchers("/v2/api-docs",
                 "/configuration/ui",
                 "/swagger-resources/**",
@@ -37,7 +34,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/webjars/**",
                 "/ws-chat/**",
                 "/main.css",
-                "/web-socket.js").permitAll()
+                "/web-socket.js");
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        // We don't need CSRF for this example
+        http.csrf().disable()
+            // dont authenticate this particular request
+            .authorizeRequests().antMatchers("/**").permitAll()
+            // dont authenticate system endpoints
             // all other requests need to be authenticated
             .anyRequest().authenticated().and().
             // make sure we use stateless session; session won't be used to
