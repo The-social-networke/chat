@@ -5,7 +5,7 @@ import org.springframework.web.client.RestTemplate;
 
 public class AuthModuleUtil {
 
-    private static final String getTokenByIdEndpoint = "/user/by_token";
+    private static final String ENDPOINT_GET_TOKEN_BY_ID = "/user/by_token";
 
     public static String getUserIdFromToken(String bearToken, String url) {
         //get token
@@ -18,7 +18,7 @@ public class AuthModuleUtil {
 
         //get user id from auth service
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> result = restTemplate.exchange(url + getTokenByIdEndpoint, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> result = restTemplate.exchange(url + ENDPOINT_GET_TOKEN_BY_ID, HttpMethod.GET, entity, String.class);
         return result.getBody();
     }
 }
