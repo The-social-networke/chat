@@ -1,13 +1,15 @@
 package com.socialnetwork.chat.util;
 
 import org.springframework.http.*;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 public class AuthModuleUtil {
 
     private static final String ENDPOINT_GET_TOKEN_BY_ID = "/user/by_token";
 
-    public static String getUserIdFromToken(String bearToken, String url) {
+    public static String getUserIdFromToken(String bearToken, String url) throws RestClientException {
         //get token
         String authToken = bearToken.substring(7);
         //set token to header request

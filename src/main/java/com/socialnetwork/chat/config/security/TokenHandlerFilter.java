@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -40,19 +41,20 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        //get token from
-        String header = request.getHeader("Authorization");
-        //check if token exists
-        if (header == null || !header.startsWith("Bearer ")) {
-            throw new ChatException(ErrorCodeException.FORBIDDEN);
-        }
-
-        //get chat from auth service
         String userId;
         try {
+            //get token from
+            String header = request.getHeader("Authorization");
+
+            //check if token exists
+            if (header == null || !header.startsWith("Bearer ")) {
+                throw new ChatException(ErrorCodeException.FORBIDDEN);
+            }
+
+            //get chat from auth service
             userId = AuthModuleUtil.getUserIdFromToken(header, url);
         }
-        catch (Exception ex) {
+        catch (ChatException | RestClientException ex) {
             log.error(ex.getMessage());
             resolver.resolveException(request, response, null, new ChatException(ErrorCodeException.FORBIDDEN));
             return;
