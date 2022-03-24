@@ -7,6 +7,7 @@ import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.ChatRoomMapper;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
+import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,10 +31,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final MessageService messageService;
 
-    private final ChatRoomMapper chatRoomMapper;
-
     @Value( "${app.system-user-id}" )
     private String systemUserId;
+
+    @Value("${app.auth.url}")
+    private String url;
 
 
     @Override
@@ -50,6 +52,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         var chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
         if(chat.isEmpty()) {
+            checkIfUserExists(dto.getUserId());
             var entity = new ChatRoom()
                 .toBuilder()
                 .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
@@ -91,10 +94,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
         log.info("Create chat room");
+
         if(chatRoomRepository.existsChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId())) {
             throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
-
+        checkIfUserExists(dto.getUserId());
         var entity = new ChatRoom()
             .toBuilder()
             .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
@@ -189,6 +193,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .anyMatch(u -> u.equals(userId));
         if(!isMemberOfChat) {
             throw new ChatException(ErrorCodeException.NOT_MEMBER_OF_CHAT);
+        }
+    }
+
+    private void checkIfUserExists(String userId) throws ChatException {
+        if(!AuthModuleUtil.existsUserById(userId, url)) {
+            throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
         }
     }
 

@@ -12,13 +12,14 @@ public enum ErrorCodeException {
     NOT_VALID_PARAM(501, "not valid"),
     FORBIDDEN(502, "forbidden"),
 
-    CHAT_NOT_FOUND(1000, "chat not found"),
-    NOT_MEMBER_OF_CHAT(1001, "not member of chat"),
-    CHAT_WITH_THESE_USERS_ALREADY_EXISTS(1002, "chat with these users already exits"),
-    USER_CANNOT_LIKE_HIS_MESSAGE(1003, "user cannot like himself"),
-    USER_CANNOT_READ_HIS_MESSAGE(1004, "user cannot read his message"),
-    USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1005, "user cannot delete not own message"),
-    USER_CANNOT_UPDATE_NOT_OWN_MESSAGE(1006, "user cannot update not own message");
+    USER_NOT_FOUND(1000, "user not found"),
+    CHAT_NOT_FOUND(1001, "chat not found"),
+    NOT_MEMBER_OF_CHAT(1002, "not member of chat"),
+    CHAT_WITH_THESE_USERS_ALREADY_EXISTS(1003, "chat with these users already exits"),
+    USER_CANNOT_LIKE_HIS_MESSAGE(1004, "user cannot like himself"),
+    USER_CANNOT_READ_HIS_MESSAGE(1005, "user cannot read his message"),
+    USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1006, "user cannot delete not own message"),
+    USER_CANNOT_UPDATE_NOT_OWN_MESSAGE(1007, "user cannot update not own message");
 
     @JsonValue
     private final long code;

@@ -1,6 +1,9 @@
 package com.socialnetwork.chat.config;
 
 import com.socialnetwork.chat.config.security.UserInterceptor;
+import com.socialnetwork.chat.util.AuthModuleUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -11,6 +14,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Value("${app.auth.url}")
