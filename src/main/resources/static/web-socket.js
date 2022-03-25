@@ -1,4 +1,5 @@
-let stompClient = null;
+let chatSocket = null;
+let userSocket = null;
 let meToken = null;
 let meUserId = null;
 let otherUserId = null;
@@ -24,32 +25,44 @@ function setConnected(connected) {
 
 async function connect() {
     meToken = $("#userToken").val();
+    otherUserId = $("#userIdTwo").val();
+    await setChat();
     let socket = new SockJS('/ws-chat', null, {});
-    stompClient = Stomp.over(socket);
-    stompClient.connect({
+    chatSocket = Stomp.over(socket);
+    chatSocket.connect({
         'Authorization': 'Bearer ' + meToken
     }, frame => {
         setConnected(true);
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/chat/messages', obj => {
+        chatSocket.subscribe('/chat/messages/' + chatId, obj => {
             showLoadingMessage();
-        });
-    });
-    await init();
+        })
+    })
+    let socket2 = new SockJS('/ws-chat', null, {});
+    userSocket = Stomp.over(socket2);
+    userSocket.connect({
+        'Authorization': 'Bearer ' + meToken
+    }, frame => {
+        setConnected(true);
+        console.log('Connected: ' + frame);
+        chatSocket.subscribe('/users/' + meUserId, obj => {
+            console.log(obj)
+            console.log("YES");
+        })
+    })
+    await changeCurrentData();
     await showLoadingMessage();
 }
 
 function disconnect() {
-    if (stompClient !== null) {
-        stompClient.disconnect();
+    if (chatSocket !== null) {
+        chatSocket.disconnect();
     }
     setConnected(false);
     console.log("Disconnected");
 }
 
-async function init() {
-    meToken = $("#userToken").val();
-    otherUserId = $("#userIdTwo").val();
+async function setChat() {
     let chat = null;
     if(otherUserId) {
         chat = await fetch(port + "/chat/get-chat",
@@ -78,7 +91,6 @@ async function init() {
     console.log(chat)
     chatId = chat.id
     meUserId = chat.users.filter(item => item !== $("#userIdTwo").val())
-    changeCurrentData()
 }
 
 function changeCurrentData() {
@@ -89,7 +101,7 @@ function changeCurrentData() {
 }
 
 function sendText() {
-    stompClient.send("/app/chat/sendMessage", {}, JSON.stringify(
+    chatSocket.send('/app/chat/sendMessage/' + chatId, {}, JSON.stringify(
         {
             'text': $("#text").val(),
             'chatRoomId': chatId
@@ -98,7 +110,7 @@ function sendText() {
 }
 
 function likeMessage(messageId,  isLike) {
-    stompClient.send("/app/chat/likeMessage", {}, JSON.stringify(
+    chatSocket.send('/app/chat/likeMessage/' + chatId, {}, JSON.stringify(
         {
             'isLike': isLike,
             'messageId' : messageId
@@ -107,7 +119,7 @@ function likeMessage(messageId,  isLike) {
 }
 
 function readMessage(messageId) {
-    stompClient.send("/app/chat/readMessage", {}, JSON.stringify(
+    chatSocket.send('/app/chat/readMessage/' + chatId, {}, JSON.stringify(
         {
             'messageId' : messageId
         }
@@ -115,7 +127,7 @@ function readMessage(messageId) {
 }
 
 function deleteMessage(messageId) {
-    stompClient.send("/app/chat/deleteMessage", {}, JSON.stringify(
+    chatSocket.send('/app/chat/deleteMessage/' + chatId, {}, JSON.stringify(
         {
             'messageId' : messageId
         }
@@ -127,7 +139,7 @@ function updateMessage() {
         alert("select message!")
         return;
     }
-    stompClient.send("/app/chat/updateMessage", {}, JSON.stringify(
+    chatSocket.send('/app/chat/updateMessage/' + chatId, {}, JSON.stringify(
         {
             'text': $("#text").val(),
             'messageId' : messageToChangeId
@@ -136,9 +148,9 @@ function updateMessage() {
 }
 
 async function showLoadingMessage() {
-    console.log("meUserId        = " + meUserId);
-    console.log("otherUserId = " + otherUserId);
-    console.log("chatId      = " + chatId);
+    // console.log("meUserId        = " + meUserId);
+    // console.log("otherUserId = " + otherUserId);
+    // console.log("chatId      = " + chatId);
     let messages = await fetch(port + "/chat/all-messages?chatId=" + chatId, {
         headers: {
             'Authorization': 'Bearer ' + meToken,

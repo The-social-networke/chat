@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +24,8 @@ public class ChatRoomSocketController {
 
     private final ChatRoomServiceImpl chatRoomService;
 
-    @SendTo("/chat/messages")
-    @MessageMapping("/chat/sendMessage")
+    @SendTo("/chat/messages/{room}")
+    @MessageMapping("/chat/sendMessage/{room}")
     public Message sendMessage(
         @Valid
         @RequestBody MessageCreateDto dto,
@@ -34,8 +35,8 @@ public class ChatRoomSocketController {
         return chatRoomService.sendMessage(dto);
     }
 
-    @SendTo("/chat/messages")
-    @MessageMapping("/chat/deleteMessage")
+    @SendTo("/chat/messages/{room}")
+    @MessageMapping("/chat/deleteMessage/{room}")
     public Message deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto,
@@ -45,8 +46,8 @@ public class ChatRoomSocketController {
         return chatRoomService.deleteMessage(dto);
     }
 
-    @SendTo("/chat/messages")
-    @MessageMapping("/chat/updateMessage")
+    @SendTo("/chat/messages/{room}")
+    @MessageMapping("/chat/updateMessage/{room}")
     public Message updateMessage(
         @Valid
         @RequestBody MessageUpdateDto dto,
@@ -56,8 +57,8 @@ public class ChatRoomSocketController {
         return chatRoomService.updateMessage(dto);
     }
 
-    @SendTo("/chat/messages")
-    @MessageMapping("/chat/likeMessage")
+    @SendTo("/chat/messages/{room}")
+    @MessageMapping("/chat/likeMessage/{room}")
     public Message likeMessage(
         @Valid
         @RequestBody MessageLikeDto dto,
@@ -67,8 +68,8 @@ public class ChatRoomSocketController {
         return chatRoomService.toggleLikeMessage(dto);
     }
 
-    @SendTo("/chat/messages")
-    @MessageMapping("/chat/readMessage")
+    @SendTo("/chat/messages/{room}")
+    @MessageMapping("/chat/readMessage/{room}")
     public Message readMessage(
         @Valid
         @RequestBody MessageReadDto dto,

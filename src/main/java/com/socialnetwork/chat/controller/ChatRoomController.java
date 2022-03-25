@@ -2,8 +2,9 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.ChatDeleteDto;
+import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
+import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,14 +39,12 @@ public class ChatRoomController {
         return chatRoomService.findChatRoomById(chatId);
     }
 
-    @PostMapping
-    public ChatRoom createChatRoom(
-        @Valid
-        @RequestParam ChatRoomCreateDto dto,
-        @CurrentUser UserSecurity userSecurity
+    @GetMapping("/find-chats")
+    public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(
+        @CurrentUser UserSecurity userSecurity,
+        Pageable pageable
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.createChatRoom(dto);
+        return chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
     }
 
     @Validated
@@ -66,11 +66,21 @@ public class ChatRoomController {
         return chatRoomService.findSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
+    @PostMapping
+    public ChatRoom createChatRoom(
+        @Valid
+        @RequestParam ChatRoomCreateDto dto,
+        @CurrentUser UserSecurity userSecurity
+    ) {
+        dto.setCurrentUserId(userSecurity.getUserId());
+        return chatRoomService.createChatRoom(dto);
+    }
+
     @Validated
     @DeleteMapping
     public boolean deleteChatRoom(
         @NotNull(message = "Id of chat should be not null")
-        @RequestBody ChatDeleteDto dto,
+        @RequestBody ChatRoomDeleteDto dto,
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());

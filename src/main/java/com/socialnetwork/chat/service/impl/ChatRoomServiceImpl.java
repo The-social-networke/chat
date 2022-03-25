@@ -4,7 +4,6 @@ import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatException;
-import com.socialnetwork.chat.mapper.ChatRoomMapper;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.AuthModuleUtil;
@@ -15,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +36,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Value("${app.auth.url}")
     private String url;
+
+    private final SimpMessagingTemplate template;
 
 
     @Override
@@ -91,6 +93,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
+        return chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
+    }
+
+    @Override
     @Transactional
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
         log.info("Create chat room");
@@ -109,7 +116,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public boolean deleteChatRoom(ChatDeleteDto dto) {
+    public boolean deleteChatRoom(ChatRoomDeleteDto dto) {
         log.info("Deleted chat room");
 
         var chatRoom = getChatRoomOrElseThrow(dto.getChatId());
@@ -128,7 +135,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         var chatRoom = getChatRoomOrElseThrow(dto.getChatRoomId());
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        return messageService.sendMessage(dto);
+        var savedMessage = messageService.sendMessage(dto);
+        String anotherUserId = chatRoom.getUsers()
+            .stream()
+            .filter(u -> u.equals(dto.getCurrentUserId()))
+            .findFirst()
+            .get();
+        ChatRoomsMessageDto chatRoomsMessageDto = new ChatRoomsMessageDto()
+            .toBuilder()
+            .chatRoomId(dto.getChatRoomId())
+            .userId(anotherUserId)
+            .sentAt(savedMessage.getSentAt())
+            .text(savedMessage.getText())
+            .build();
+        template.convertAndSend("/users/" + anotherUserId, chatRoomsMessageDto);
+        return savedMessage;
     }
 
     @Override

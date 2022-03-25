@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class ChatDeleteDto {
+public class ChatRoomDeleteDto {
 
     @NotNull(message = "id should not be null")
     private String chatId;

@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.service;
 
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
-import com.socialnetwork.chat.dto.ChatDeleteDto;
+import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
 import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
@@ -177,7 +177,7 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatExistsAndUserIsMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
-        ChatDeleteDto dto = ChatDeleteDto.builder()
+        ChatRoomDeleteDto dto = ChatRoomDeleteDto.builder()
             .currentUserId(userId)
             .chatId(chatId)
             .build();
@@ -197,7 +197,7 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatExistsAndUserNotMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
-        ChatDeleteDto dto = ChatDeleteDto.builder()
+        ChatRoomDeleteDto dto = ChatRoomDeleteDto.builder()
             .currentUserId(userId)
             .chatId(chatId)
             .build();
@@ -220,7 +220,7 @@ class ChatRoomServiceTest {
     void testDeleteChatRoomIfChatNotExistsAndUserNotMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
-        ChatDeleteDto dto = ChatDeleteDto.builder()
+        ChatRoomDeleteDto dto = ChatRoomDeleteDto.builder()
             .currentUserId(userId)
             .chatId(chatId)
             .build();

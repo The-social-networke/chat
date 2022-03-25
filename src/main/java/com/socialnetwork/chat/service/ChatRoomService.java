@@ -18,9 +18,11 @@ public interface ChatRoomService {
 
     Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
 
+    Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable);
+
     ChatRoom createChatRoom(ChatRoomCreateDto dto);
 
-    boolean deleteChatRoom(ChatDeleteDto dto);
+    boolean deleteChatRoom(ChatRoomDeleteDto dto);
 
     Message updateMessage(MessageUpdateDto dto);
 
