@@ -13,6 +13,7 @@ import com.socialnetwork.chat.service.impl.MessageService;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -53,12 +54,12 @@ class ChatRoomServiceTest {
     @InjectMocks
     private ChatRoomServiceImpl service;
 
-    private static List<String> users;
+    private List<String> users;
 
-    private static List<ChatRoom> chatRooms;
+    private List<ChatRoom> chatRooms;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         users = List.of(
             "ff2ce835-e775-40d2-a1b6-4e382b8e465c",
             "d3c5c1a2-f69b-49f6-93ea-68e29adce0d1",

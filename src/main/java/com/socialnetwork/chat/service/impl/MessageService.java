@@ -37,7 +37,7 @@ public class MessageService {
         return messageRepository.save(entity);
     }
 
-    public Message deleteMessage(MessageDeleteDto dto) {
+    public void deleteMessage(MessageDeleteDto dto) {
         Message message = messageRepository.findById(dto.getMessageId()).get();
 
         if(!message.getUserId().equals(dto.getCurrentUserId())) {
@@ -45,7 +45,6 @@ public class MessageService {
         }
 
         messageRepository.delete(message);
-        return message;
     }
 
     public Message readMessage(MessageReadDto dto) {

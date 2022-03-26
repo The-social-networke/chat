@@ -28,7 +28,7 @@ public interface ChatRoomService {
 
     Message sendMessage(MessageCreateDto dto);
 
-    Message deleteMessage(MessageDeleteDto dto);
+    void deleteMessage(MessageDeleteDto dto);
 
     Message toggleLikeMessage(MessageLikeDto dto);
 

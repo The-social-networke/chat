@@ -14,6 +14,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
 @NoArgsConstructor
 @Table(name = "chat_room")
 @Builder(toBuilder = true)

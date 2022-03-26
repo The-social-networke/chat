@@ -37,13 +37,13 @@ public class ChatRoomSocketController {
 
     @SendTo("/chat/messages/{room}")
     @MessageMapping("/chat/deleteMessage/{room}")
-    public Message deleteMessage(
+    public void deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto,
         Principal principal
     ) {
         dto.setCurrentUserId(principal.getName());
-        return chatRoomService.deleteMessage(dto);
+        chatRoomService.deleteMessage(dto);
     }
 
     @SendTo("/chat/messages/{room}")

@@ -138,7 +138,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         var savedMessage = messageService.sendMessage(dto);
         String anotherUserId = chatRoom.getUsers()
             .stream()
-            .filter(u -> u.equals(dto.getCurrentUserId()))
+            .filter(u -> !u.equals(dto.getCurrentUserId()))
             .findFirst()
             .get();
         ChatRoomsMessageDto chatRoomsMessageDto = new ChatRoomsMessageDto()
@@ -154,7 +154,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public Message deleteMessage(MessageDeleteDto dto) {
+    public void deleteMessage(MessageDeleteDto dto) {
         log.info("Delete message");
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
@@ -163,7 +163,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
 
-        return messageService.deleteMessage(dto);
+        messageService.deleteMessage(dto);
     }
 
     @Override
