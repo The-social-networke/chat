@@ -8,6 +8,8 @@ import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +28,15 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@Api(tags = "Chat API", description = "Allows you to interact with admin")
 public class ChatRoomController {
 
     private final ChatRoomServiceImpl chatRoomService;
 
     @Validated
     @GetMapping
-    public Optional<ChatRoom> findChatRoom(
+    //@ApiOperation(value = "Find chat by id")
+    public Optional<ChatRoom> findChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId
     ) {

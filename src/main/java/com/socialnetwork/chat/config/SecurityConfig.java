@@ -24,20 +24,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring()
-            .antMatchers("/v2/api-docs",
-                "/configuration/ui",
-                "/swagger-resources/**",
-                "/configuration/security",
-                "/swagger-ui.html",
-                "/webjars/**",
-                "/ws-chat/**",
-                "/main.css",
-                "/web-socket.js");
-    }
-
-    @Override
     protected void configure(HttpSecurity http) throws Exception {
         // We don't need CSRF for this example
         http.csrf().disable()

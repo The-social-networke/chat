@@ -1,13 +1,15 @@
 package com.socialnetwork.chat.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthModuleUtil {
 
     private static final String ENDPOINT_GET_TOKEN_BY_ID = "/user/by_token";
-
     private static final String ENDPOINT_EXISTS_USER_BY_ID = "/user/exists_by_id";
 
 

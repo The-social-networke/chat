@@ -74,8 +74,10 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         String[] inauthenticationEndpoints = new String[]{
+            "/csrf",
             "/v2/api-docs",
             "/configuration/ui",
+            "/swagger-resources",
             "/swagger-resources/.*",
             "/configuration/security",
             "/swagger-ui.html",
@@ -84,6 +86,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
             "/index.html",
             "/main.css",
             "/web-socket.js",
+            "/favicon.ico",
             "/"
         };
         return Stream.of(inauthenticationEndpoints).anyMatch(path::matches);
