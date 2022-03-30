@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 import java.util.Set;
@@ -39,6 +40,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private final SimpMessagingTemplate template;
 
+    private final RestTemplate restTemplate;
+
 
     @Override
     public Optional<ChatRoom> findChatRoomById(String id) {
@@ -49,7 +52,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
+    public ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
         log.info("Find chat room by users");
 
         var chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
@@ -67,7 +70,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom findSystemChatRoomByUserOrElseCreate(String userId) {
+    public ChatRoom getSystemChatRoomByUserOrElseCreate(String userId) {
         log.info("Find system chat room by users");
 
         var chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
@@ -218,7 +221,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     private void checkIfUserExists(String userId) throws ChatException {
-        if(!AuthModuleUtil.existsUserById(userId, url)) {
+        if(!AuthModuleUtil.existsUserById(userId, url, restTemplate)) {
             throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
         }
     }

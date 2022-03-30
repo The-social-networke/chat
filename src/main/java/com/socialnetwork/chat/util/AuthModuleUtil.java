@@ -28,8 +28,7 @@ public class AuthModuleUtil {
         return result.getBody();
     }
 
-    public static boolean existsUserById(String userId, String url) throws RestClientException {
-        RestTemplate restTemplate = new RestTemplate();
+    public static boolean existsUserById(String userId, String url, RestTemplate restTemplate) throws RestClientException {
         ResponseEntity<Boolean> result = restTemplate.exchange(url + ENDPOINT_EXISTS_USER_BY_ID + "?userId=" + userId, HttpMethod.GET, null, Boolean.class);
         return Boolean.TRUE.equals(result.getBody());
     }

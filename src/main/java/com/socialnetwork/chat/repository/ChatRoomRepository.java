@@ -1,7 +1,6 @@
 package com.socialnetwork.chat.repository;
 
 import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
-import com.socialnetwork.chat.dto.ChatRoomsMessageDtoInterface;
 import com.socialnetwork.chat.entity.ChatRoom;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

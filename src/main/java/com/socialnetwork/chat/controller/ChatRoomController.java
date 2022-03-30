@@ -2,8 +2,8 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
+import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
 import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
@@ -15,9 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -28,14 +28,14 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Api(tags = "Chat API", description = "Allows you to interact with admin")
+@Api(tags = "Chat API", description = "Allows you to interact with chat")
 public class ChatRoomController {
 
     private final ChatRoomServiceImpl chatRoomService;
 
     @Validated
     @GetMapping
-    //@ApiOperation(value = "Find chat by id")
+    @ApiOperation(value = "Find chatRoom by id")
     public Optional<ChatRoom> findChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId
@@ -44,7 +44,9 @@ public class ChatRoomController {
     }
 
     @GetMapping("/find-chats")
+    @ApiOperation(value = "Find chatRooms with message by user id")
     public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity,
         Pageable pageable
     ) {
@@ -53,27 +55,33 @@ public class ChatRoomController {
 
     @Validated
     @PostMapping("/get-chat")
-    public ChatRoom findChatRoomByUsersOrElseCreate(
+    @ApiOperation(value = "Get chatRooms by user id or else create")
+    public ChatRoom getChatRoomByUsersOrElseCreate(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.findChatRoomByUsersOrElseCreate(dto);
+        return chatRoomService.getChatRoomByUsersOrElseCreate(dto);
     }
 
     @Validated
     @PostMapping("/get-system-chat")
-    public ChatRoom findSystemChatRoomByUserOrElseCreate(
+    @ApiOperation(value = "Get system chatRooms by user id or else create")
+    public ChatRoom getSystemChatRoomByUserOrElseCreate(
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
+        return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
     @PostMapping
+    @ApiOperation(value = "Create chatRoom")
     public ChatRoom createChatRoom(
         @Valid
         @RequestParam ChatRoomCreateDto dto,
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
@@ -82,9 +90,11 @@ public class ChatRoomController {
 
     @Validated
     @DeleteMapping
+    @ApiOperation(value = "Delete chatRoom")
     public boolean deleteChatRoom(
         @NotNull(message = "Id of chat should be not null")
         @RequestBody ChatRoomDeleteDto dto,
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
@@ -93,10 +103,12 @@ public class ChatRoomController {
 
     @Validated
     @GetMapping("/all-messages")
+    @ApiOperation(value = "Delete chatRoom")
     public Page<Message> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
         Pageable pageable,
+        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.findMessagesByChatId(chatId, userSecurity.getUserId(), pageable);

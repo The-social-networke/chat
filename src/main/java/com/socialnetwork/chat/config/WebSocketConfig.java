@@ -1,7 +1,6 @@
 package com.socialnetwork.chat.config;
 
 import com.socialnetwork.chat.config.security.UserInterceptor;
-import com.socialnetwork.chat.util.AuthModuleUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

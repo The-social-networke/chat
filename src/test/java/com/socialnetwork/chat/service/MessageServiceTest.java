@@ -10,7 +10,6 @@ import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.impl.MessageService;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -88,6 +87,7 @@ class MessageServiceTest {
         );
     }
 
+
     @Test
     void testFindAllByChatId() {
         Page<Message> messagesPage = new PageImpl<>(messages);
@@ -99,6 +99,7 @@ class MessageServiceTest {
         Assertions.assertEquals(messagesResult.getContent(), messagesPage.getContent());
         verify(repository).findAllByChatRoomId(eq(chatId), any(Pageable.class));
     }
+
 
     @Test
     void testSentMessage() {
@@ -117,8 +118,9 @@ class MessageServiceTest {
         verify(repository).save(any(Message.class));
     }
 
+
     @Test
-    void testDeleteMessageIfMessageBelongToUser() {
+    void testDeleteMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(0);
         MessageDeleteDto dto = new MessageDeleteDto()
@@ -137,7 +139,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testDeleteMessageIfMessageNotBelongToUser() {
+    void testDeleteMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(1).getUserId();
         Message expectFoundMessage = messages.get(0);
         MessageDeleteDto dto = new MessageDeleteDto()
@@ -157,8 +159,9 @@ class MessageServiceTest {
         verify(repository).findById(dto.getMessageId());
     }
 
+
     @Test
-    void testReadMessageIfMessageNotBelongToUserAndNotReadBefore() {
+    void testReadMessage_ifMessageNotBelongToUserAndNotReadBefore() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1);
         Message expectSavedMessage = messages.get(1)
@@ -182,7 +185,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testReadMessageIfMessageNotBelongToUserAndReadBefore() {
+    void testReadMessage_ifMessageNotBelongToUserAndReadBefore() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1)
             .toBuilder()
@@ -204,7 +207,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testReadMessageIfMessageBelongToUser() {
+    void testReadMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(0);
         MessageReadDto dto = new MessageReadDto()
@@ -226,7 +229,7 @@ class MessageServiceTest {
 
 
     @Test
-    void testUpdateMessageIfMessageBelongToUser() {
+    void testUpdateMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(0);
         Message expectSavedMessage = messages.get(0)
@@ -252,7 +255,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testUpdateMessageIfMessageNotBelongToUser() {
+    void testUpdateMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1);
         MessageUpdateDto dto = new MessageUpdateDto()
@@ -275,8 +278,9 @@ class MessageServiceTest {
         verify(repository, never()).save(any());
     }
 
+
     @Test
-    void testLikeMessageIfMessageNotBelongToUserAndLikeToggleToTrue() {
+    void testLikeMessage_ifMessageNotBelongToUserAndLikeToggleToTrue() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1);
         Message expectSavedMessage = messages.get(1)
@@ -301,7 +305,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testLikeMessageIfMessageNotBelongToUserAndLikeToggleToFalse() {
+    void testLikeMessage_ifMessageNotBelongToUserAndLikeToggleToFalse() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1)
             .toBuilder()
@@ -328,7 +332,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testLikeMessageIfMessageNotBelongToUserAndLikeTheSame() {
+    void testLikeMessage_ifMessageNotBelongToUserAndLikeTheSame() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(1);
         MessageLikeDto dto = new MessageLikeDto()
@@ -348,7 +352,7 @@ class MessageServiceTest {
     }
 
     @Test
-    void testLikeMessageIfMessageBelongToUser() {
+    void testLikeMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message expectFoundMessage = messages.get(0);
         MessageLikeDto dto = new MessageLikeDto()

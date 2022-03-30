@@ -12,9 +12,9 @@ public interface ChatRoomService {
 
     Optional<ChatRoom> findChatRoomById(String id);
 
-    ChatRoom findChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
+    ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
-    ChatRoom findSystemChatRoomByUserOrElseCreate(String userId);
+    ChatRoom getSystemChatRoomByUserOrElseCreate(String userId);
 
     Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
 
