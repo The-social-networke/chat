@@ -8,8 +8,8 @@ let currentMessages = null;
 let messageToChangeId = null;
 let messageText = null;
 
-//let port = "http://198.211.110.141:8002";
-let port = "http://localhost:8081";
+let port = "http://198.211.110.141:8002";
+//let port = "http://localhost:8081";
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);

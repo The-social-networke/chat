@@ -1,0 +1,734 @@
+<html><head>
+    <title>Api Socket Documentation</title>
+    <style type="text/css">
+        body {
+            font-family: Trebuchet MS, sans-serif;
+            font-size: 15px;
+            color: #444;
+            margin-right: 24px;
+        }
+
+        h1	{
+            font-size: 25px;
+        }
+        h2	{
+            font-size: 20px;
+        }
+        h3	{
+            font-size: 16px;
+            font-weight: bold;
+        }
+        hr	{
+            height: 1px;
+            border: 0;
+            color: #ddd;
+            background-color: #ddd;
+        }
+
+        .app-desc {
+            clear: both;
+            margin-left: 20px;
+        }
+        .param-name {
+            width: 100%;
+        }
+        .license-info {
+            margin-left: 20px;
+        }
+
+        .license-url {
+            margin-left: 20px;
+        }
+
+        .model {
+            margin: 0 0 0px 20px;
+        }
+
+        .method {
+            margin-left: 20px;
+        }
+
+        .method-notes	{
+            margin: 10px 0 20px 0;
+            font-size: 90%;
+            color: #555;
+        }
+
+        pre {
+            padding: 10px;
+            margin-bottom: 2px;
+        }
+
+        .http-method {
+            text-transform: uppercase;
+        }
+
+        pre.get {
+            background-color: #0f6ab4;
+        }
+
+        pre.post {
+            background-color: #10a54a;
+        }
+
+        pre.put {
+            background-color: #c5862b;
+        }
+
+        pre.delete {
+            background-color: #a41e22;
+        }
+
+        .huge	{
+            color: #fff;
+        }
+
+        pre.example {
+            background-color: #f3f3f3;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        code {
+            white-space: pre;
+        }
+
+        .nickname {
+            font-weight: bold;
+        }
+
+        .method-path {
+            font-size: 1.5em;
+            background-color: #0f6ab4;
+        }
+
+        .up {
+            float:right;
+        }
+
+        .parameter {
+            width: 500px;
+        }
+
+        .param {
+            width: 500px;
+            padding: 10px 0 0 20px;
+            font-weight: bold;
+        }
+
+        .param-desc {
+            width: 700px;
+            padding: 0 0 0 20px;
+            color: #777;
+        }
+
+        .param-type {
+            font-style: italic;
+        }
+
+        .param-enum-header {
+            width: 700px;
+            padding: 0 0 0 60px;
+            color: #777;
+            font-weight: bold;
+        }
+
+        .param-enum {
+            width: 700px;
+            padding: 0 0 0 80px;
+            color: #777;
+            font-style: italic;
+        }
+
+        .field-label {
+            padding: 0;
+            margin: 0;
+            clear: both;
+        }
+
+        .field-items	{
+            padding: 0 0 15px 0;
+            margin-bottom: 15px;
+        }
+
+        .return-type {
+            clear: both;
+            padding-bottom: 10px;
+        }
+
+        .param-header {
+            font-weight: bold;
+        }
+
+        .method-tags {
+            text-align: right;
+        }
+
+        .method-tag {
+            background: none repeat scroll 0% 0% #24A600;
+            border-radius: 3px;
+            padding: 2px 10px;
+            margin: 2px;
+            color: #FFF;
+            display: inline-block;
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Api Socket Documentation</h1>
+<div class="app-desc">Api Socket Documentation</div>
+<h2>Access</h2>
+
+<h2><a name="__Methods">Methods</a></h2>
+[ Jump to <a href="#__Models">Models</a> ]
+
+<h3>Table of Contents </h3>
+<div class="method-summary"></div>
+<h4><a href="#ChatRoomSocketController">ChatRoomSocketController</a></h4>
+<ul>
+    <li><a href="#connectUsingGET"><code><span class="http-method">Connect</span> ws:/198.211.110.141:8002/ws-chat</code></a></li>
+    <li><a href="#deleteMessageUsingPOST"><code><span class="http-method">Send</span> /chat/deleteMessage/{roomId}</code></a></li>
+    <li><a href="#likeMessageUsingPOST"><code><span class="http-method">Send</span> /chat/likeMessage/{roomId}</code></a></li>
+    <li><a href="#readMessageUsingPOST"><code><span class="http-method">Send</span> /chat/readMessage/{roomId}</code></a></li>
+    <li><a href="#sendMessageUsingPOST"><code><span class="http-method">Send</span> /chat/sendMessage/{roomId}</code></a></li>
+    <li><a href="#updateMessageUsingPOST"><code><span class="http-method">Send</span> /chat/updateMessage/{roomId}</code></a></li>
+    <li><a href="#usersUsingPUT"><code><span class="http-method">Subscribe</span> /users/{userId}</code></a></li>
+    <li><a href="#usersUsingPUT_1"><code><span class="http-method">Subscribe</span> /chat/messages/{chatId}</code></a></li>
+</ul>
+
+<h1><a name="ChatRoomSocketController">ChatRoomSocketController</a></h1>
+<div class="method"><a name="connectUsingGET">
+</a><div class="method-path"><a name="connectUsingGET">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="get"><code class="huge"><span class="http-method">Connect</span> ws:/198.211.110.141:8002/ws-chat</code></pre></div>
+    <div class="method-summary">connect to socket (<span class="nickname">connectUsingGET</span>)</div>
+    <div class="method-notes">it is required add bearer jwt token to header. For example ( { 'Authorization': 'Bearer ' + token } )</div>
+
+
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">503</h4>
+    {
+    "errorCode": 503
+    "message": "forbidden"
+    }
+    <a href="#"></a>
+    <h4 class="field-label"></h4>
+    Success
+    <a href="#"></a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="deleteMessageUsingPOST">
+</a><div class="method-path"><a name="deleteMessageUsingPOST">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">Send</span> /chat/deleteMessage/{roomId}</code></pre></div>
+    <div class="method-summary">delete message (<span class="nickname">deleteMessageUsingPOST</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">roomId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat room which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+        <div class="param">dto <a href="#MessageDeleteDto">MessageDeleteDto</a> (optional)</div>
+
+        <div class="param-desc"><span class="param-type">Body Parameter</span> — A JSON value representing a object of message delete dto </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">1001</h4>
+    {
+    "errorCode": 1001
+    "message": "chat not found"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1002</h4>
+    {
+    "errorCode": 1002
+    "message": "not member of chat"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1006</h4>
+    {
+    "errorCode": 1006
+    "message": "user cannot delete not own message"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">sent to /chat/messages/{room}</h4>
+    Successful
+    <a href="#"></a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="likeMessageUsingPOST">
+</a><div class="method-path"><a name="likeMessageUsingPOST">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">Send</span> /chat/likeMessage/{roomId}</code></pre></div>
+    <div class="method-summary">like message (<span class="nickname">likeMessageUsingPOST</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">roomId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat room which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+        <div class="param">dto <a href="#MessageLikeDto">MessageLikeDto</a> (optional)</div>
+
+        <div class="param-desc"><span class="param-type">Body Parameter</span> — A JSON value representing a object of message like dto </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">1001</h4>
+    {
+    "errorCode": 1001
+    "message": "chat not found"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1002</h4>
+    {
+    "errorCode": 1002
+    "message": "not member of chat"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1007</h4>
+    {
+    "errorCode": 1004
+    "message": "user cannot like himself"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">sent to /chat/messages/{room}</h4>
+    Successful
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="readMessageUsingPOST">
+</a><div class="method-path"><a name="readMessageUsingPOST">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">Send</span> /chat/readMessage/{roomId}</code></pre></div>
+    <div class="method-summary">like message (<span class="nickname">readMessageUsingPOST</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">roomId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat room which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+        <div class="param">dto <a href="#MessageReadDto">MessageReadDto</a> (optional)</div>
+
+        <div class="param-desc"><span class="param-type">Body Parameter</span> — A JSON value representing a object of read like dto </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">1001</h4>
+    {
+    "errorCode": 1001
+    "message": "chat not found"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1002</h4>
+    {
+    "errorCode": 1002
+    "message": "not member of chat"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1007</h4>
+    {
+    "errorCode": 1005
+    "message": "user cannot read his message"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">sent to /chat/messages/{room}</h4>
+    Successful
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="sendMessageUsingPOST">
+</a><div class="method-path"><a name="sendMessageUsingPOST">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">Send</span> /chat/sendMessage/{roomId}</code></pre></div>
+    <div class="method-summary">send message (<span class="nickname">sendMessageUsingPOST</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">roomId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat room which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+        <div class="param">dto <a href="#MessageCreateDto">MessageCreateDto</a> (optional)</div>
+
+        <div class="param-desc"><span class="param-type">Body Parameter</span> — A JSON value representing a object of message </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">1001</h4>
+    {
+    "errorCode": 1001
+    "message": "chat not found"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1002</h4>
+    {
+    "errorCode": 1002
+    "message": "not member of chat"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">send to </h4>
+    Successful
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="updateMessageUsingPOST">
+</a><div class="method-path"><a name="updateMessageUsingPOST">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="post"><code class="huge"><span class="http-method">Send</span> /chat/updateMessage/{roomId}</code></pre></div>
+    <div class="method-summary">update message (<span class="nickname">updateMessageUsingPOST</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">roomId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat room which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+    <h3 class="field-label">Request body</h3>
+    <div class="field-items">
+        <div class="param">dto <a href="#MessageUpdateDto">MessageUpdateDto</a> (optional)</div>
+
+        <div class="param-desc"><span class="param-type">Body Parameter</span> — A JSON value representing a object of message update dto </div>
+
+    </div>  <!-- field-items -->
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">1001</h4>
+    {
+    "errorCode": 1001
+    "message": "chat not found"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1002</h4>
+    {
+    "errorCode": 1002
+    "message": "not member of chat"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">1007</h4>
+    {
+    "errorCode": 1007
+    "message": "user cannot update not own message"
+    }
+    <a href="#"></a>
+    <h4 class="field-label">sent to /chat/messages/{room}</h4>
+    Successful
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="usersUsingPUT">
+</a><div class="method-path"><a name="usersUsingPUT">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">subscribe</span> /users/{userId}</code></pre></div>
+    <div class="method-summary">subscribe user (<span class="nickname">usersUsingPUT</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">userId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the user who will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">sent from other</h4>
+    OK
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+<div class="method"><a name="usersUsingPUT_1">
+</a><div class="method-path"><a name="usersUsingPUT_1">
+</a><a class="up" href="#__Methods">Up</a>
+    <pre class="put"><code class="huge"><span class="http-method">subscribe</span> /chat/messages/{chatId}</code></pre></div>
+    <div class="method-summary">subscribe user (<span class="nickname">usersUsingPUT_1</span>)</div>
+    <div class="method-notes"></div>
+
+    <h3 class="field-label">Path parameters</h3>
+    <div class="field-items">
+        <div class="param">chatId (required)</div>
+
+        <div class="param-desc"><span class="param-type">Path Parameter</span> — the chat which will receive messages and notifications </div>
+    </div>  <!-- field-items -->
+
+    <h3 class="field-label">Consumes</h3>
+    This API call consumes the following media types via the <span class="header">Content-Type</span> request header:
+    <ul>
+        <li><code>application/json</code></li>
+    </ul>
+
+
+
+
+
+
+    <!--Todo: process Response Object and its headers, schema, examples -->
+
+
+    <h3 class="field-label">Produces</h3>
+    This API call produces the following media types according to the <span class="header">Accept</span> request header;
+    the media type will be conveyed by the <span class="header">Content-Type</span> response header.
+    <ul>
+        <li><code>*/*</code></li>
+    </ul>
+
+    <h3 class="field-label">Responses</h3>
+    <h4 class="field-label">sent from other</h4>
+    OK
+    <a href="#Message">Message</a>
+</div> <!-- method -->
+<hr>
+
+<h2><a name="__Models">Models</a></h2>
+[ Jump to <a href="#__Methods">Methods</a> ]
+
+<h3>Table of Contents</h3>
+<ol>
+    <li><a href="#Message"><code>Message</code> - Message</a></li>
+    <li><a href="#MessageCreateDto"><code>MessageCreateDto</code> - MessageCreateDto</a></li>
+    <li><a href="#MessageDeleteDto"><code>MessageDeleteDto</code> - MessageDeleteDto</a></li>
+    <li><a href="#MessageLikeDto"><code>MessageLikeDto</code> - MessageLikeDto</a></li>
+    <li><a href="#MessageReadDto"><code>MessageReadDto</code> - MessageReadDto</a></li>
+    <li><a href="#MessageUpdateDto"><code>MessageUpdateDto</code> - MessageUpdateDto</a></li>
+</ol>
+
+<div class="model">
+    <h3><a name="Message"><code>Message</code> - Message</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description"></div>
+    <div class="field-items">
+        <div class="param">forwardId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param">forwardType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">MESSAGE</div><div class="param-enum">CONTENT</div><div class="param-enum">PROFILE</div>
+        <div class="param">id (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param">messageLikes (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+        <div class="param">messageReads (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span>  </div>
+        <div class="param">photo (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">byte[]</a></span>  format: byte</div>
+        <div class="param">sentAt (optional)</div><div class="param-desc"><span class="param-type"><a href="#DateTime">Date</a></span>  format: date-time</div>
+        <div class="param">text (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param">updated (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span>  </div>
+        <div class="param">userId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+    </div>  <!-- field-items -->
+</div>
+<div class="model">
+    <h3><a name="MessageCreateDto"><code>MessageCreateDto</code> - MessageCreateDto</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description">dto to create message</div>
+    <div class="field-items">
+        <div class="param">chatRoomId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Another user in chat room </div>
+        <div class="param-desc"><span class="param-type">example: cfdbefcb-012e-4901-97e1-c673335558d7</span></div>
+        <div class="param">forwardId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param">forwardType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">MESSAGE</div><div class="param-enum">CONTENT</div><div class="param-enum">PROFILE</div>
+        <div class="param">photo (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">byte[]</a></span>  format: byte</div>
+        <div class="param">text </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> text of message </div>
+        <div class="param-desc"><span class="param-type">example: some text</span></div>
+    </div>  <!-- field-items -->
+</div>
+<div class="model">
+    <h3><a name="MessageDeleteDto"><code>MessageDeleteDto</code> - MessageDeleteDto</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description">dto to delete message</div>
+    <div class="field-items">
+        <div class="param">messageId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-desc"><span class="param-type">example: cfdbefcb-012e-4901-97e1-c673335558d7</span></div>
+    </div>  <!-- field-items -->
+</div>
+<div class="model">
+    <h3><a name="MessageLikeDto"><code>MessageLikeDto</code> - MessageLikeDto</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description">dto to like message</div>
+    <div class="field-items">
+        <div class="param">isLike (optional)</div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> like or dislike of message </div>
+        <div class="param-desc"><span class="param-type">example: false</span></div>
+        <div class="param">messageId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> message that should be liked </div>
+        <div class="param-desc"><span class="param-type">example: cfdbefcb-012e-4901-97e1-c673335558d7</span></div>
+    </div>  <!-- field-items -->
+</div>
+<div class="model">
+    <h3><a name="MessageReadDto"><code>MessageReadDto</code> - MessageReadDto</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description">dto to read message</div>
+    <div class="field-items">
+        <div class="param">messageId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> message that should be read </div>
+        <div class="param-desc"><span class="param-type">example: cfdbefcb-012e-4901-97e1-c673335558d7</span></div>
+    </div>  <!-- field-items -->
+</div>
+<div class="model">
+    <h3><a name="MessageUpdateDto"><code>MessageUpdateDto</code> - MessageUpdateDto</a> <a class="up" href="#__Models">Up</a></h3>
+    <div class="model-description">dto to update message</div>
+    <div class="field-items">
+        <div class="param">forwardId (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param">forwardType (optional)</div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span>  </div>
+        <div class="param-enum-header">Enum:</div>
+        <div class="param-enum">MESSAGE</div><div class="param-enum">CONTENT</div><div class="param-enum">PROFILE</div>
+        <div class="param">messageId </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> Message that should be deleted </div>
+        <div class="param-desc"><span class="param-type">example: cfdbefcb-012e-4901-97e1-c673335558d7</span></div>
+        <div class="param">photo (optional)</div><div class="param-desc"><span class="param-type"><a href="#ByteArray">byte[]</a></span>  format: byte</div>
+        <div class="param">text </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> text of message </div>
+        <div class="param-desc"><span class="param-type">example: some text</span></div>
+    </div>  <!-- field-items -->
+</div>
+
+
+</body></html>

@@ -10,6 +10,8 @@ import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,12 @@ public class ChatRoomController {
     @Validated
     @GetMapping
     @ApiOperation(value = "Find chatRoom by id")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successful"),
+        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
+        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
+        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+    })
     public Optional<ChatRoom> findChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId

@@ -87,6 +87,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
             "/main.css",
             "/web-socket.js",
             "/favicon.ico",
+            "/swagger-socket-ui.html",
             "/"
         };
         return Stream.of(inauthenticationEndpoints).anyMatch(path::matches);

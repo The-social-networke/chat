@@ -46,6 +46,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public Optional<ChatRoom> findChatRoomById(String id) {
         log.info("Find chat room");
+        //todo make test
+
 
         return chatRoomRepository.findById(id);
     }
