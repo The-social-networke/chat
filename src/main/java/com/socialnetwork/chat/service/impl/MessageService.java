@@ -6,6 +6,7 @@ import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,21 +35,25 @@ public class MessageService {
             .toBuilder()
             .id(UUID.randomUUID().toString())
             .build();
-        return messageRepository.save(entity);
+        Message messageSaved = messageRepository.save(entity);
+        messageSaved.setMessageStatus(MessageStatus.SENT);
+        return messageSaved;
     }
 
-    public void deleteMessage(MessageDeleteDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
+    public Message deleteMessage(MessageDeleteDto dto) {
+        Message message = messageRepository.findById(dto.getMessageId()).orElseThrow();
 
         if(!message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE);
         }
 
         messageRepository.delete(message);
+        message.setMessageStatus(MessageStatus.DELETED);
+        return message;
     }
 
     public Message readMessage(MessageReadDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
+        Message message = messageRepository.findById(dto.getMessageId()).orElseThrow();
 
         if(message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_READ_HIS_MESSAGE);
@@ -59,11 +64,14 @@ public class MessageService {
             return message;
         }
         message.getMessageReads().add(dto.getCurrentUserId());
-        return messageRepository.save(message);
+        return messageRepository.save(message)
+                .toBuilder()
+                .messageStatus(MessageStatus.UPDATED)
+                .build();
     }
 
     public Message updateMessage(MessageUpdateDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
+        Message message = messageRepository.findById(dto.getMessageId()).orElseThrow();
 
         if(!message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_UPDATE_NOT_OWN_MESSAGE);
@@ -72,12 +80,17 @@ public class MessageService {
         message = message.toBuilder()
             .isUpdated(true)
             .text(dto.getText())
+            .forwardId(dto.getForwardId())
+            .forwardType(dto.getForwardType())
             .build();
-        return messageRepository.save(message);
+        return messageRepository.save(message)
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
     }
 
     public Message toggleLikeMessage(MessageLikeDto dto) {
-        Message message = messageRepository.findById(dto.getMessageId()).get();
+        Message message = messageRepository.findById(dto.getMessageId()).orElseThrow();
 
         if(message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_LIKE_HIS_MESSAGE);
@@ -94,6 +107,9 @@ public class MessageService {
         else {
             message.getMessageLikes().remove(dto.getCurrentUserId());
         }
-        return messageRepository.save(message);
+        return messageRepository.save(message)
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
     }
 }

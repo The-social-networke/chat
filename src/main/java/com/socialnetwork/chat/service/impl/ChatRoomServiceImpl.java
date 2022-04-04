@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,18 +43,19 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public Optional<ChatRoom> findChatRoomById(String id) {
-        log.info("Find chat room");
-        //todo make test
+    public ChatRoom getChatRoomById(String userId, String chatId) {
+        log.info("Find chat room with userId = {} and chatId = {}", userId, chatId);
 
-
-        return chatRoomRepository.findById(id);
+        var chat = chatRoomRepository.findById(chatId)
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        checkIfUserMemberOfChat(chat, userId);
+        return chat;
     }
 
     @Override
     @Transactional
     public ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
-        log.info("Find chat room by users");
+        log.info("Find chat room by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
 
         var chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
         if(chat.isEmpty()) {
@@ -73,7 +73,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public ChatRoom getSystemChatRoomByUserOrElseCreate(String userId) {
-        log.info("Find system chat room by users");
+        log.info("Find system chat room by users with userId = {}", userId);
 
         var chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
         if(chat.isEmpty()) {
@@ -88,7 +88,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable) {
+    public Page<Message> findMessagesByChatId(String userId, String chatId, Pageable pageable) {
         log.info("Find chat room");
 
         var chatRoom = getChatRoomOrElseThrow(chatId);
@@ -159,7 +159,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public void deleteMessage(MessageDeleteDto dto) {
+    public Message deleteMessage(MessageDeleteDto dto) {
         log.info("Delete message");
 
         var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
@@ -168,7 +168,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
         checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
 
-        messageService.deleteMessage(dto);
+        return messageService.deleteMessage(dto);
     }
 
     @Override
@@ -213,7 +213,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return messageService.readMessage(dto);
     }
 
-    private void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
+    private static void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
         boolean isMemberOfChat = chatRoom.getUsers()
             .stream()
             .anyMatch(u -> u.equals(userId));

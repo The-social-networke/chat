@@ -9,6 +9,7 @@ import com.socialnetwork.chat.mapper.MessageMapperImpl;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.impl.MessageService;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,33 +123,33 @@ class MessageServiceTest {
     @Test
     void testDeleteMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(0);
+        Message messageFound = messages.get(0);
         MessageDeleteDto dto = new MessageDeleteDto()
             .toBuilder()
             .messageId(messages.get(0).getId())
             .currentUserId(currentUser)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
-        doNothing().when(repository).delete(expectFoundMessage);
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        doNothing().when(repository).delete(messageFound);
 
         service.deleteMessage(dto);
 
         verify(repository).findById(dto.getMessageId());
-        verify(repository).delete(expectFoundMessage);
+        verify(repository).delete(messageFound);
     }
 
     @Test
     void testDeleteMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(1).getUserId();
-        Message expectFoundMessage = messages.get(0);
+        Message messageFound = messages.get(0);
         MessageDeleteDto dto = new MessageDeleteDto()
             .toBuilder()
             .messageId(messages.get(0).getId())
             .currentUserId(currentUser)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         ChatException thrown = assertThrows(
             ChatException.class,
@@ -163,10 +164,13 @@ class MessageServiceTest {
     @Test
     void testReadMessage_ifMessageNotBelongToUserAndNotReadBefore() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1);
-        Message expectSavedMessage = messages.get(1)
+        Message messageFound = messages.get(1);
+        Message messageSaved = messages.get(1)
             .toBuilder()
             .messageReads(Set.of(currentUser))
+            .build();
+        Message messageExpect = messageSaved.toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageReadDto dto = new MessageReadDto()
             .toBuilder()
@@ -174,20 +178,20 @@ class MessageServiceTest {
             .currentUserId(currentUser)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
-        when(repository.save(expectFoundMessage)).thenReturn(expectSavedMessage);
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        when(repository.save(messageFound)).thenReturn(messageSaved);
 
         Message returnedMessage = service.readMessage(dto);
 
-        Assertions.assertEquals(returnedMessage, expectSavedMessage);
+        Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
-        verify(repository).save(expectFoundMessage);
+        verify(repository).save(messageFound);
     }
 
     @Test
     void testReadMessage_ifMessageNotBelongToUserAndReadBefore() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1)
+        Message messageFound = messages.get(1)
             .toBuilder()
             .messageReads(Set.of(currentUser))
             .build();
@@ -197,11 +201,11 @@ class MessageServiceTest {
             .currentUserId(currentUser)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         Message returnedMessage = service.readMessage(dto);
 
-        Assertions.assertEquals(returnedMessage, expectFoundMessage);
+        Assertions.assertEquals(returnedMessage, messageFound);
         verify(repository).findById(dto.getMessageId());
         verify(repository, never()).save(any());
     }
@@ -209,14 +213,14 @@ class MessageServiceTest {
     @Test
     void testReadMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(0);
+        Message messageFound = messages.get(0);
         MessageReadDto dto = new MessageReadDto()
             .toBuilder()
             .messageId(messages.get(0).getId())
             .currentUserId(currentUser)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         ChatException thrown = assertThrows(
             ChatException.class,
@@ -231,11 +235,15 @@ class MessageServiceTest {
     @Test
     void testUpdateMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(0);
-        Message expectSavedMessage = messages.get(0)
+        Message messageFound = messages.get(0);
+        Message messageSaved = messages.get(0)
             .toBuilder()
             .isUpdated(true)
             .text("some new text")
+            .build();
+        Message expectExpectResult = messageSaved
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageUpdateDto dto = new MessageUpdateDto()
             .toBuilder()
@@ -244,20 +252,20 @@ class MessageServiceTest {
             .text("some new text")
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
-        when(repository.save(expectSavedMessage)).thenReturn(expectSavedMessage);
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        when(repository.save(messageSaved)).thenReturn(messageSaved);
 
-        Message message = service.updateMessage(dto);
+        Message messageResult = service.updateMessage(dto);
 
-        Assertions.assertEquals(expectSavedMessage, message);
+        Assertions.assertEquals(expectExpectResult, messageResult);
         verify(repository).findById(dto.getMessageId());
-        verify(repository).save(expectSavedMessage);
+        verify(repository).save(messageSaved);
     }
 
     @Test
     void testUpdateMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1);
+        Message messageFound = messages.get(1);
         MessageUpdateDto dto = new MessageUpdateDto()
             .toBuilder()
             .messageId(messages.get(1).getId())
@@ -265,7 +273,7 @@ class MessageServiceTest {
             .text("some new text")
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
 
         ChatException thrown = assertThrows(
@@ -282,10 +290,13 @@ class MessageServiceTest {
     @Test
     void testLikeMessage_ifMessageNotBelongToUserAndLikeToggleToTrue() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1);
-        Message expectSavedMessage = messages.get(1)
+        Message messageFound = messages.get(1);
+        Message messageSaved = messages.get(1)
             .toBuilder()
             .messageLikes(Set.of(currentUser))
+            .build();
+        Message messageExpect = messageSaved.toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageLikeDto dto = new MessageLikeDto()
             .toBuilder()
@@ -294,26 +305,32 @@ class MessageServiceTest {
             .isLike(true)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
-        when(repository.save(expectSavedMessage)).thenReturn(expectSavedMessage);
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        when(repository.save(messageSaved)).thenReturn(messageSaved);
 
         Message returnedMessage = service.toggleLikeMessage(dto);
 
-        Assertions.assertEquals(expectSavedMessage, returnedMessage);
+        Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
-        verify(repository).save(expectSavedMessage);
+        verify(repository).save(messageSaved);
     }
 
     @Test
     void testLikeMessage_ifMessageNotBelongToUserAndLikeToggleToFalse() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1)
+        Message messageFound = messages.get(1)
             .toBuilder()
-            .messageLikes(new HashSet<>() {{
+            .messageLikes(new HashSet<>() {
+                private static final long serialVersionUID = -7673589026101535761L;
+
+                {
                 add(currentUser);
             }})
             .build();
         Message expectSavedMessage = messages.get(1);
+        Message messageExpect = expectSavedMessage.toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
         MessageLikeDto dto = new MessageLikeDto()
             .toBuilder()
             .messageId(messages.get(1).getId())
@@ -321,12 +338,12 @@ class MessageServiceTest {
             .isLike(false)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
         when(repository.save(expectSavedMessage)).thenReturn(expectSavedMessage);
 
         Message returnedMessage = service.toggleLikeMessage(dto);
 
-        Assertions.assertEquals(expectSavedMessage, returnedMessage);
+        Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
         verify(repository).save(expectSavedMessage);
     }
@@ -334,7 +351,7 @@ class MessageServiceTest {
     @Test
     void testLikeMessage_ifMessageNotBelongToUserAndLikeTheSame() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(1);
+        Message messageFound = messages.get(1);
         MessageLikeDto dto = new MessageLikeDto()
             .toBuilder()
             .messageId(messages.get(1).getId())
@@ -342,11 +359,11 @@ class MessageServiceTest {
             .isLike(false)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         Message returnedMessage = service.toggleLikeMessage(dto);
 
-        Assertions.assertEquals(expectFoundMessage, returnedMessage);
+        Assertions.assertEquals(messageFound, returnedMessage);
         verify(repository).findById(dto.getMessageId());
         verify(repository, never()).save(any());
     }
@@ -354,7 +371,7 @@ class MessageServiceTest {
     @Test
     void testLikeMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
-        Message expectFoundMessage = messages.get(0);
+        Message messageFound = messages.get(0);
         MessageLikeDto dto = new MessageLikeDto()
             .toBuilder()
             .messageId(messages.get(0).getId())
@@ -362,7 +379,7 @@ class MessageServiceTest {
             .isLike(true)
             .build();
 
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(expectFoundMessage));
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         ChatException thrown = assertThrows(
             ChatException.class,

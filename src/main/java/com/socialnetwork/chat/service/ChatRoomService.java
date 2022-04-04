@@ -6,17 +6,15 @@ import com.socialnetwork.chat.entity.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
-
 public interface ChatRoomService {
 
-    Optional<ChatRoom> findChatRoomById(String id);
+    ChatRoom getChatRoomById(String userId, String chatId);
 
     ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
     ChatRoom getSystemChatRoomByUserOrElseCreate(String userId);
 
-    Page<Message> findMessagesByChatId(String chatId, String userId, Pageable pageable);
+    Page<Message> findMessagesByChatId(String userId, String chatId, Pageable pageable);
 
     Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable);
 
@@ -28,7 +26,7 @@ public interface ChatRoomService {
 
     Message sendMessage(MessageCreateDto dto);
 
-    void deleteMessage(MessageDeleteDto dto);
+    Message deleteMessage(MessageDeleteDto dto);
 
     Message toggleLikeMessage(MessageLikeDto dto);
 

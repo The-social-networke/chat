@@ -23,7 +23,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 @Slf4j
 @Validated
@@ -44,11 +43,13 @@ public class ChatRoomController {
         @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
         @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
     })
-    public Optional<ChatRoom> findChatRoomById(
+    public ChatRoom findChatRoomById(
         @NotNull(message = "chat id should not be null")
-        @RequestParam String chatId
+        @RequestParam String chatId,
+        @ApiIgnore
+        @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findChatRoomById(chatId);
+        return this.chatRoomService.getChatRoomById(userSecurity.getUserId(), chatId);
     }
 
     @GetMapping("/find-chats")
@@ -58,7 +59,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity,
         Pageable pageable
     ) {
-        return chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
+        return this.chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
     }
 
     @Validated
@@ -71,7 +72,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.getChatRoomByUsersOrElseCreate(dto);
+        return this.chatRoomService.getChatRoomByUsersOrElseCreate(dto);
     }
 
     @Validated
@@ -81,7 +82,7 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
+        return this.chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
     @PostMapping
@@ -93,7 +94,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.createChatRoom(dto);
+        return this.chatRoomService.createChatRoom(dto);
     }
 
     @Validated
@@ -106,7 +107,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.deleteChatRoom(dto);
+        return this.chatRoomService.deleteChatRoom(dto);
     }
 
     @Validated
@@ -119,6 +120,6 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findMessagesByChatId(chatId, userSecurity.getUserId(), pageable);
+        return this.chatRoomService.findMessagesByChatId(chatId, userSecurity.getUserId(), pageable);
     }
 }

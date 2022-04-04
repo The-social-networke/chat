@@ -36,7 +36,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @ActiveProfiles("dev")
@@ -187,15 +188,50 @@ class ChatRoomServiceTest {
 
 
     @Test
-    void testFindChatRoomById() {
+    void testGetChatRoomById_ifChatExistsAndUserIsMemberOfChat() {
         String chatId = chatRooms.get(0).getId();
+        String userId = users.get(0);
+        ChatRoom chatRoomExpect = chatRooms.get(0);
+
+        when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
+
+        ChatRoom chatRoomResult = service.getChatRoomById(userId, chatId);
+
+        Assertions.assertEquals(chatRoomResult, chatRoomExpect);
+        verify(repository).findById(chatId);
+    }
+
+    @Test
+    void testGetChatRoomById_ifChatExistsAndUserIsNotMemberOfChat() {
+        String chatId = chatRooms.get(0).getId();
+        String userId = users.get(2);
+        ChatRoom chatRoomExpect = chatRooms.get(0);
+
+        when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
+
+        ChatException thrown = assertThrows(
+            ChatException.class,
+            () -> service.getChatRoomById(userId, chatId)
+        );
+
+        Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
+        verify(repository).findById(chatId);
+    }
+
+    @Test
+    void testGetChatRoomById_ifChatNotExists() {
+        String chatId = chatRooms.get(0).getId();
+        String userId = users.get(0);
         ChatRoom chatRoomExpect = chatRooms.get(1);
 
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
 
-        Optional<ChatRoom> chatRoomResult = service.findChatRoomById(chatId);
+        ChatException thrown = assertThrows(
+            ChatException.class,
+            () -> service.getChatRoomById(userId, chatId)
+        );
 
-        Assertions.assertEquals(chatRoomResult.get(), chatRoomExpect);
+        Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
         verify(repository).findById(chatId);
     }
 
@@ -299,7 +335,7 @@ class ChatRoomServiceTest {
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
         when(messageService.findMessagesByChatId(chatId, Pageable.ofSize(4))).thenReturn(messagesPage);
 
-        Page<Message>  messagesResult = service.findMessagesByChatId(chatId, userId, Pageable.ofSize(4));
+        Page<Message>  messagesResult = service.findMessagesByChatId(userId, chatId, Pageable.ofSize(4));
 
         Assertions.assertEquals(messagesPage.getContent(), messagesResult.getContent());
         verify(repository).findById(chatId);
@@ -317,7 +353,7 @@ class ChatRoomServiceTest {
         var pageable = Pageable.ofSize(4);
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.findMessagesByChatId(chatId, userId, pageable)
+            () -> service.findMessagesByChatId(userId, chatId, pageable)
         );
 
         Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
@@ -334,7 +370,7 @@ class ChatRoomServiceTest {
         var pageable = Pageable.ofSize(4);
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.findMessagesByChatId(chatId, userId, pageable)
+            () -> service.findMessagesByChatId(userId, chatId, pageable)
         );
 
         Assertions.assertEquals(ErrorCodeException.CHAT_NOT_FOUND, thrown.getErrorCodeException());
@@ -567,7 +603,8 @@ class ChatRoomServiceTest {
     @Test
     void testDeleteMessage_ifChatExistsAndUserIsMemberOfChat() {
         String userId = users.get(0);
-        String messageId = chatRooms.get(0).getMessages().iterator().next().getId();
+        Message messageFound = chatRooms.get(0).getMessages().iterator().next();
+        String messageId = messageFound.getId();
         ChatRoom chatRoomExpect = chatRooms.get(0);
         MessageDeleteDto dto = new MessageDeleteDto()
             .toBuilder()
@@ -576,10 +613,12 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findChatRoomByMessageId(messageId)).thenReturn(Optional.of(chatRoomExpect));
-        doNothing().when(messageService).deleteMessage(dto);
+        when(messageService.deleteMessage(dto)).thenReturn(messageFound);
 
-        service.deleteMessage(dto);
+        Message messageResult = service.deleteMessage(dto);
 
+
+        assertEquals(messageFound, messageResult);
         verify(repository).findChatRoomByMessageId(messageId);
         verify(messageService).deleteMessage(dto);
     }
@@ -841,7 +880,7 @@ class ChatRoomServiceTest {
     }
 
 
-    private ResponseEntity<Boolean> getSuccessResponse(boolean value) {
+    private static ResponseEntity<Boolean> getSuccessResponse(boolean value) {
         return new ResponseEntity<>(value, HttpStatus.OK);
     }
 }
