@@ -32,7 +32,7 @@ public class ChatRoomsMessageDto {
 
     @ApiModelProperty(
         example = "some text",
-        notes = "text of message")
+        notes = "Text of message")
     private String text;
 
     @ApiModelProperty(

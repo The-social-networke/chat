@@ -48,13 +48,18 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
 
             //check if token exists
             if (header == null || !header.startsWith("Bearer ")) {
-                throw new ChatException(ErrorCodeException.FORBIDDEN);
+                throw new ChatException(ErrorCodeException.UNAUTHORIZED);
             }
 
             //get chat from auth service
             userId = AuthModuleUtil.getUserIdFromToken(header, url);
         }
-        catch (ChatException | RestClientException ex) {
+        catch (ChatException ex) {
+            log.error(ex.getMessage());
+            resolver.resolveException(request, response, null, new ChatException(ex.getErrorCodeException()));
+            return;
+        }
+        catch (RestClientException ex) {
             log.error(ex.getMessage());
             resolver.resolveException(request, response, null, new ChatException(ErrorCodeException.FORBIDDEN));
             return;

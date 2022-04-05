@@ -5,6 +5,7 @@ import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
 import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
+import com.socialnetwork.chat.dto.ErrorDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
@@ -36,14 +37,12 @@ public class ChatRoomController {
 
     @Validated
     @GetMapping
-    @ApiOperation(value = "Find chatRoom by id")
+    @ApiOperation(value = "Get chatRoom by id")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successful"),
-        @ApiResponse(code = 401, message = "You are not authorized to view the resource"),
-        @ApiResponse(code = 403, message = "Accessing the resource you were trying to reach is forbidden"),
-        @ApiResponse(code = 404, message = "The resource you were trying to reach is not found")
+        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
+        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
     })
-    public ChatRoom findChatRoomById(
+    public ChatRoom getChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId,
         @ApiIgnore
@@ -65,6 +64,9 @@ public class ChatRoomController {
     @Validated
     @PostMapping("/get-chat")
     @ApiOperation(value = "Get chatRooms by user id or else create")
+    @ApiResponses(value = {
+        @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class)
+    })
     public ChatRoom getChatRoomByUsersOrElseCreate(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
@@ -87,6 +89,10 @@ public class ChatRoomController {
 
     @PostMapping
     @ApiOperation(value = "Create chatRoom")
+    @ApiResponses(value = {
+        @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class),
+        @ApiResponse(code = 1003, message = "chat with these users already exits", response = ErrorDto.class),
+    })
     public ChatRoom createChatRoom(
         @Valid
         @RequestParam ChatRoomCreateDto dto,
@@ -100,6 +106,10 @@ public class ChatRoomController {
     @Validated
     @DeleteMapping
     @ApiOperation(value = "Delete chatRoom")
+    @ApiResponses(value = {
+        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
+        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
+    })
     public boolean deleteChatRoom(
         @NotNull(message = "Id of chat should be not null")
         @RequestBody ChatRoomDeleteDto dto,
@@ -112,7 +122,12 @@ public class ChatRoomController {
 
     @Validated
     @GetMapping("/all-messages")
-    @ApiOperation(value = "Delete chatRoom")
+    @ApiOperation(value = "Find all message by chat root")
+    @ApiResponses(value = {
+        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
+        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class
+        )
+    })
     public Page<Message> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,

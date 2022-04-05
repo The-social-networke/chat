@@ -38,7 +38,7 @@ public class UserInterceptor implements ChannelInterceptor {
             try {
                 var headers = (Map<String, List<String>>) message.getHeaders().get(NativeMessageHeaderAccessor.NATIVE_HEADERS);
                 if(headers == null || !headers.containsKey("Authorization")) {
-                    throw new ChatException(ErrorCodeException.FORBIDDEN);
+                    throw new ChatException(ErrorCodeException.UNAUTHORIZED);
                 }
                 List<String> auth = headers.get("Authorization");
                 String userIdFromToken = AuthModuleUtil.getUserIdFromToken(auth.get(0), url);

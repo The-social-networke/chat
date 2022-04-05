@@ -6,6 +6,7 @@ import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.util.FieldViolationsError;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -57,13 +58,17 @@ public class ControllerAdvice {
             .build();
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ChatException.class)
-    public ErrorDto handleNotFoundError(ChatException ex) {
-
-        return ErrorDto.builder()
+    public ResponseEntity<Object> handleNotFoundError(ChatException ex) {
+        if(ex.getErrorCodeException().equals(ErrorCodeException.UNAUTHORIZED)) {
+            return new ResponseEntity<>("unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+        if(ex.getErrorCodeException().equals(ErrorCodeException.FORBIDDEN)) {
+            return new ResponseEntity<>("forbidden", HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(ErrorDto.builder()
             .message(ex.getMessage())
             .errorCode(ex.getErrorCodeException())
-            .build();
+            .build(), HttpStatus.BAD_REQUEST);
     }
 }
