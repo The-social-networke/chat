@@ -60,6 +60,7 @@ public class Message implements Serializable {
     private boolean isUpdated = false;
 
     @JsonIgnore
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private ChatRoom chatRoom;
 

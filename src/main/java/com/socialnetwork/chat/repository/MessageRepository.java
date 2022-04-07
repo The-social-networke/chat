@@ -5,6 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.Optional;
 
 public interface MessageRepository extends JpaRepository<Message, String> {
 
@@ -14,4 +17,15 @@ public interface MessageRepository extends JpaRepository<Message, String> {
             "ORDER BY sent_at",
         nativeQuery = true)
     Page<Message> findAllByChatRoomId(String chatId, Pageable pageable);
+
+    @Query(value =
+        "SELECT message.* " +
+            "FROM chat.chat_room" +
+            "   JOIN chat.message" +
+            "       ON chat.message.chat_room_id = :chatRoomId" +
+            "       AND chat_room.id = message.chat_room_id " +
+            "ORDER BY message.sent_at DESC " +
+            "LIMIT 1",
+        nativeQuery = true)
+    Optional<Message> findLastMessageInChat(@Param("chatRoomId") String chatRoomId);
 }

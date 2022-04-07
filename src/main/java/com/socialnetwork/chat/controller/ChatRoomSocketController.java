@@ -1,16 +1,19 @@
 package com.socialnetwork.chat.controller;
 
+import com.socialnetwork.chat.config.security.CurrentUser;
+import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import java.security.Principal;
@@ -23,19 +26,18 @@ public class ChatRoomSocketController {
 
     private final ChatRoomServiceImpl chatRoomService;
 
-    @SendTo("/chat/messages/{room}")
-    @MessageMapping("/chat/sendMessage/{room}")
+    @PostMapping("/chat/sendMessage")
     public Message sendMessage(
         @Valid
         @RequestBody MessageCreateDto dto,
-        Principal principal
+        @ApiIgnore
+        @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(principal.getName());
+        dto.setCurrentUserId(userSecurity.getUserId());
         return chatRoomService.sendMessage(dto);
     }
 
-    @SendTo("/chat/messages/{room}")
-    @MessageMapping("/chat/deleteMessage/{room}")
+    @DeleteMapping("/chat/deleteMessage")
     public Message deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto,
@@ -45,8 +47,7 @@ public class ChatRoomSocketController {
         return chatRoomService.deleteMessage(dto);
     }
 
-    @SendTo("/chat/messages/{room}")
-    @MessageMapping("/chat/updateMessage/{room}")
+    @PostMapping("/chat/updateMessage")
     public Message updateMessage(
         @Valid
         @RequestBody MessageUpdateDto dto,
@@ -56,8 +57,7 @@ public class ChatRoomSocketController {
         return chatRoomService.updateMessage(dto);
     }
 
-    @SendTo("/chat/messages/{room}")
-    @MessageMapping("/chat/likeMessage/{room}")
+    @PostMapping("/chat/likeMessage")
     public Message likeMessage(
         @Valid
         @RequestBody MessageLikeDto dto,
@@ -67,8 +67,7 @@ public class ChatRoomSocketController {
         return chatRoomService.toggleLikeMessage(dto);
     }
 
-    @SendTo("/chat/messages/{room}")
-    @MessageMapping("/chat/readMessage/{room}")
+    @PostMapping("/chat/readMessage")
     public Message readMessage(
         @Valid
         @RequestBody MessageReadDto dto,

@@ -19,5 +19,7 @@ class SocialNetworkApplicationTest {
 
     @Test
     void contextLoads() {
+        var x = repository.isLastMessageInChatRoom("b045d3de-2093-432a-b903-4e1d6fd6f539", "239257a9-d1a0-49f6-8f42-4fc455cc88d1");
+        System.out.println();
     }
 }

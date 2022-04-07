@@ -8,8 +8,8 @@ let currentMessages = null;
 let messageToChangeId = null;
 let messageText = null;
 
-let port = "http://198.211.110.141:8002";
-//let port = "http://localhost:8081";
+//let port = "http://198.211.110.141:8002";
+let port = "http://localhost:8081";
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -100,139 +100,202 @@ function changeCurrentData() {
     $("#messageToChangeIdShow").text(messageToChangeId + " [" + messageText + "] ");
 }
 
-function sendText() {
-    chatSocket.send('/app/chat/sendMessage/' + chatId, {}, JSON.stringify(
+async function sendText() {
+    await fetch(port + "/chat/sendMessage",
         {
-            'text': $("#text").val(),
-            'chatRoomId': chatId
-        }
-    ));
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'text': $("#text").val(),
+                'chatRoomId': chatId
+            })
+        })
+        .then(response => response.json())
+    // chatSocket.send('/app/chat/sendMessage/' + chatId, {}, JSON.stringify(
+    //     {
+    //         'text': $("#text").val(),
+    //         'chatRoomId': chatId
+    //     }
+    // ));
 }
 
-function likeMessage(messageId,  isLike) {
-    chatSocket.send('/app/chat/likeMessage/' + chatId, {}, JSON.stringify(
+async function likeMessage(messageId, isLike) {
+    await fetch(port + "/chat/likeMessage",
         {
-            'isLike': isLike,
-            'messageId' : messageId
-        }
-    ));
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'isLike': isLike,
+                'messageId': messageId
+            })
+        })
+        .then(response => response.json())
+    // chatSocket.send('/app/chat/likeMessage/' + chatId, {}, JSON.stringify(
+    //     {
+    //         'isLike': isLike,
+    //         'messageId': messageId
+    //     }
+    // ));
 }
 
-function readMessage(messageId) {
-    chatSocket.send('/app/chat/readMessage/' + chatId, {}, JSON.stringify(
+async function readMessage(messageId) {
+    await fetch(port + "/chat/readMessage",
         {
-            'messageId' : messageId
-        }
-    ));
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'messageId' : messageId
+            })
+        })
+        .then(response => response.json())
+    // chatSocket.send('/app/chat/readMessage/' + chatId, {}, JSON.stringify(
+    //     {
+    //         'messageId' : messageId
+    //     }
+    // ));
 }
 
-function deleteMessage(messageId) {
-    chatSocket.send('/app/chat/deleteMessage/' + chatId, {}, JSON.stringify(
+async function deleteMessage(messageId) {
+    await fetch(port + "/chat/deleteMessage",
         {
-            'messageId' : messageId
-        }
-    ));
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'messageId': messageId
+            })
+        })
+        .then(response => response.json())
+    // chatSocket.send('/app/chat/deleteMessage/' + chatId, {}, JSON.stringify(
+    //     {
+    //         'messageId': messageId
+    //     }
+    // ));
 }
 
-function updateMessage() {
-    if(messageToChangeId === null) {
+async function updateMessage() {
+    if (messageToChangeId === null) {
         alert("select message!")
         return;
     }
-    chatSocket.send('/app/chat/updateMessage/' + chatId, {}, JSON.stringify(
+    await fetch(port + "/chat/updateMessage",
         {
-            'text': $("#text").val(),
-            'messageId' : messageToChangeId
-        }
-    ));
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                'text': $("#text").val(),
+                'messageId': messageToChangeId
+            })
+        })
+        .then(response => response.json())
+    // chatSocket.send('/app/chat/updateMessage/' + chatId, {}, JSON.stringify(
+    //     {
+    //         'text': $("#text").val(),
+    //         'messageId': messageToChangeId
+    //     }
+    // ));
 }
 
 async function showLoadingMessage() {
-    // console.log("meUserId        = " + meUserId);
-    // console.log("otherUserId = " + otherUserId);
-    // console.log("chatId      = " + chatId);
-    let messages = await fetch(port + "/chat/all-messages?chatId=" + chatId, {
-        headers: {
-            'Authorization': 'Bearer ' + meToken,
-            'Content-Type': 'application/json',
-        },
-    })
-        .then(response => response.json())
-        .then(response => response.content);
-    console.log(messages);
-    console.log("meId" + meUserId)
-    let createdBlock = false;
-    let lastMessageFromIdLoading = null;
-    let text = "";
-    let append = (str) => {
-        text += str;
-    }
-    currentMessages = messages;
-    messages.forEach(message => {
-        if (createdBlock === true && (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"])) {
-            append("</div>");
-            createdBlock = false;
+    try {
+        let messages = await fetch(port + "/chat/all-messages?chatId=" + chatId, {
+            headers: {
+                'Authorization': 'Bearer ' + meToken,
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(response => response.content);
+        console.log(messages);
+        console.log("meId" + meUserId)
+        let createdBlock = false;
+        let lastMessageFromIdLoading = null;
+        let text = "";
+        let append = (str) => {
+            text += str;
         }
-        if (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"]) {
-            let username = message["userId"] == meUserId ? "Me" : "user " + message["userId"];
+        currentMessages = messages;
+        messages.forEach(message => {
+            if (createdBlock === true && (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"])) {
+                append("</div>");
+                createdBlock = false;
+            }
+            if (lastMessageFromIdLoading === null || lastMessageFromIdLoading !== message["userId"]) {
+                let username = message["userId"] == meUserId ? "Me" : "user " + message["userId"];
+                append(
+                    "<div class=\"block_messages_from_person\">" +
+                    "<div class=\"sent_from\">" +
+                    username +
+                    "</div>"
+                )
+                createdBlock = true;
+            }
+            let isOwnStyle = meUserId == message["userId"] ? "message_own" : "message_not_own";
+
+            let isLiked = message.messageLikes.length === 0 ? "" : "color:red;";
+            let isRead = message.messageReads.length === 0 ? "" : "border-style: dotted;";
+            let style = "style=\" " + isLiked + isRead + " \"";
+
             append(
-                "<div class=\"block_messages_from_person\">" +
-                "<div class=\"sent_from\">" +
-                username +
+                "<div class=\"new_line\" id=\"" + message.id + "\">" +
+                "<div class=\"" + isOwnStyle + " message_block\" " + style + ">"
+            )
+            append(message.text + "<br>");
+            if (message.updated === true) {
+                append("<b style='font-size: 0.5em;'>updated</b>")
+            }
+            append(
+                "<div class=\"sent_at\" style=\"font-size: 0.5em\">" + message["sentAt"].substring(0, 19) + "</div>"
+            )
+            append(
+                "</div>" +
                 "</div>"
             )
-            createdBlock = true;
-        }
-        let isOwnStyle = meUserId == message["userId"] ? "message_own" : "message_not_own";
-
-        let isLiked = message.messageLikes.length === 0 ? "" : "color:red;";
-        let isRead = message.messageReads.length === 0 ? "" : "border-style: dotted;";
-        let style = "style=\" " + isLiked + isRead + " \"";
-
-        append(
-            "<div class=\"new_line\" id=\"" + message.id  + "\">" +
-            "<div class=\"" + isOwnStyle + " message_block\" " + style + ">"
-        )
-        append(message.text + "<br>");
-        if(message.updated === true) {
-            append("<b style='font-size: 0.5em;'>updated</b>")
-        }
-        append(
-            "<div class=\"sent_at\" style=\"font-size: 0.5em\">" + message["sentAt"].substring(0,19) + "</div>"
-        )
-        append(
-            "</div>" +
-            "</div>"
-        )
-        lastMessageFromIdLoading = message["userId"];
-    })
-    $("#messages_block").empty().append(text)
-    currentMessages.forEach(message => {
-        if(message.userId != meUserId) {
-            $("#" + message.id)
-                .click(function () {
-                    likeMessage(message.id, message.messageLikes.length === 0);
-                })
-                .mouseover(function () {
-                    if(message.messageReads.length === 0) {
-                        if (!message.messageReads.includes(meUserId)) {
-                            readMessage(message.id);
+            lastMessageFromIdLoading = message["userId"];
+        })
+        $("#messages_block").empty().append(text)
+        currentMessages.forEach(message => {
+            if (message.userId != meUserId) {
+                $("#" + message.id)
+                    .click(function () {
+                        likeMessage(message.id, message.messageLikes.length === 0);
+                    })
+                    .mouseover(function () {
+                        if (message.messageReads.length === 0) {
+                            if (!message.messageReads.includes(meUserId)) {
+                                readMessage(message.id);
+                            }
                         }
-                    }
-                })
-        }
-        else {
-            $("#" + message.id)
-                .click(function () {
-                    deleteMessage(message.id)
-                })
-                .mouseover(function () {
-                    messageToChangeId = message.id
-                    messageText = message.text
-                    changeCurrentData()
-                })
-        }
-    })
+                    })
+            } else {
+                $("#" + message.id)
+                    .click(function () {
+                        deleteMessage(message.id)
+                    })
+                    .mouseover(function () {
+                        messageToChangeId = message.id
+                        messageText = message.text
+                        changeCurrentData()
+                    })
+            }
+        })
+    } catch (ex) {
+        console.log(ex)
+    }
 }
 
 $(function () {

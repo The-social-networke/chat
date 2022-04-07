@@ -22,17 +22,29 @@ import java.util.Set;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NamedNativeQuery(
     name = "ChatRoomsMessageDtoSql",
-    query = "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt" +
-        " FROM chat.chat_room chat " +
-        "    JOIN chat.user__chat_room user_chat" +
-        "        ON chat.id = user_chat.chat_room_id" +
-        "        AND user_chat.user_id = :userId" +
-        "    JOIN (" +
+    query = "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, readed_cout.amountOfNotReadMessages" +
+        " FROM chat.chat_room chat" +
+        "         JOIN chat.user__chat_room user_chat" +
+        "              ON chat.id = user_chat.chat_room_id" +
+        "                  AND user_chat.user_id = :userId" +
+        "         JOIN (" +
         "            SELECT DISTINCT ON (chat_room_id) chat_room_id, id, text, user_id, sent_at FROM" +
         "            (SELECT * FROM chat.message" +
         "            ORDER BY message.chat_room_id, sent_at DESC) ordered_message" +
         "         ) AS message" +
-        "        ON message.chat_room_id = chat.id" +
+        "            ON message.chat_room_id = chat.id" +
+        "        JOIN (" +
+        "            SELECT message.chat_room_id, COUNT(*) as amountOfNotReadMessages" +
+        "            FROM chat.message" +
+        "                JOIN chat.user__chat_room" +
+        "                    ON user__chat_room.user_id = :userId" +
+        "                        AND user__chat_room.chat_room_id = message.chat_room_id" +
+        "                FULL JOIN chat.read_message" +
+        "                    ON read_message.message_id = message.id" +
+        "                        AND read_message.user_id IS NULL" +
+        "            GROUP BY message.chat_room_id" +
+        "            ) as readed_cout" +
+        "                ON readed_cout.chat_room_id = message.chat_room_id" +
         " ORDER BY message.sent_at DESC",
     resultSetMapping = "ChatRoomsMessageDto")
 @SqlResultSetMapping(name = "ChatRoomsMessageDto",
@@ -44,12 +56,14 @@ import java.util.Set;
                 @ColumnResult(name = "userId", type = String.class),
                 @ColumnResult(name = "messageId", type = String.class),
                 @ColumnResult(name = "text", type = String.class),
-                @ColumnResult(name = "sentAt", type = LocalDateTime.class)}
+                @ColumnResult(name = "sentAt", type = LocalDateTime.class),
+                @ColumnResult(name = "amountOfNotReadMessages", type = Integer.class)}
         )
     }
 )
 public class ChatRoom implements Serializable {
 
+    private static final long serialVersionUID = -4587740129089262748L;
     @Id
     @Column(nullable = false, updatable = false)
     private String id;

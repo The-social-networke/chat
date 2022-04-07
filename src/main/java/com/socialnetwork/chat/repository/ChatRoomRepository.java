@@ -28,6 +28,23 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
     boolean existsChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
     @Query(value =
+        "SELECT EXISTS(" +
+            "    SELECT *" +
+            "    FROM (" +
+            "        SELECT message.id" +
+            "        FROM chat.chat_room" +
+            "        JOIN chat.message" +
+            "            ON chat.message.chat_room_id = :chatRoomId" +
+            "            AND chat_room.id = message.chat_room_id" +
+            "        ORDER BY message.sent_at DESC" +
+            "        LIMIT 1" +
+            "    ) AS last_message" +
+            "    WHERE last_message.id = :messageId" +
+            ")",
+        nativeQuery = true)
+    boolean isLastMessageInChatRoom(@Param("chatRoomId") String chatRoomId, @Param("messageId") String messageId);
+
+    @Query(value =
         "SELECT cr.* " +
             "FROM chat.user__chat_room ucr1" +
             "   JOIN chat.user__chat_room ucr2" +

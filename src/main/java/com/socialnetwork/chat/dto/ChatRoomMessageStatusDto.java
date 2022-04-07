@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.dto;
 
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @ApiModel(description = "dto to show chatRoom")
-public class ChatRoomsMessageDto {
+public class ChatRoomMessageStatusDto {
 
     @ApiModelProperty(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
@@ -43,6 +44,6 @@ public class ChatRoomsMessageDto {
 
     @ApiModelProperty(
         example = "2022-03-26T02:02:42.774980",
-        notes = "Amount of not read messages")
-    private Integer amountOfNotReadMessages;
+        notes = "Status of last message")
+    private MessageStatus messageStatus;
 }

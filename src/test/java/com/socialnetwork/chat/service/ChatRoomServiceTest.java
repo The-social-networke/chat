@@ -8,6 +8,7 @@ import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
 import com.socialnetwork.chat.service.impl.MessageService;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,8 +37,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -527,29 +527,38 @@ class ChatRoomServiceTest {
     void testSendMessage_ifChatExistsAndUserIsMemberOfChat() {
         String userId = users.get(0);
         String chatId = chatRooms.get(0).getId();
-        ChatRoom chatRoomExpect = chatRooms.get(0);
+        ChatRoom chatRoomFound = chatRooms.get(0);
         MessageCreateDto messageCreateDto = new MessageCreateDto()
             .toBuilder()
-            .chatRoomId(chatRoomExpect.getId())
+            .chatRoomId(chatRoomFound.getId())
             .currentUserId(userId)
             .text("some text")
             .build();
-        Message messageExpect = new Message()
+        Message messageSaved = new Message()
             .toBuilder()
             .id("3bb05f77-2b8f-4bf6-969d-8179cb298e69")
             .sentAt(LocalDateTime.now())
             .isUpdated(false)
-            .chatRoom(chatRoomExpect)
+            .chatRoom(chatRoomFound)
             .userId(userId)
             .text("some text")
             .build();
+        Message messageExpect = messageSaved
+            .toBuilder()
+            .messageStatus(MessageStatus.SENT)
+            .build();
+        var chatRoomsMessageStatusExpect = convertToChatRoomsMessageStatusDto(chatRoomFound.getId(), messageSaved, MessageStatus.SENT);
 
-        when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
-        when(messageService.sendMessage(messageCreateDto)).thenReturn(messageExpect);
+        when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomFound));
+        when(messageService.sendMessage(messageCreateDto)).thenReturn(messageSaved);
+        doNothing().when(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
+        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageSaved);
 
         Message messageResult = service.sendMessage(messageCreateDto);
 
-        Assertions.assertEquals(messageResult, messageExpect);
+        Assertions.assertEquals(messageExpect, messageResult);
+        verify(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
+        verify(template).convertAndSend("/chat/messages/" + messageCreateDto.getChatRoomId(), messageExpect);
         verify(repository).findById(chatId);
         verify(messageService).sendMessage(messageCreateDto);
     }
@@ -567,12 +576,14 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
+        doNothing().when(template).convertAndSend(anyString(), anyString());
 
         ChatException thrown = assertThrows(
             ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 
+        verify(template, never()).convertAndSend(anyString(), anyString());
         Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
         verify(repository).findById(chatId);
     }
@@ -589,36 +600,42 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findById(chatId)).thenReturn(Optional.empty());
+        doNothing().when(template).convertAndSend(anyString(), anyString());
 
         ChatException thrown = assertThrows(
             ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 
+        verify(template, never()).convertAndSend(anyString(), anyString());
         Assertions.assertEquals(ErrorCodeException.CHAT_NOT_FOUND, thrown.getErrorCodeException());
         verify(repository).findById(chatId);
     }
 
 
     @Test
-    void testDeleteMessage_ifChatExistsAndUserIsMemberOfChat() {
+    void testDeleteMessage_ifChatExistsAndUserIsMemberOfChat_notLastMessage() {
         String userId = users.get(0);
-        Message messageFound = chatRooms.get(0).getMessages().iterator().next();
-        String messageId = messageFound.getId();
-        ChatRoom chatRoomExpect = chatRooms.get(0);
+        ChatRoom chatRoomFound = chatRooms.get(0);
+        Message messageDeleted = chatRooms.get(0).getMessages().iterator().next();;
+        String messageId = messageDeleted.getId();
+        Message messageExpect = messageDeleted
+            .toBuilder()
+            .messageStatus(MessageStatus.DELETED)
+            .build();
         MessageDeleteDto dto = new MessageDeleteDto()
             .toBuilder()
             .currentUserId(userId)
             .messageId(messageId)
             .build();
 
-        when(repository.findChatRoomByMessageId(messageId)).thenReturn(Optional.of(chatRoomExpect));
-        when(messageService.deleteMessage(dto)).thenReturn(messageFound);
+        when(repository.findChatRoomByMessageId(messageId)).thenReturn(Optional.of(chatRoomFound));
+        when(messageService.deleteMessage(dto)).thenReturn(messageDeleted);
 
         Message messageResult = service.deleteMessage(dto);
 
 
-        assertEquals(messageFound, messageResult);
+        assertEquals(messageExpect, messageResult);
         verify(repository).findChatRoomByMessageId(messageId);
         verify(messageService).deleteMessage(dto);
     }
@@ -672,9 +689,13 @@ class ChatRoomServiceTest {
         String userId = users.get(0);
         Message message = chatRooms.get(0).getMessages().iterator().next();
         ChatRoom chatRoomFound = chatRooms.get(0);
-        Message messageExpect = message
+        Message messageSaved = message
             .toBuilder()
             .text("some new text")
+            .build();
+        Message messageExpect = messageSaved
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageUpdateDto dto = new MessageUpdateDto()
             .toBuilder()
@@ -684,7 +705,7 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findChatRoomByMessageId(message.getId())).thenReturn(Optional.of(chatRoomFound));
-        when(messageService.updateMessage(dto)).thenReturn(messageExpect);
+        when(messageService.updateMessage(dto)).thenReturn(messageSaved);
 
         Message messageResult = service.updateMessage(dto);
 
@@ -744,9 +765,13 @@ class ChatRoomServiceTest {
         String userId = users.get(0);
         Message message = chatRooms.get(0).getMessages().iterator().next();
         ChatRoom chatRoomFound = chatRooms.get(0);
-        Message messageExpect = message
+        Message messageSaved = message
             .toBuilder()
             .messageLikes(Set.of())
+            .build();
+        Message messageExpect = messageSaved
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageLikeDto dto = new MessageLikeDto()
             .toBuilder()
@@ -756,7 +781,7 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findChatRoomByMessageId(message.getId())).thenReturn(Optional.of(chatRoomFound));
-        when(messageService.toggleLikeMessage(dto)).thenReturn(messageExpect);
+        when(messageService.toggleLikeMessage(dto)).thenReturn(messageSaved);
 
         Message messageResult = service.toggleLikeMessage(dto);
 
@@ -816,9 +841,13 @@ class ChatRoomServiceTest {
         String userId = users.get(0);
         Message message = chatRooms.get(0).getMessages().iterator().next();
         ChatRoom chatRoomFound = chatRooms.get(0);
-        Message messageExpect = message
+        Message messageSaved = message
             .toBuilder()
             .messageReads(Set.of(users.get(1)))
+            .build();
+        Message messageExpect = messageSaved
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageReadDto dto = new MessageReadDto()
             .toBuilder()
@@ -827,7 +856,7 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findChatRoomByMessageId(message.getId())).thenReturn(Optional.of(chatRoomFound));
-        when(messageService.readMessage(dto)).thenReturn(messageExpect);
+        when(messageService.readMessage(dto)).thenReturn(messageSaved);
 
         Message messageResult = service.readMessage(dto);
 
@@ -882,5 +911,17 @@ class ChatRoomServiceTest {
 
     private static ResponseEntity<Boolean> getSuccessResponse(boolean value) {
         return new ResponseEntity<>(value, HttpStatus.OK);
+    }
+
+    private ChatRoomMessageStatusDto convertToChatRoomsMessageStatusDto(String chatRoomId, Message message, MessageStatus messageStatus) {
+        return new ChatRoomMessageStatusDto()
+            .toBuilder()
+            .chatRoomId(chatRoomId)
+            .messageId(message == null ? null : message.getId())
+            .text(message == null ? null : message.getText())
+            .sentAt(message == null ? null : message.getSentAt())
+            .userId(message == null ? null : message.getUserId())
+            .messageStatus(messageStatus)
+            .build();
     }
 }

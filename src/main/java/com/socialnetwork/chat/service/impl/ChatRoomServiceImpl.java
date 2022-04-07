@@ -5,9 +5,11 @@ import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
+import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -26,6 +29,12 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChatRoomServiceImpl implements ChatRoomService {
+
+    private static final String USER_SOCKET_NOTIFICATION = "/users/";
+
+    private static final String CHAT_SOCKET_NOTIFICATION = "/chat/messages/";
+
+    private final MessageRepository messageRepository;
 
     private final ChatRoomRepository chatRoomRepository;
 
@@ -46,7 +55,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom getChatRoomById(String userId, String chatId) {
         log.info("Find chat room with userId = {} and chatId = {}", userId, chatId);
 
-        var chat = chatRoomRepository.findById(chatId)
+        ChatRoom chat = chatRoomRepository.findById(chatId)
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chat, userId);
         return chat;
@@ -57,10 +66,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
         log.info("Find chat room by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
 
-        var chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
+        Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
         if(chat.isEmpty()) {
             checkIfUserExists(dto.getUserId());
-            var entity = new ChatRoom()
+            ChatRoom entity = new ChatRoom()
                 .toBuilder()
                 .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
                 .id(UUID.randomUUID().toString())
@@ -75,9 +84,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom getSystemChatRoomByUserOrElseCreate(String userId) {
         log.info("Find system chat room by users with userId = {}", userId);
 
-        var chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
+        Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
         if(chat.isEmpty()) {
-            var newChatRoom = new ChatRoom()
+            ChatRoom newChatRoom = new ChatRoom()
                 .toBuilder()
                 .id(UUID.randomUUID().toString())
                 .users(Set.of(userId, systemUserId))
@@ -91,7 +100,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Page<Message> findMessagesByChatId(String userId, String chatId, Pageable pageable) {
         log.info("Find chat room");
 
-        var chatRoom = getChatRoomOrElseThrow(chatId);
+        ChatRoom chatRoom = getChatRoomOrElseThrow(chatId);
         checkIfUserMemberOfChat(chatRoom, userId);
 
         return messageService.findMessagesByChatId(chatId, pageable);
@@ -111,7 +120,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
         checkIfUserExists(dto.getUserId());
-        var entity = new ChatRoom()
+        ChatRoom entity = new ChatRoom()
             .toBuilder()
             .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
             .id(UUID.randomUUID().toString())
@@ -124,7 +133,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public boolean deleteChatRoom(ChatRoomDeleteDto dto) {
         log.info("Deleted chat room");
 
-        var chatRoom = getChatRoomOrElseThrow(dto.getChatId());
+        ChatRoom chatRoom = getChatRoomOrElseThrow(dto.getChatId());
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
         chatRoomRepository.deleteById(dto.getChatId());
@@ -137,23 +146,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Message sendMessage(MessageCreateDto dto) {
         log.info("Send message");
 
-        var chatRoom = getChatRoomOrElseThrow(dto.getChatRoomId());
+        ChatRoom chatRoom = getChatRoomOrElseThrow(dto.getChatRoomId());
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        var savedMessage = messageService.sendMessage(dto);
-        String anotherUserId = chatRoom.getUsers()
-            .stream()
-            .filter(u -> !u.equals(dto.getCurrentUserId()))
-            .findFirst()
-            .get();
-        ChatRoomsMessageDto chatRoomsMessageDto = new ChatRoomsMessageDto()
-            .toBuilder()
-            .chatRoomId(dto.getChatRoomId())
-            .userId(anotherUserId)
-            .sentAt(savedMessage.getSentAt())
-            .text(savedMessage.getText())
+        Message savedMessage = messageService.sendMessage(dto).toBuilder()
+            .messageStatus(MessageStatus.SENT)
             .build();
-        template.convertAndSend("/users/" + anotherUserId, chatRoomsMessageDto);
+
+        String anotherUserId = getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId());
+        template.convertAndSend(USER_SOCKET_NOTIFICATION + anotherUserId, convertToChatRoomMessageStatusDto(chatRoom.getId(), savedMessage, MessageStatus.SENT));
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + dto.getChatRoomId(), savedMessage);
+
         return savedMessage;
     }
 
@@ -162,13 +165,24 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Message deleteMessage(MessageDeleteDto dto) {
         log.info("Delete message");
 
-        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
-        if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
-        }
-        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId())
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        return messageService.deleteMessage(dto);
+        boolean isLastMessage = chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId());
+
+        Message deletedMessage = messageService.deleteMessage(dto).toBuilder()
+            .messageStatus(MessageStatus.DELETED)
+            .build();
+
+        if(isLastMessage) {
+            var lastMessage = messageRepository.findLastMessageInChat(chatRoom.getId());
+            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage.orElse(null), MessageStatus.DELETED);
+            template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
+        }
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), deletedMessage);
+
+        return deletedMessage;
     }
 
     @Override
@@ -176,13 +190,22 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Message updateMessage(MessageUpdateDto dto) {
         log.info("Update message");
 
-        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
-        if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
-        }
-        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId())
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        return messageService.updateMessage(dto);
+        Message updatedMessage = messageService.updateMessage(dto)
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
+
+        if(chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId())) {
+            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), updatedMessage, MessageStatus.UPDATED);
+            template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
+        }
+
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), updatedMessage);
+        return  updatedMessage;
     }
 
     @Override
@@ -190,13 +213,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Message toggleLikeMessage(MessageLikeDto dto) {
         log.info("Like message {}", dto.getIsLike());
 
-        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
-        if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
-        }
-        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
+        var chatRoom = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId())
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        return messageService.toggleLikeMessage(dto);
+        Message changedMessage = messageService.toggleLikeMessage(dto)
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
+
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
+
+        return changedMessage;
     }
 
     @Override
@@ -204,14 +232,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public Message readMessage(MessageReadDto dto) {
         log.info("Read message");
 
-        var chatRoomOfMessage = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId());
-        if(chatRoomOfMessage.isEmpty()) {
-            throw new ChatException(ErrorCodeException.CHAT_NOT_FOUND);
-        }
-        checkIfUserMemberOfChat(chatRoomOfMessage.get(), dto.getCurrentUserId());
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByMessageId(dto.getMessageId())
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        return messageService.readMessage(dto);
+        Message changedMessage = messageService.readMessage(dto)
+            .toBuilder()
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
+
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
+
+        return changedMessage;
     }
+
 
     private static void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
         boolean isMemberOfChat = chatRoom.getUsers()
@@ -228,8 +262,29 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
     }
 
+
     private ChatRoom getChatRoomOrElseThrow(String chatId) throws ChatException {
-        var chatRoom = chatRoomRepository.findById(chatId);
-        return chatRoom.orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+        return chatRoomRepository.findById(chatId)
+            .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
+    }
+
+    private String getAnotherUserIdFromChat(ChatRoom chatRoom, String userId) throws ChatException {
+        return chatRoom.getUsers()
+            .stream()
+            .filter(u -> !u.equals(userId))
+            .findFirst()
+            .orElseThrow();
+    }
+
+    private ChatRoomMessageStatusDto convertToChatRoomMessageStatusDto(String chatRoomId, Message message, MessageStatus messageStatus) {
+        return new ChatRoomMessageStatusDto()
+            .toBuilder()
+            .chatRoomId(chatRoomId)
+            .messageId(message == null ? null : message.getId())
+            .text(message == null ? null : message.getText())
+            .sentAt(message == null ? null : message.getSentAt())
+            .userId(message == null ? null : message.getUserId())
+            .messageStatus(messageStatus)
+            .build();
     }
 }

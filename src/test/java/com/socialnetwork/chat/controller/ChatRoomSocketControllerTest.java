@@ -63,7 +63,7 @@ class ChatRoomSocketControllerTest {
 
         WebSocketHttpHeaders headers = new WebSocketHttpHeaders(HttpHeaders.EMPTY);
         StompHeaders stompHeaders = new StompHeaders();
-        stompHeaders.set("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbWFpbDJAZ21haWwuY29tIiwiaWF0IjoxNjQ5MTE0OTgxLCJleHAiOjE2NDkxMTg1ODF9.d1r63gWvHwqWOtzY1tfZSp9pqqjRUaZsnQ5KEEoVQ_w");
+        stompHeaders.set("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbWFpbDJAZ21haWwuY29tIiwiaWF0IjoxNjQ5MTE5NDI5LCJleHAiOjE2NDkxMjMwMjl9.cj5av7hQssDa76EVXRjwxU1bVpmgVTCYnOu30YccYfs");
 
         StompSession session = webSocketStompClient
             .connect(URL + port + CONNECT_SOCKET_ENDPOINT, headers, stompHeaders, new StompSessionHandlerAdapter() {})

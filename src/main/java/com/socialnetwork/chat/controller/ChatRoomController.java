@@ -48,7 +48,7 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return this.chatRoomService.getChatRoomById(userSecurity.getUserId(), chatId);
+        return chatRoomService.getChatRoomById(userSecurity.getUserId(), chatId);
     }
 
     @GetMapping("/find-chats")
@@ -58,7 +58,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity,
         Pageable pageable
     ) {
-        return this.chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
+        return chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
     }
 
     @Validated
@@ -74,7 +74,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return this.chatRoomService.getChatRoomByUsersOrElseCreate(dto);
+        return chatRoomService.getChatRoomByUsersOrElseCreate(dto);
     }
 
     @Validated
@@ -84,7 +84,7 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return this.chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
+        return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
     @PostMapping
@@ -100,7 +100,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return this.chatRoomService.createChatRoom(dto);
+        return chatRoomService.createChatRoom(dto);
     }
 
     @Validated
@@ -117,7 +117,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return this.chatRoomService.deleteChatRoom(dto);
+        return chatRoomService.deleteChatRoom(dto);
     }
 
     @Validated
@@ -135,6 +135,6 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return this.chatRoomService.findMessagesByChatId(chatId, userSecurity.getUserId(), pageable);
+        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable);
     }
 }
