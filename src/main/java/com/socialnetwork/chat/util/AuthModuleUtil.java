@@ -9,8 +9,8 @@ import org.springframework.web.client.RestTemplate;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthModuleUtil {
 
-    private static final String ENDPOINT_GET_TOKEN_BY_ID = "/user/by_token";
-    private static final String ENDPOINT_EXISTS_USER_BY_ID = "/user/exists_by_id";
+    private static final String ENDPOINT_GET_TOKEN_BY_ID = "/user/id";
+    private static final String ENDPOINT_EXISTS_USER_BY_ID = "/user/exists-by-id";
 
 
     public static String getUserIdFromToken(String bearToken, String url, RestTemplate restTemplate) throws RestClientException {
