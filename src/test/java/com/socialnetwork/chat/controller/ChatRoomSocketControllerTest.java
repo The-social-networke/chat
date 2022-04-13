@@ -1,114 +1,309 @@
 package com.socialnetwork.chat.controller;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.socialnetwork.chat.TestUtils;
 import com.socialnetwork.chat.dto.MessageCreateDto;
+import com.socialnetwork.chat.dto.MessageDeleteDto;
+import com.socialnetwork.chat.dto.MessageLikeDto;
+import com.socialnetwork.chat.dto.MessageUpdateDto;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.repository.ChatRoomRepository;
+import com.socialnetwork.chat.repository.MessageRepository;
+import com.socialnetwork.chat.service.ChatRoomService;
+import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
+import com.socialnetwork.chat.service.impl.MessageService;
+import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
-import org.springframework.messaging.simp.stomp.*;
+import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.socket.WebSocketHttpHeaders;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestTemplate;
 
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.Mockito.spy;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-
+@SpringBootTest
 @ActiveProfiles("test")
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@RunWith(MockitoJUnitRunner.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(value = {"classpath:setup-test-before.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(value = {"classpath:clear-test-after.sql"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 class ChatRoomSocketControllerTest {
 
-    static final String URL = "ws://localhost:";
-    static final String CONNECT_SOCKET_ENDPOINT = "/ws-chat";
-    static final String SUBSCRIBE_CHAT_MESSAGES_ENDPOINT = "/chat/messages/";
-    static final String SEND_MESSAGE_ENDPOINT = "/app/chat/sendMessage/";
+    @Autowired
+    private MessageRepository messageRepository;
 
-    @LocalServerPort
-    private Integer port;
+    @Autowired
+    private ChatRoomRepository chatRoomRepository;
 
-    private ArrayBlockingQueue<Message> blockingQueueMessage;
+    @Autowired
+    private MessageService messageService;
 
-    private ArrayBlockingQueue<Throwable> blockingQueueErrors;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
-    private WebSocketStompClient webSocketStompClient;
+    @Mock
+    private RestTemplate restTemplate;
+
+    private MockMvc mockMvc;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final String authorizedUserId = "8a744b81-38fd-4fe1-a032-33836e7a0221";
 
     @BeforeEach
-    public void setup() {
-        blockingQueueMessage = new ArrayBlockingQueue<>(1);
-        blockingQueueErrors = new ArrayBlockingQueue<>(1);
-        webSocketStompClient = new WebSocketStompClient(new SockJsClient(
-            List.of(new WebSocketTransport(new StandardWebSocketClient()))));
-        webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+    void setUp() {
+        ChatRoomService chatRoomService = spy(new ChatRoomServiceImpl(messageRepository, chatRoomRepository, messageService, simpMessagingTemplate, restTemplate));
+        ChatRoomSocketController controller = spy(new ChatRoomSocketController(chatRoomService));
+        mockMvc = MockMvcBuilders
+            .standaloneSetup(controller)
+            .setCustomArgumentResolvers(new TestUtils.PrincipalDetailsArgumentResolver(authorizedUserId))
+            .setControllerAdvice(new ControllerAdvice())
+            .build();
+
+        TestUtils.setFieldsFromPropertiesFile(chatRoomService);
+    }
+
+
+    @Test
+    void testSendMessage_success() throws Exception {
+        var dto = new MessageCreateDto()
+            .toBuilder()
+            .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a53745e")
+            .text("some new mesage")
+            .build();
+        var messageExpect = new Message()
+            .toBuilder()
+            .userId("8a744b81-38fd-4fe1-a032-33836e7a0221")
+            .text("some new mesage")
+            .messageStatus(MessageStatus.SENT)
+            .build();
+
+        mockMvc.perform(post("/chat/sendMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNotEmpty())
+            .andExpect(jsonPath("$.userId").value(messageExpect.getUserId()))
+            .andExpect(jsonPath("$.text").value(messageExpect.getText()))
+            .andExpect(jsonPath("$.messageStatus").value(messageExpect.getMessageStatus().toString()))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty());
     }
 
     @Test
-    void verifyGreetingIsReceived() throws Exception {
-        String chatId = "b045d3de-2093-432a-b903-4e1d6fd6f539";
-        String userId = "52d9f27d-32f7-4312-8a35-4c8d2e0cb49a";
-
-        WebSocketHttpHeaders headers = new WebSocketHttpHeaders(HttpHeaders.EMPTY);
-        StompHeaders stompHeaders = new StompHeaders();
-        stompHeaders.set("Authorization", "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlbWFpbDJAZ21haWwuY29tIiwiaWF0IjoxNjQ5MTE5NDI5LCJleHAiOjE2NDkxMjMwMjl9.cj5av7hQssDa76EVXRjwxU1bVpmgVTCYnOu30YccYfs");
-
-        StompSession session = webSocketStompClient
-            .connect(URL + port + CONNECT_SOCKET_ENDPOINT, headers, stompHeaders, new StompSessionHandlerAdapter() {})
-            .get(3, SECONDS);
-        var ww = session.subscribe(SUBSCRIBE_CHAT_MESSAGES_ENDPOINT + chatId, new DefaultStompFrameHandler());
-        var obj = new MessageCreateDto()
+    void testSendMessage_unsuccess() throws Exception {
+        var dto = new MessageCreateDto()
             .toBuilder()
-            .text("12312312")
-            .chatRoomId(chatId)
+            .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a537556")
+            .text("some new mesage")
             .build();
 
-        var ww2 = session.send(SEND_MESSAGE_ENDPOINT + chatId, obj);
-        //var aa = ContexHol
-        var result = blockingQueueMessage.poll(1, SECONDS);
-        var exception = blockingQueueErrors.poll(1,SECONDS);
-
-        System.out.println();
+        mockMvc.perform(post("/chat/sendMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("chat not found"))
+            .andExpect(jsonPath("$.errorCode").value(1001))
+            .andExpect(jsonPath("$.*", hasSize(2)));
     }
 
-    class DefaultStompFrameHandler extends StompSessionHandlerAdapter implements StompFrameHandler {
+
+    @Test
+    void testDeleteMessage_success() throws Exception {
+        var dto = new MessageDeleteDto()
+            .toBuilder()
+            .messageId("7c610c79-369c-42af-9d51-bb3bc0891065")
+            .build();
+        var messageExpect = new Message()
+            .toBuilder()
+            .id("7c610c79-369c-42af-9d51-bb3bc0891065")
+            .userId("8a744b81-38fd-4fe1-a032-33836e7a0221")
+            .text("how are you")
+            .messageStatus(MessageStatus.DELETED)
+            .build();
+
+        mockMvc.perform(delete("/chat/deleteMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(messageExpect.getId()))
+            .andExpect(jsonPath("$.userId").value(messageExpect.getUserId()))
+            .andExpect(jsonPath("$.text").value(messageExpect.getText()))
+            .andExpect(jsonPath("$.messageStatus").value(messageExpect.getMessageStatus().toString()))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty());
+    }
+
+    @Test
+    void testDeleteMessage_unsuccess() throws Exception {
+        var dto = new MessageDeleteDto()
+            .toBuilder()
+            .messageId("7c610c79-369c-42af-9d51-bb3bc0891678")
+            .build();
+
+        mockMvc.perform(delete("/chat/deleteMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("chat not found"))
+            .andExpect(jsonPath("$.errorCode").value(1001))
+            .andExpect(jsonPath("$.*", hasSize(2)));
+    }
 
 
-        @Override
-        public void handleTransportError(StompSession session, Throwable exception) {
-            System.out.println();
-        }
-        @Override
-        public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
-            System.out.println("Connected");
-        }
+    @Test
+    void testUpdateMessage_success() throws Exception {
+        var dto = new MessageUpdateDto()
+            .toBuilder()
+            .messageId("7c610c79-369c-42af-9d51-bb3bc0891065")
+            .text("how r u?")
+            .build();
+        var messageExpect = new Message()
+            .toBuilder()
+            .id("7c610c79-369c-42af-9d51-bb3bc0891065")
+            .userId("8a744b81-38fd-4fe1-a032-33836e7a0221")
+            .text("how r u?")
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
 
-        @Override
-        public void handleException(StompSession session, StompCommand command, StompHeaders headers, byte[] payload, Throwable exception) {
-            blockingQueueErrors.add(exception);
-        }
+        mockMvc.perform(post("/chat/updateMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(messageExpect.getId()))
+            .andExpect(jsonPath("$.userId").value(messageExpect.getUserId()))
+            .andExpect(jsonPath("$.text").value(messageExpect.getText()))
+            .andExpect(jsonPath("$.messageStatus").value(messageExpect.getMessageStatus().toString()))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty());
+    }
 
-        @Override
-        public Type getPayloadType(StompHeaders headers) {
-            return Message.class;
-        }
+    @Test
+    void testUpdateMessage_unsuccess() throws Exception {
+        var dto = new MessageUpdateDto()
+            .toBuilder()
+            .messageId("7c610c79-369c-42af-9d51-bb3bc0891678")
+            .text("how r u?")
+            .build();
 
-        @Override
-        public void handleFrame(StompHeaders headers, Object payload) {
-            Message msg = (Message) payload;
-            blockingQueueMessage.add(msg);
-        }
+        mockMvc.perform(post("/chat/updateMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("chat not found"))
+            .andExpect(jsonPath("$.errorCode").value(1001))
+            .andExpect(jsonPath("$.*", hasSize(2)));
+    }
+
+    @Test
+    void testLikeMessage_success() throws Exception {
+        var dto = new MessageLikeDto()
+            .toBuilder()
+            .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
+            .isLike(true)
+            .build();
+        var messageExpect = new Message()
+            .toBuilder()
+            .id("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
+            .userId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e")
+            .text("great!")
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
+
+        mockMvc.perform(post("/chat/likeMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(messageExpect.getId()))
+            .andExpect(jsonPath("$.userId").value(messageExpect.getUserId()))
+            .andExpect(jsonPath("$.text").value(messageExpect.getText()))
+            .andExpect(jsonPath("$.messageStatus").value(messageExpect.getMessageStatus().toString()))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty())
+            .andExpect(jsonPath("$.messageLikes", hasItem(authorizedUserId)));
+    }
+
+    @Test
+    void testLikeMessage_unsuccess() throws Exception {
+        var dto = new MessageLikeDto()
+            .toBuilder()
+            .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b123")
+            .isLike(true)
+            .build();
+
+        mockMvc.perform(post("/chat/likeMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("chat not found"))
+            .andExpect(jsonPath("$.errorCode").value(1001))
+            .andExpect(jsonPath("$.*", hasSize(2)));
+    }
+
+    @Test
+    void testReadMessage_success() throws Exception {
+        var dto = new MessageLikeDto()
+            .toBuilder()
+            .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
+            .isLike(true)
+            .build();
+        var messageExpect = new Message()
+            .toBuilder()
+            .id("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
+            .userId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e")
+            .text("great!")
+            .messageStatus(MessageStatus.UPDATED)
+            .build();
+
+        mockMvc.perform(post("/chat/readMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(messageExpect.getId()))
+            .andExpect(jsonPath("$.userId").value(messageExpect.getUserId()))
+            .andExpect(jsonPath("$.text").value(messageExpect.getText()))
+            .andExpect(jsonPath("$.messageStatus").value(messageExpect.getMessageStatus().toString()))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty())
+            .andExpect(jsonPath("$.messageReads", hasItem(authorizedUserId)));
+    }
+
+    @Test
+    void testReadMessage_unsuccess() throws Exception {
+        var dto = new MessageLikeDto()
+            .toBuilder()
+            .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b123")
+            .isLike(true)
+            .build();
+
+        mockMvc.perform(post("/chat/readMessage")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("chat not found"))
+            .andExpect(jsonPath("$.errorCode").value(1001))
+            .andExpect(jsonPath("$.*", hasSize(2)));
     }
 }

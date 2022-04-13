@@ -95,6 +95,4 @@ public class Message implements Serializable {
         result = 31 * result + Arrays.hashCode(photo);
         return result;
     }
-
-
 }

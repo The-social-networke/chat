@@ -20,9 +20,9 @@ public interface MessageRepository extends JpaRepository<Message, String> {
 
     @Query(value =
         "SELECT message.* " +
-            "FROM chat.chat_room" +
-            "   JOIN chat.message" +
-            "       ON chat.message.chat_room_id = :chatRoomId" +
+            "FROM chat_room" +
+            "   JOIN message" +
+            "       ON message.chat_room_id = :chatRoomId" +
             "       AND chat_room.id = message.chat_room_id " +
             "ORDER BY message.sent_at DESC " +
             "LIMIT 1",

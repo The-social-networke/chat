@@ -23,23 +23,23 @@ import java.util.Set;
 @NamedNativeQuery(
     name = "ChatRoomsMessageDtoSql",
     query = "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, readed_cout.amountOfNotReadMessages" +
-        " FROM chat.chat_room chat" +
-        "         JOIN chat.user__chat_room user_chat" +
+        " FROM chat_room chat" +
+        "         JOIN user__chat_room user_chat" +
         "              ON chat.id = user_chat.chat_room_id" +
         "                  AND user_chat.user_id = :userId" +
         "         JOIN (" +
         "            SELECT DISTINCT ON (chat_room_id) chat_room_id, id, text, user_id, sent_at FROM" +
-        "            (SELECT * FROM chat.message" +
+        "            (SELECT * FROM message" +
         "            ORDER BY message.chat_room_id, sent_at DESC) ordered_message" +
         "         ) AS message" +
         "            ON message.chat_room_id = chat.id" +
         "        JOIN (" +
         "            SELECT message.chat_room_id, COUNT(*) as amountOfNotReadMessages" +
-        "            FROM chat.message" +
-        "                JOIN chat.user__chat_room" +
+        "            FROM message" +
+        "                JOIN user__chat_room" +
         "                    ON user__chat_room.user_id = :userId" +
         "                        AND user__chat_room.chat_room_id = message.chat_room_id" +
-        "                FULL JOIN chat.read_message" +
+        "                FULL JOIN read_message" +
         "                    ON read_message.message_id = message.id" +
         "                        AND read_message.user_id IS NULL" +
         "            GROUP BY message.chat_room_id" +
@@ -74,6 +74,7 @@ public class ChatRoom implements Serializable {
     private Set<String> users;
 
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy="chatRoom")
     private Set<Message> messages;
 

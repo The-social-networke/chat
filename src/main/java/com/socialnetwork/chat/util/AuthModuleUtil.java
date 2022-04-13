@@ -13,7 +13,7 @@ public class AuthModuleUtil {
     private static final String ENDPOINT_EXISTS_USER_BY_ID = "/user/exists_by_id";
 
 
-    public static String getUserIdFromToken(String bearToken, String url) throws RestClientException {
+    public static String getUserIdFromToken(String bearToken, String url, RestTemplate restTemplate) throws RestClientException {
         //get token
         String authToken = bearToken.substring(7);
         //set token to header request
@@ -23,7 +23,6 @@ public class AuthModuleUtil {
         HttpEntity<String> entity = new HttpEntity<>(null, headers);
 
         //get user id from auth service
-        RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> result = restTemplate.exchange(url + ENDPOINT_GET_TOKEN_BY_ID, HttpMethod.GET, entity, String.class);
         return result.getBody();
     }

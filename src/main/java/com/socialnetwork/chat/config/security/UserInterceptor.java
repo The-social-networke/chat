@@ -13,6 +13,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.support.NativeMessageHeaderAccessor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class UserInterceptor implements ChannelInterceptor {
                     throw new ChatException(ErrorCodeException.UNAUTHORIZED);
                 }
                 List<String> auth = headers.get("Authorization");
-                String userIdFromToken = AuthModuleUtil.getUserIdFromToken(auth.get(0), url);
+                String userIdFromToken = AuthModuleUtil.getUserIdFromToken(auth.get(0), url, new RestTemplate());
                 UserSecurity userSecurity = new UserSecurity(userIdFromToken);
                 UsernamePasswordAuthenticationToken authReq
                     = new UsernamePasswordAuthenticationToken(userSecurity, null, null);

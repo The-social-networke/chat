@@ -8,7 +8,8 @@ import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
 import com.socialnetwork.chat.dto.ErrorDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
-import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
+import com.socialnetwork.chat.service.ChatRoomService;
+import com.socialnetwork.chat.util.CustomPageable;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
@@ -30,10 +30,10 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Api(tags = "Chat API", description = "Allows you to interact with chat")
+@Api(tags = "Chat API", description = "Rest chat methods")
 public class ChatRoomController {
 
-    private final ChatRoomServiceImpl chatRoomService;
+    private final ChatRoomService chatRoomService;
 
     @Validated
     @GetMapping
@@ -53,15 +53,14 @@ public class ChatRoomController {
 
     @GetMapping("/find-chats")
     @ApiOperation(value = "Find chatRooms with message by user id")
-    public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(
+    public Page<ChatRoomsMessageDto> findChatRoomsMessage(
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity,
-        Pageable pageable
+        CustomPageable pageable
     ) {
-        return chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable);
+        return chatRoomService.findChatRoomsMessageByUserId(userSecurity.getUserId(), pageable.toPageable());
     }
 
-    @Validated
     @PostMapping("/get-chat")
     @ApiOperation(value = "Get chatRooms by user id or else create")
     @ApiResponses(value = {
@@ -77,7 +76,6 @@ public class ChatRoomController {
         return chatRoomService.getChatRoomByUsersOrElseCreate(dto);
     }
 
-    @Validated
     @PostMapping("/get-system-chat")
     @ApiOperation(value = "Get system chatRooms by user id or else create")
     public ChatRoom getSystemChatRoomByUserOrElseCreate(
@@ -95,7 +93,7 @@ public class ChatRoomController {
     })
     public ChatRoom createChatRoom(
         @Valid
-        @RequestParam ChatRoomCreateDto dto,
+        @RequestBody ChatRoomCreateDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
@@ -103,7 +101,6 @@ public class ChatRoomController {
         return chatRoomService.createChatRoom(dto);
     }
 
-    @Validated
     @DeleteMapping
     @ApiOperation(value = "Delete chatRoom")
     @ApiResponses(value = {
@@ -111,6 +108,7 @@ public class ChatRoomController {
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
     })
     public boolean deleteChatRoom(
+        @Valid
         @NotNull(message = "Id of chat should be not null")
         @RequestBody ChatRoomDeleteDto dto,
         @ApiIgnore
@@ -131,10 +129,10 @@ public class ChatRoomController {
     public Page<Message> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
-        Pageable pageable,
+        CustomPageable pageable,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable);
+        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable());
     }
 }

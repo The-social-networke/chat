@@ -1,0 +1,1 @@
+DROP SCHEMA chat_test CASCADE;

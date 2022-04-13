@@ -12,7 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
@@ -28,15 +28,22 @@ import java.util.stream.Stream;
 @Component
 public class TokenHandlerFilter extends OncePerRequestFilter {
 
-    private final HandlerExceptionResolver resolver;
-
     @Value("${app.auth.url}")
     private String url;
 
+    @Value("${app.auth.not-auth-endpoints}")
+    private String[] allowedNotAuthEndpoints;
+
+    private final HandlerExceptionResolver resolver;
+
+    private final RestTemplate restTemplate;
+
 
     @Autowired
-    public TokenHandlerFilter(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver) {
+    public TokenHandlerFilter(@Qualifier("handlerExceptionResolver") HandlerExceptionResolver resolver,
+                              RestTemplate restTemplate) {
         this.resolver = resolver;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -52,14 +59,14 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
             }
 
             //get chat from auth service
-            userId = AuthModuleUtil.getUserIdFromToken(header, url);
+            userId = AuthModuleUtil.getUserIdFromToken(header, url, restTemplate);
         }
         catch (ChatException ex) {
             log.error(ex.getMessage());
             resolver.resolveException(request, response, null, new ChatException(ex.getErrorCodeException()));
             return;
         }
-        catch (RestClientException ex) {
+        catch (Exception ex) {
             log.error(ex.getMessage());
             resolver.resolveException(request, response, null, new ChatException(ErrorCodeException.FORBIDDEN));
             return;
@@ -78,23 +85,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
-        String[] inauthenticationEndpoints = new String[]{
-            "/csrf",
-            "/v2/api-docs",
-            "/configuration/ui",
-            "/swagger-resources",
-            "/swagger-resources/.*",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/.*",
-            "/ws-chat/.*",
-            "/index.html",
-            "/main.css",
-            "/web-socket.js",
-            "/favicon.ico",
-            "/swagger-socket-ui.html",
-            "/"
-        };
+        String[] inauthenticationEndpoints = allowedNotAuthEndpoints;
         return Stream.of(inauthenticationEndpoints).anyMatch(path::matches);
     }
 }
