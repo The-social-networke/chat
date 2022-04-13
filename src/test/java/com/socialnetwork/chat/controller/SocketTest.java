@@ -31,7 +31,8 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
-class ChatRoomSocketControllerTest2 {
+//todo need to do it
+class SocketTest {
 
     static final String URL = "ws://localhost:";
     static final String CONNECT_SOCKET_ENDPOINT = "/ws-chat";

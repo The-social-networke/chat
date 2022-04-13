@@ -85,7 +85,7 @@ public class ChatRoomSocketController {
     @ApiResponses(value = {
         @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
-        @ApiResponse(code = 1004, message = "user cannot like himself", response = ErrorDto.class),
+        @ApiResponse(code = 1004, message = "user cannot like his message", response = ErrorDto.class),
     })
     public Message likeMessage(
         @Valid
