@@ -23,7 +23,12 @@ public class ChatRoomsMessageDto {
 
     @ApiModelProperty(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Sent by user in chat room")
+        notes = "Another user in this chat")
+    private String anotherUserId;
+
+    @ApiModelProperty(
+        example = "cfdbefcb-012e-4901-97e1-c673335558d7",
+        notes = "Author of message")
     private String userId;
 
     @ApiModelProperty(
