@@ -18,9 +18,9 @@ public class TestUtils {
 
     public static String BASE_URL = "http://198.211.110.141:3000";
 
-    public static String IS_EXISTS_USER_BY_ID_ENDPOINT = "/user/exists_by_id?userId=";
+    public static String IS_EXISTS_USER_BY_ID_ENDPOINT = "/user/exists-by-id?userId=";
 
-    public static String USER_ID_BY_TOKEN_ENDPOINT = "/user/by_token";
+    public static String USER_ID_BY_TOKEN_ENDPOINT = "/user/id";
 
     public static String SYSTEM_USER_ID = "38bcd488-2d2b-4f50-976b-cae650f6a3f0";
 

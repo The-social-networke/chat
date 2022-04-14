@@ -4,7 +4,6 @@ package com.socialnetwork.chat.controller;
 import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.Message;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -57,7 +56,7 @@ class SocketTest {
         webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
     }
 
-    @Test
+
     void verifyGreetingIsReceived() throws Exception {
         String chatId = "b045d3de-2093-432a-b903-4e1d6fd6f539";
         String userId = "52d9f27d-32f7-4312-8a35-4c8d2e0cb49a";
