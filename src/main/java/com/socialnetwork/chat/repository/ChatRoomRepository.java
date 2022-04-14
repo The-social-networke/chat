@@ -2,6 +2,7 @@ package com.socialnetwork.chat.repository;
 
 import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
+import com.socialnetwork.chat.repository.query.ChatRoomQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,54 +13,28 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
-    @Query(name = "ChatRoomsMessageDtoSql"
-        , nativeQuery = true)
+    @Query(name = "ChatRoom.findChatRoomsMessage",
+        //countName = "ChatRoom.findChatRoomsMessage.count",
+        nativeQuery = true)
     Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(@Param("userId") String userId, Pageable pageable);
 
-    @Query(value =
-        "SELECT EXISTS(" +
-            "SELECT *" +
-            "   FROM user__chat_room ucr1" +
-            "       JOIN user__chat_room ucr2 " +
-            "           ON ucr1.chat_room_id = ucr2.chat_room_id" +
-            "           AND (ucr1.user_id, ucr2.user_id) = (:userOne, :userTwo)" +
-            ")",
+//    default Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
+//        return findChatRoomsMessageByUserId(userId, pageable.getPageSize(), pageable.getPageNumber());
+//    }
+
+    @Query(value = ChatRoomQuery.EXISTS_CHAT_ROOM_BY_USERS,
         nativeQuery = true)
     boolean existsChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
-    @Query(value =
-        "SELECT EXISTS(" +
-            "    SELECT *" +
-            "    FROM (" +
-            "        SELECT message.id" +
-            "        FROM chat_room" +
-            "        JOIN message" +
-            "            ON message.chat_room_id = :chatRoomId" +
-            "            AND chat_room.id = message.chat_room_id" +
-            "        ORDER BY message.sent_at DESC" +
-            "        LIMIT 1" +
-            "    ) AS last_message" +
-            "    WHERE last_message.id = :messageId" +
-            ")",
+    @Query(value = ChatRoomQuery.IS_LAST_MESSAGE_IN_CHAT_ROOM,
         nativeQuery = true)
     boolean isLastMessageInChatRoom(@Param("chatRoomId") String chatRoomId, @Param("messageId") String messageId);
 
-    @Query(value =
-        "SELECT cr.* " +
-            "FROM user__chat_room ucr1" +
-            "   JOIN user__chat_room ucr2" +
-            "       ON ucr1.chat_room_id = ucr2.chat_room_id" +
-            "       AND (ucr1.user_id, ucr2.user_id) = (:userOne, :userTwo)" +
-            "   JOIN chat_room cr" +
-            "       ON cr.id = ucr1.chat_room_id",
+    @Query(value = ChatRoomQuery.FIND_CHAT_ROOM_BY_USERS,
         nativeQuery = true)
     Optional<ChatRoom> findChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
-    @Query(value =
-        "SELECT * FROM chat_room " +
-            "WHERE id LIKE " +
-            "   (SELECT chat_room_id FROM message" +
-            "       WHERE id = :messageId)",
+    @Query(value = ChatRoomQuery.FIND_CHAT_ROOM_BY_MESSAGE_ID,
         nativeQuery = true)
     Optional<ChatRoom> findChatRoomByMessageId(@Param("messageId") String messageId);
 }

@@ -2,6 +2,7 @@ package com.socialnetwork.chat.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
+import com.socialnetwork.chat.repository.query.ChatRoomQuery;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,35 +22,12 @@ import java.util.Set;
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NamedNativeQuery(
-    name = "ChatRoomsMessageDtoSql",
-    query = "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, readed_cout.amountOfNotReadMessages, another_user.user_id anotherUserId" +
-        "         FROM chat_room chat" +
-        "                 JOIN user__chat_room user_chat" +
-        "                      ON chat.id = user_chat.chat_room_id" +
-        "                          AND user_chat.user_id = :userId" +
-        "                 JOIN (" +
-        "                    SELECT DISTINCT ON (chat_room_id) chat_room_id, id, text, user_id, sent_at FROM" +
-        "                    (SELECT * FROM message" +
-        "                    ORDER BY message.chat_room_id, sent_at DESC) ordered_message" +
-        "                 ) AS message" +
-        "                    ON message.chat_room_id = chat.id" +
-        "                JOIN (" +
-        "                    SELECT message.chat_room_id, COUNT(*) as amountOfNotReadMessages" +
-        "                    FROM message" +
-        "                        JOIN user__chat_room" +
-        "                            ON user__chat_room.user_id = :userId" +
-        "                                AND user__chat_room.chat_room_id = message.chat_room_id" +
-        "                        FULL JOIN read_message" +
-        "                            ON read_message.message_id = message.id" +
-        "                                AND read_message.user_id IS NULL" +
-        "                    GROUP BY message.chat_room_id" +
-        "                    ) as readed_cout" +
-        "                        ON readed_cout.chat_room_id = message.chat_room_id" +
-        "                 JOIN user__chat_room another_user" +
-        "                      ON user_chat.chat_room_id = another_user.chat_room_id" +
-        "                          AND another_user.user_id != :userId" +
-        "         ORDER BY message.sent_at DESC",
+    name = "ChatRoom.findChatRoomsMessage",
+    query = ChatRoomQuery.FIND_CHAT_ROOMS_MESSAGE,
     resultSetMapping = "ChatRoomsMessageDto")
+@NamedNativeQuery(
+    name = "ChatRoom.findChatRoomsMessage.count",
+    query = ChatRoomQuery.FIND_CHAT_ROOMS_MESSAGE_COUNT)
 @SqlResultSetMapping(name = "ChatRoomsMessageDto",
     classes = {
         @ConstructorResult(
