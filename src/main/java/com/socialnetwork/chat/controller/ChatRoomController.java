@@ -29,6 +29,7 @@ import javax.validation.constraints.NotNull;
 @Validated
 @RestController
 @RequestMapping("/chat")
+@CrossOrigin(origins = "http://localhost:3000", exposedHeaders = "Authorization")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Api(tags = "Chat API", description = "Rest chat methods")
 public class ChatRoomController {
