@@ -49,7 +49,6 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userId;
-        log.info("start security");
         try {
             //get token from
             String header = request.getHeader("Authorization");

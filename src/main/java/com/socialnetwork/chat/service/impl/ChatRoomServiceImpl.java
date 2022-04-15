@@ -64,7 +64,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
-        log.info("Find chat room by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
+        log.info("getChatRoomByUsersOrElseCreate by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
 
         Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
         if(chat.isEmpty()) {
