@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
     @Query(name = "ChatRoom.findChatRoomsMessage",
-        //countName = "ChatRoom.findChatRoomsMessage.count",
+        countName = "ChatRoom.findChatRoomsMessage.count",
         nativeQuery = true)
     Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(@Param("userId") String userId, Pageable pageable);
 

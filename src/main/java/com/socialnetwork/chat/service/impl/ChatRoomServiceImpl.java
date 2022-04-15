@@ -7,7 +7,6 @@ import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
-import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import com.socialnetwork.chat.util.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
@@ -257,7 +257,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     private void checkIfUserExists(String userId) throws ChatException {
-        if(!AuthModuleUtil.existsUserById(userId, url, restTemplate)) {
+        try {
+            //todo change it
+            System.out.println("check if user exists, DELETE IT IN FUTURE!");
+//            if (!AuthModuleUtil.existsUserById(userId, url, restTemplate)) {
+//                throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
+//            }
+        } catch (RestClientException e) {
+            log.error(e.getMessage());
             throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
         }
     }
