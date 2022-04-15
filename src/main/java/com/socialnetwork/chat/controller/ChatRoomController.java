@@ -27,6 +27,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @Validated
+@CrossOrigin
 @RestController
 @RequestMapping("/chat")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
