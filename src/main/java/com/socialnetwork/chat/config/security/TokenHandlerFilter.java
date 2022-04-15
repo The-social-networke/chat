@@ -49,17 +49,19 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String userId;
+        log.info("start security");
         try {
             //get token from
             String header = request.getHeader("Authorization");
-
+            log.info("has header");
             //check if token exists
             if (header == null || !header.startsWith("Bearer ")) {
                 throw new ChatException(ErrorCodeException.UNAUTHORIZED);
             }
-
+            log.info("has bearer");
             //get chat from auth service
             userId = AuthModuleUtil.getUserIdFromToken(header, url, restTemplate);
+            log.info("yes security");
         }
         catch (ChatException ex) {
             log.error(ex.getMessage());
@@ -78,7 +80,7 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
             = new UsernamePasswordAuthenticationToken(userSecurity, null, null);
         SecurityContextHolder.getContext().setAuthentication(authReq);
         authReq.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
+        log.info("yes auth");
         doFilter(request, response, filterChain);
     }
 
