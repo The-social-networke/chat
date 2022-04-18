@@ -7,6 +7,7 @@ import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
+import com.socialnetwork.chat.util.AuthModuleUtil;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import com.socialnetwork.chat.util.enums.MessageStatus;
 import lombok.RequiredArgsConstructor;
@@ -258,11 +259,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private void checkIfUserExists(String userId) throws ChatException {
         try {
-            //todo change it
-            System.out.println("check if user exists, DELETE IT IN FUTURE!");
-//            if (!AuthModuleUtil.existsUserById(userId, url, restTemplate)) {
-//                throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
-//            }
+            if (!AuthModuleUtil.existsUserById(userId, url, restTemplate)) {
+                throw new ChatException(ErrorCodeException.USER_NOT_FOUND);
+            }
         } catch (RestClientException e) {
             log.error(e.getMessage());
             throw new ChatException(ErrorCodeException.USER_NOT_FOUND);

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
+    // todo return chat rooms without message
     @Query(name = "ChatRoom.findChatRoomsMessage",
         countName = "ChatRoom.findChatRoomsMessage.count",
         nativeQuery = true)

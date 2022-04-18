@@ -18,7 +18,6 @@ public enum ErrorCodeException {
     CHAT_NOT_FOUND(1001, "chat not found"),
     NOT_MEMBER_OF_CHAT(1002, "not member of chat"),
     CHAT_WITH_THESE_USERS_ALREADY_EXISTS(1003, "chat with these users already exits"),
-    //todo change message to "user cannot like his message"
     USER_CANNOT_LIKE_HIS_MESSAGE(1004, "user cannot like his message"),
     USER_CANNOT_READ_HIS_MESSAGE(1005, "user cannot read his message"),
     USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1006, "user cannot delete not own message"),
