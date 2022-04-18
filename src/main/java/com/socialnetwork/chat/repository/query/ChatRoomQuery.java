@@ -3,33 +3,46 @@ package com.socialnetwork.chat.repository.query;
 public interface ChatRoomQuery {
 
     String FIND_CHAT_ROOMS_MESSAGE =
-        "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, read_count.amountOfNotReadMessages, another_user.user_id anotherUserId" +
-            "         FROM chat_room chat" +
-            "                 JOIN user__chat_room user_chat" +
-            "                      ON chat.id = user_chat.chat_room_id" +
-            "                          AND user_chat.user_id = :userId" +
-            "                 JOIN (" +
-            "                    SELECT DISTINCT ON (chat_room_id) chat_room_id, id, text, user_id, sent_at FROM" +
-            "                    (SELECT * FROM message" +
-            "                    ORDER BY message.chat_room_id, sent_at DESC) ordered_message" +
-            "                 ) AS message" +
-            "                    ON message.chat_room_id = chat.id" +
-            "                JOIN (" +
-            "                    SELECT message.chat_room_id, COUNT(*) as amountOfNotReadMessages" +
-            "                    FROM message" +
-            "                        JOIN user__chat_room" +
-            "                            ON user__chat_room.user_id = :userId" +
-            "                                AND user__chat_room.chat_room_id = message.chat_room_id" +
-            "                        FULL JOIN read_message" +
-            "                            ON read_message.message_id = message.id" +
-            "                                AND read_message.user_id IS NULL" +
-            "                    GROUP BY message.chat_room_id" +
-            "                    ) as read_count" +
-            "                        ON read_count.chat_room_id = message.chat_room_id" +
-            "                 JOIN user__chat_room another_user" +
-            "                      ON user_chat.chat_room_id = another_user.chat_room_id" +
-            "                          AND another_user.user_id != :userId" +
-            "         ORDER BY message.sent_at DESC ";
+        "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, read_count.amountOfNotReadMessages, another_user.user_id anotherUserId " +
+            //"-- SELECT ALL CHATS " +
+            "FROM chat_room chat " +
+            //"    -- JOIN ALL CHATS FOR USER" +
+            "    JOIN user__chat_room user_chat" +
+            "        ON chat.id = user_chat.chat_room_id" +
+            "        AND user_chat.user_id = :userId" +
+            //"    -- JOIN ANOTHER USER FOR CHATS" +
+            "    JOIN user__chat_room another_user" +
+            "        ON user_chat.chat_room_id = another_user.chat_room_id" +
+            "        AND another_user.user_id != :userId" +
+            //"    -- JOIN LAST MESSAGE FOR CHAT" +
+            "    LEFT JOIN" +
+            "    (" +
+            //"        -- SELECT UNIQUE MESSAGE FOR EACH CHAT" +
+            "        SELECT DISTINCT ON (chat_room_id) chat_room_id, id, text, user_id, sent_at FROM" +
+            "        (" +
+            //"            -- SELECT ALL SORTED MESSAGE" +
+            "            SELECT * FROM message" +
+            "            ORDER BY message.chat_room_id, sent_at DESC" +
+            "        ) ordered_message" +
+            "    ) AS message" +
+            "        ON message.chat_room_id = chat.id" +
+            //"    -- JOIN AMOUNT OF NOT READ MESSAGE FOR ALL USER'S CHATS" +
+            "    LEFT JOIN (" +
+            //"        -- SELECT AMOUNT OF NOT READ MESSAGE FOR ALL USER'S CHATS" +
+            "        SELECT message.chat_room_id, COUNT(*) as amountOfNotReadMessages" +
+            "        FROM message" +
+            //"            -- JOIN ALL MESSAGE FOR ALL CHATS" +
+            "            JOIN user__chat_room" +
+            "                ON user__chat_room.user_id = :userId" +
+            "                AND user__chat_room.chat_room_id = message.chat_room_id" +
+            //"            -- JOIN ALL READ MESSAGE" +
+            "            LEFT JOIN read_message" +
+            "                ON read_message.message_id = message.id" +
+            "                AND read_message.user_id IS NULL" +
+            "        GROUP BY message.chat_room_id" +
+            "    ) as read_count" +
+            "        ON read_count.chat_room_id = message.chat_room_id " +
+            "ORDER BY message.sent_at DESC NULLS LAST";
 
     String FIND_CHAT_ROOMS_MESSAGE_COUNT =
         "SELECT COUNT(chat.id) " +
