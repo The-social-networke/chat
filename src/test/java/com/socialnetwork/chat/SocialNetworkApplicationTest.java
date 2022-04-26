@@ -28,8 +28,8 @@ class SocialNetworkApplicationTest {
 
     @Test
     void contextLoads() {
-        var a = chatRoomRepository.findChatRoomsMessageByUserId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e", PageRequest.of(1, 5));
-        System.out.println(a);
+        var a = chatRoomRepository.findChatRoomsMessageByUserId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e", PageRequest.of(0, 1));
+        System.err.println(a);
         //var b = messageRepository.findAllByChatRoomId("cfdbefcb-012e-4901-97e1-c673335558d7", PageRequest.of(2, 10));
 //        HttpHeaders headers = new HttpHeaders();
 //        headers.setContentType(MediaType.APPLICATION_JSON);
