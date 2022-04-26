@@ -5,7 +5,7 @@ public interface MessageQuery {
     String FIND_ALL_BY_CHAT_ROOM_ID =
         "SELECT * FROM message " +
             "WHERE chat_room_id LIKE :chatId " +
-            "ORDER BY sent_at";
+            "ORDER BY sent_at DESC";
 
     String FIND_ALL_BY_CHAT_ROOM_ID_COUNT =
         "SELECT COUNT(*) FROM message " +
