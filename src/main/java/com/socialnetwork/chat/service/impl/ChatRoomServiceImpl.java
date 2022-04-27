@@ -116,7 +116,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         var result = chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
         new Object();
         result = result.map(u -> {
-            String userInfoString = restTemplate.getForObject("http://localhost:8082/user/get_info_by_user_id?userId=" + u.getAnotherUserId(), String.class);
+            String userInfoString = restTemplate.getForObject(url + "/user/get_info_by_user_id?userId=" + u.getAnotherUserId(), String.class);
             Object userInfo = objectMapper.convertValue(userInfoString, Object.class);
             return u.toBuilder()
                 .userInfo(userInfo)
