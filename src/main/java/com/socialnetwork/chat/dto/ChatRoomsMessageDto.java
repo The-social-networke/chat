@@ -50,4 +50,6 @@ public class ChatRoomsMessageDto {
         example = "2022-03-26T02:02:42.774980",
         notes = "Amount of not read messages")
     private Integer amountOfNotReadMessages;
+
+    private Object userInfo;
 }

@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
@@ -50,6 +51,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final SimpMessagingTemplate template;
 
     private final RestTemplate restTemplate;
+
+    private final ObjectMapper objectMapper;
 
 
     @Override
@@ -109,7 +112,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
-        return chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
+        log.info("Find chat room message by user id");
+        var result = chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
+        new Object();
+        result = result.map(u -> {
+            String userInfoString = restTemplate.getForObject("http://localhost:8082/user/get_info_by_user_id?userId=" + u.getAnotherUserId(), String.class);
+            Object userInfo = objectMapper.convertValue(userInfoString, Object.class);
+            return u.toBuilder()
+                .userInfo(userInfo)
+                .build();
+        });
+
+        return result;
     }
 
     @Override

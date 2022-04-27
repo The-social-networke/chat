@@ -69,7 +69,7 @@ class ChatRoomSocketControllerTest {
 
     @BeforeEach
     void setUp() {
-        ChatRoomService chatRoomService = spy(new ChatRoomServiceImpl(messageRepository, chatRoomRepository, messageService, simpMessagingTemplate, restTemplate));
+        ChatRoomService chatRoomService = spy(new ChatRoomServiceImpl(messageRepository, chatRoomRepository, messageService, simpMessagingTemplate, restTemplate, objectMapper));
         ChatRoomSocketController controller = spy(new ChatRoomSocketController(chatRoomService));
         mockMvc = MockMvcBuilders
             .standaloneSetup(controller)
