@@ -1,5 +1,6 @@
 package com.socialnetwork.chat.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -116,7 +118,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         var result = chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
         result = result.map(u -> {
             String userInfoString = restTemplate.getForObject(url + "/user/get_info_by_user_id?userId=" + u.getAnotherUserId(), String.class);
-            Object userInfo = objectMapper.convertValue(userInfoString, Object.class);
+            Object userInfo = null;
+            if(userInfoString != null) {
+                try {
+                    userInfo = objectMapper.readValue(userInfoString, Map.class);
+                } catch (JsonProcessingException e) {
+                    log.error("some problem with parsing json to map", e);
+                }
+            }
             return u.toBuilder()
                 .userInfo(userInfo)
                 .build();
