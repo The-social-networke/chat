@@ -184,10 +184,11 @@ class ChatRoomControllerTest {
                 .userId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e")
                 .text("great!")
                 .sentAt(LocalDateTime.of(2022, 3, 23, 10, 10, 7, 220500))
-                .amountOfNotReadMessages(3)
+                .amountOfNotReadMessages(1)
                 .build(),
         };
 
+        //todo change it
         mockMvc.perform(get("/chat/find-chats"))
             .andDo(print())
             .andExpect(status().isOk())

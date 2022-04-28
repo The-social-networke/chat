@@ -39,7 +39,7 @@ public interface ChatRoomQuery {
             //"            -- JOIN ALL READ MESSAGE" +
             "            LEFT JOIN read_message" +
             "                ON read_message.message_id = message.id" +
-            "                AND read_message.user_id IS NULL" +
+            "            WHERE read_message.user_id IS NULL" +
             "        GROUP BY message.chat_room_id" +
             "    ) as read_count" +
             "        ON read_count.chat_room_id = message.chat_room_id " +

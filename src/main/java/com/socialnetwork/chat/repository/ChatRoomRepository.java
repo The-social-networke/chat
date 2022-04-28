@@ -38,7 +38,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
                         .messageId(map.get("messageId") == null ? null : (String) map.get("messageId"))
                         .text(map.get("text") == null ? null : (String) map.get("text"))
                         .sentAt(map.get("sentAt") == null ? null : ((Timestamp) map.get("sentAt")).toLocalDateTime())
-                        .amountOfNotReadMessages(map.get("amountOfNotReadMessages") == null ? null : ((BigInteger) map.get("amountOfNotReadMessages")).intValue())
+                        .amountOfNotReadMessages(map.get("amountOfNotReadMessages") == null ? 0 : ((BigInteger) map.get("amountOfNotReadMessages")).intValue())
                         .build()
             )
             .collect(Collectors.toList());

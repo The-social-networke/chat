@@ -1,5 +1,7 @@
 package com.socialnetwork.chat.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.TestUtils;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
@@ -57,6 +59,9 @@ class ChatRoomServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ChatRoomServiceImpl service;
@@ -384,7 +389,7 @@ class ChatRoomServiceTest {
 
 
     @Test
-    void testFindChatRoomsMessageByUserId() {
+    void testFindChatRoomsMessageByUserId() throws JsonProcessingException {
         String userId = users.get(0);
         var chatRoom = chatRooms.get(0);
         var messageFromChatRoom = messages.get(0);
@@ -399,11 +404,14 @@ class ChatRoomServiceTest {
 
         var pageable = Pageable.ofSize(4);
         when(repository.findChatRoomsMessageByUserId(userId, Pageable.ofSize(4))).thenReturn(expectedResult);
+        when(restTemplate.getForObject(anyString(), eq(String.class)))
+            .thenReturn("[]");
 
         Page<ChatRoomsMessageDto> chatRoomsMessageDtos = service.findChatRoomsMessageByUserId(userId, pageable);
 
         assertEquals(chatRoomsMessageDtos, expectedResult);
         verify(repository).findChatRoomsMessageByUserId(userId, pageable);
+        verify(restTemplate).getForObject(anyString(), eq(String.class));
     }
 
 
