@@ -25,7 +25,7 @@ class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("authorization", "content-type", "x-auth-token", "Authorization"));
         configuration.setExposedHeaders(Arrays.asList("x-auth-token", "Authorization"));
@@ -33,4 +33,14 @@ class WebMvcConfig implements WebMvcConfigurer {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+//
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//            .allowedOrigins("*")
+//            .allowedMethods("GET", "POST")
+//            .allowedHeaders("Origin", "Accept", "Content-Type", "Authorization")
+//            .allowCredentials(true)
+//            .maxAge(3600);
+//    }
 }
