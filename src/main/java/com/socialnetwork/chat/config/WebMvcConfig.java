@@ -36,6 +36,7 @@ class WebMvcConfig implements WebMvcConfigurer {
             .addMapping("/**")
             .allowedOriginPatterns("*")
             .allowedHeaders("content-type", "x-auth-token", "Authorization", "Access-Control-Allow-Origin")
+            .exposedHeaders("Access-Control-Allow-Origin")
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowCredentials(true);
     }
