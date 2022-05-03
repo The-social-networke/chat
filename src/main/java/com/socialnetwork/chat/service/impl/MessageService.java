@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Slf4j
@@ -34,10 +35,13 @@ public class MessageService {
         var entity = messageMapper.toEntity(dto)
             .toBuilder()
             .id(UUID.randomUUID().toString())
+            .sentAt(LocalDateTime.now())
             .build();
-        Message messageSaved = messageRepository.save(entity);
-        messageSaved.setMessageStatus(MessageStatus.SENT);
-        return messageSaved;
+
+        return messageRepository.save(entity)
+            .toBuilder()
+            .messageStatus(MessageStatus.SENT)
+            .build();
     }
 
     public Message deleteMessage(MessageDeleteDto dto) {

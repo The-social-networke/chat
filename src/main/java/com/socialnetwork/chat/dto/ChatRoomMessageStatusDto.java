@@ -46,4 +46,9 @@ public class ChatRoomMessageStatusDto {
         example = "2022-03-26T02:02:42.774980",
         notes = "Status of last message")
     private MessageStatus messageStatus;
+
+    @ApiModelProperty(
+        example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
+        notes = "User information")
+    private Object userInfo;
 }

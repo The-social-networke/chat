@@ -4,7 +4,6 @@ import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.ChatRoomMessageStatusDto;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.ChatRoomService;
-import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +26,10 @@ public class TestUtils {
 
     public static void setFieldsFromPropertiesFile(ChatRoomService service) {
         ReflectionTestUtils.setField(service, "url", BASE_URL);
-
         ReflectionTestUtils.setField(service, "systemUserId", TestUtils.SYSTEM_USER_ID);
     }
 
-    public static ChatRoomMessageStatusDto convertToChatRoomsMessageStatusDto(String chatRoomId, Message message, MessageStatus messageStatus) {
+    public static ChatRoomMessageStatusDto convertToChatRoomsMessageStatusDto(String chatRoomId, Message message) {
         return new ChatRoomMessageStatusDto()
             .toBuilder()
             .chatRoomId(chatRoomId)
@@ -39,7 +37,7 @@ public class TestUtils {
             .text(message == null ? null : message.getText())
             .sentAt(message == null ? null : message.getSentAt())
             .userId(message == null ? null : message.getUserId())
-            .messageStatus(messageStatus)
+            .messageStatus(message == null ? null :  message.getMessageStatus())
             .build();
     }
 

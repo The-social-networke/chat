@@ -51,5 +51,8 @@ public class ChatRoomsMessageDto {
         notes = "Amount of not read messages")
     private Integer amountOfNotReadMessages;
 
+    @ApiModelProperty(
+        example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
+        notes = "User information")
     private Object userInfo;
 }

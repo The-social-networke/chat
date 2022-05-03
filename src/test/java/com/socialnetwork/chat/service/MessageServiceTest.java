@@ -104,7 +104,10 @@ class MessageServiceTest {
 
     @Test
     void testSentMessage() {
-        Message expectedResult = messages.get(0);
+        Message expectedResult = messages.get(0)
+            .toBuilder()
+            .messageStatus(MessageStatus.SENT)
+            .build();
         MessageCreateDto dto = new MessageCreateDto()
             .toBuilder()
             .chatRoomId(chatId)

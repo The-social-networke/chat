@@ -50,6 +50,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Value("${app.auth.url}")
     private String url;
 
+    @Value("${app.auth.endpoint.get-info-by-user-id}")
+    private String endpointGetInfoByUserId;
+
     private final SimpMessagingTemplate template;
 
     private final RestTemplate restTemplate;
@@ -115,21 +118,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
         log.info("Find chat room message by user id");
+
         var result = chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
-        result = result.map(u -> {
-            String userInfoString = restTemplate.getForObject(url + "/user/get_info_by_user_id?userId=" + u.getAnotherUserId(), String.class);
-            Object userInfo = null;
-            if(userInfoString != null) {
-                try {
-                    userInfo = objectMapper.readValue(userInfoString, Map.class);
-                } catch (JsonProcessingException e) {
-                    log.error("some problem with parsing json to map", e);
-                }
-            }
-            return u.toBuilder()
-                .userInfo(userInfo)
-                .build();
-        });
+        result = result.map(u -> u.toBuilder()
+            .userInfo(getUserInfoByUserId(u.getAnotherUserId()))
+            .build());
 
         return result;
     }
@@ -143,6 +136,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
         checkIfUserExists(dto.getUserId());
+
         ChatRoom entity = new ChatRoom()
             .toBuilder()
             .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
@@ -172,12 +166,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = getChatRoomOrElseThrow(dto.getChatRoomId());
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        Message savedMessage = messageService.sendMessage(dto).toBuilder()
-            .messageStatus(MessageStatus.SENT)
-            .build();
+        Message savedMessage = messageService.sendMessage(dto);
 
         String anotherUserId = getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId());
-        template.convertAndSend(USER_SOCKET_NOTIFICATION + anotherUserId, convertToChatRoomMessageStatusDto(chatRoom.getId(), savedMessage, MessageStatus.SENT));
+        template.convertAndSend(USER_SOCKET_NOTIFICATION + anotherUserId, convertToChatRoomMessageStatusDto(chatRoom.getId(), savedMessage));
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + dto.getChatRoomId(), savedMessage);
 
         return savedMessage;
@@ -194,13 +186,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         boolean isLastMessage = chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId());
 
-        Message deletedMessage = messageService.deleteMessage(dto).toBuilder()
-            .messageStatus(MessageStatus.DELETED)
-            .build();
+        Message deletedMessage = messageService.deleteMessage(dto);
 
         if(isLastMessage) {
-            var lastMessage = messageRepository.findLastMessageInChat(chatRoom.getId());
-            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage.orElse(null), MessageStatus.DELETED);
+            var lastMessage = messageRepository.findLastMessageInChat(chatRoom.getId())
+                .map(m -> m.toBuilder().messageStatus(MessageStatus.DELETED).build());
+            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage.orElse(null));
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
         }
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), deletedMessage);
@@ -217,13 +208,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        Message updatedMessage = messageService.updateMessage(dto)
-            .toBuilder()
-            .messageStatus(MessageStatus.UPDATED)
-            .build();
+        Message updatedMessage = messageService.updateMessage(dto);
 
         if(chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId())) {
-            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), updatedMessage, MessageStatus.UPDATED);
+            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), updatedMessage);
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
         }
 
@@ -240,10 +228,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        Message changedMessage = messageService.toggleLikeMessage(dto)
-            .toBuilder()
-            .messageStatus(MessageStatus.UPDATED)
-            .build();
+        Message changedMessage = messageService.toggleLikeMessage(dto);
 
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
 
@@ -259,10 +244,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chatRoom, dto.getCurrentUserId());
 
-        Message changedMessage = messageService.readMessage(dto)
-            .toBuilder()
-            .messageStatus(MessageStatus.UPDATED)
-            .build();
+        Message changedMessage = messageService.readMessage(dto);
 
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
 
@@ -304,7 +286,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow();
     }
 
-    private ChatRoomMessageStatusDto convertToChatRoomMessageStatusDto(String chatRoomId, Message message, MessageStatus messageStatus) {
+    private ChatRoomMessageStatusDto convertToChatRoomMessageStatusDto(String chatRoomId, Message message) {
         return new ChatRoomMessageStatusDto()
             .toBuilder()
             .chatRoomId(chatRoomId)
@@ -312,7 +294,21 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .text(message == null ? null : message.getText())
             .sentAt(message == null ? null : message.getSentAt())
             .userId(message == null ? null : message.getUserId())
-            .messageStatus(messageStatus)
+            .messageStatus(message == null ? null :  message.getMessageStatus())
+            .userInfo(message == null ? null : getUserInfoByUserId(message.getUserId()))
             .build();
+    }
+
+    private Object getUserInfoByUserId(String userid) {
+        String userInfoString = restTemplate.getForObject(url + endpointGetInfoByUserId + userid, String.class);
+        Object userInfo = null;
+        if(userInfoString != null) {
+            try {
+                userInfo = objectMapper.readValue(userInfoString, Map.class);
+            } catch (JsonProcessingException e) {
+                log.error("some problem with parsing json to map", e);
+            }
+        }
+        return userInfo;
     }
 }
