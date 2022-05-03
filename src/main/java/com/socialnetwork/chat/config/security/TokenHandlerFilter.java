@@ -84,6 +84,9 @@ public class TokenHandlerFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         String[] inauthenticationEndpoints = allowedNotAuthEndpoints;
+        for(var x : inauthenticationEndpoints) {
+            log.info(x);
+        }
         return Stream.of(inauthenticationEndpoints).anyMatch(path::matches);
     }
 }
