@@ -30,9 +30,7 @@ async function connect() {
     let socket = new SockJS('http://198.211.110.141:8002/ws-chat');
     //let socket = new SockJS('/ws-chat', null, {});
     chatSocket = Stomp.over(socket);
-    chatSocket.connect({
-        'Authorization': 'Bearer ' + meToken
-    }, frame => {
+    chatSocket.connect({}, frame => {
         setConnected(true);
         console.log('Connected: ' + frame);
         chatSocket.subscribe('/chat/messages/' + chatId, obj => {
