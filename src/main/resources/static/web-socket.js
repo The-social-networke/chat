@@ -8,8 +8,8 @@ let currentMessages = null;
 let messageToChangeId = null;
 let messageText = null;
 
-//let port = "http://198.211.110.141:8002";
-let port = "http://localhost:8081";
+let port = "http://198.211.110.141:8002";
+//let port = "http://localhost:8081";
 
 function setConnected(connected) {
     $("#connect").prop("disabled", connected);
@@ -27,7 +27,8 @@ async function connect() {
     meToken = $("#userToken").val();
     otherUserId = $("#userIdTwo").val();
     await setChat();
-    let socket = new SockJS('/ws-chat', null, {});
+    let socket = new SockJS('http://198.211.110.141:8002/ws-chat');
+    //let socket = new SockJS('/ws-chat', null, {});
     chatSocket = Stomp.over(socket);
     chatSocket.connect({
         'Authorization': 'Bearer ' + meToken

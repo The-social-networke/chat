@@ -124,8 +124,7 @@ public class ChatRoomController {
     @ApiOperation(value = "Find all message by chat root")
     @ApiResponses(value = {
         @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
-        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class
-        )
+        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class)
     })
     public Page<Message> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
