@@ -2,10 +2,7 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.ChatRoomCreateDto;
-import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
-import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
-import com.socialnetwork.chat.dto.ErrorDto;
+import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.service.ChatRoomService;
@@ -67,7 +64,7 @@ public class ChatRoomController {
     @ApiResponses(value = {
         @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class)
     })
-    public ChatRoom getChatRoomByUsersOrElseCreate(
+    public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
         @ApiIgnore

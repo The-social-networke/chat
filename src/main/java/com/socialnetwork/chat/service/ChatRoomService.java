@@ -10,7 +10,7 @@ public interface ChatRoomService {
 
     ChatRoom getChatRoomById(String userId, String chatId);
 
-    ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
+    ChatRoomInfoDto getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
     ChatRoom getSystemChatRoomByUserOrElseCreate(String userId);
 

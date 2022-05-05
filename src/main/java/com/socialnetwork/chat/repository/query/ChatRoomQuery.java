@@ -90,4 +90,11 @@ public interface ChatRoomQuery {
             "    ) AS last_message" +
             "    WHERE last_message.id = :messageId" +
             ")";
+
+    String GET_AMOUNT_OF_NOT_READ_MESSAGE =
+        "SELECT count(*) FROM message\n" +
+            "    LEFT JOIN read_message rm\n" +
+            "        ON message.id = rm.message_id\n" +
+            "        AND rm.message_id IS NULL\n" +
+            "    WHERE chat_room_id = :chatRoomId";
 }

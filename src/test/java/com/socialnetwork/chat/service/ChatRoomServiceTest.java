@@ -252,14 +252,23 @@ class ChatRoomServiceTest {
             .currentUserId(users.get(0))
             .userId(users.get(1))
             .build();
-        ChatRoom expectChatRoom = chatRooms.get(0);
+        ChatRoom foundChatRoom = chatRooms.get(0);
+        ChatRoomInfoDto expectChatRoom = new ChatRoomInfoDto()
+            .toBuilder()
+            .id(foundChatRoom.getId())
+            .users(foundChatRoom.getUsers())
+            .createdAt(foundChatRoom.getCreatedAt())
+            .amountOfNotReadMessages(0)
+            .build();
 
-        when(repository.findChatRoomByUsers(users.get(0), users.get(1))).thenReturn(Optional.of(expectChatRoom));
+        when(repository.findChatRoomByUsers(users.get(0), users.get(1))).thenReturn(Optional.of(foundChatRoom));
+        when(repository.getAmountOfNotReadMessages(foundChatRoom.getId())).thenReturn(0);
 
-        ChatRoom chatRoomResult = service.getChatRoomByUsersOrElseCreate(dto);
+        ChatRoomInfoDto chatRoomResult = service.getChatRoomByUsersOrElseCreate(dto);
 
         Assertions.assertEquals(expectChatRoom, chatRoomResult);
         verify(repository).findChatRoomByUsers(users.get(0), users.get(1));
+        verify(repository).getAmountOfNotReadMessages(foundChatRoom.getId());
     }
 
     @Test
@@ -269,13 +278,20 @@ class ChatRoomServiceTest {
             .currentUserId(users.get(0))
             .userId(users.get(1))
             .build();
-        ChatRoom expectChatRoom = chatRooms.get(0);
+        ChatRoom foundChatRoom = chatRooms.get(0);
+        ChatRoomInfoDto expectChatRoom = new ChatRoomInfoDto()
+            .toBuilder()
+            .id(foundChatRoom.getId())
+            .users(foundChatRoom.getUsers())
+            .createdAt(foundChatRoom.getCreatedAt())
+            .amountOfNotReadMessages(0)
+            .build();
 
         when(repository.findChatRoomByUsers(users.get(0), users.get(1))).thenReturn(Optional.empty());
         when(restTemplate.exchange(TestUtils.getUrlToCheckIfUserExists(users.get(1)), HttpMethod.GET, null, Boolean.class)).thenReturn(TestUtils.getResponseEntityBoolean(true));
-        when(repository.save(any(ChatRoom.class))).thenReturn(expectChatRoom);
+        when(repository.save(any(ChatRoom.class))).thenReturn(foundChatRoom);
 
-        ChatRoom chatRoomResult = service.getChatRoomByUsersOrElseCreate(dto);
+        ChatRoomInfoDto chatRoomResult = service.getChatRoomByUsersOrElseCreate(dto);
 
         Assertions.assertEquals(expectChatRoom, chatRoomResult);
         verify(repository).findChatRoomByUsers(users.get(0), users.get(1));

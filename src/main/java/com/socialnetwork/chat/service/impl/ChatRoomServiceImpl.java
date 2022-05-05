@@ -72,7 +72,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @Transactional
-    public ChatRoom getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
+    public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
         log.info("getChatRoomByUsersOrElseCreate by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
 
         Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
@@ -83,9 +83,23 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
                 .id(UUID.randomUUID().toString())
                 .build();
-            return chatRoomRepository.save(entity);
+            ChatRoom savedChatRoom = chatRoomRepository.save(entity);
+            return new ChatRoomInfoDto()
+                .toBuilder()
+                .id(savedChatRoom.getId())
+                .users(savedChatRoom.getUsers())
+                .createdAt(savedChatRoom.getCreatedAt())
+                .amountOfNotReadMessages(0)
+                .build();
         }
-        return chat.get();
+        ChatRoom foundChatRoom = chat.get();
+        return new ChatRoomInfoDto()
+            .toBuilder()
+            .id(foundChatRoom.getId())
+            .users(foundChatRoom.getUsers())
+            .createdAt(foundChatRoom.getCreatedAt())
+            .amountOfNotReadMessages(chatRoomRepository.getAmountOfNotReadMessages(foundChatRoom.getId()))
+            .build();
     }
 
     @Override
