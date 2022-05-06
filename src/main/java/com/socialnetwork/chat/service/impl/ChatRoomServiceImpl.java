@@ -265,6 +265,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return changedMessage;
     }
 
+    @Override
+    //todo add test
+    public Integer getAmountOfAllNotReadMessages(String userId) {
+        Integer result = chatRoomRepository.getAmountOfAllNotReadMessages(userId);
+        return result == null ? 0 : result;
+    }
+
 
     private static void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
         boolean isMemberOfChat = chatRoom.getUsers()

@@ -31,4 +31,6 @@ public interface ChatRoomService {
     Message toggleLikeMessage(MessageLikeDto dto);
 
     Message readMessage(MessageReadDto dto);
+
+    Integer getAmountOfAllNotReadMessages(String userId);
 }

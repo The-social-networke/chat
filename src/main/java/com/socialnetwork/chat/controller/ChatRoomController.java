@@ -132,4 +132,13 @@ public class ChatRoomController {
     ) {
         return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable());
     }
+
+    @GetMapping("/not-read-messages-amount")
+    @ApiOperation(value = "Amount of all not read message")
+    public Integer amountOfAllNotReadMessages(
+        @ApiIgnore
+        @CurrentUser UserSecurity userSecurity
+    ) {
+        return chatRoomService.getAmountOfAllNotReadMessages(userSecurity.getUserId());
+    }
 }

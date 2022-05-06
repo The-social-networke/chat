@@ -92,9 +92,22 @@ public interface ChatRoomQuery {
             ")";
 
     String GET_AMOUNT_OF_NOT_READ_MESSAGE =
-        "SELECT count(*) FROM message\n" +
-            "    LEFT JOIN read_message rm\n" +
-            "        ON message.id = rm.message_id\n" +
-            "        AND rm.message_id IS NULL\n" +
+        "SELECT count(*) FROM message" +
+            "    LEFT JOIN read_message rm" +
+            "        ON message.id = rm.message_id" +
+            "        AND rm.message_id IS NULL" +
             "    WHERE chat_room_id = :chatRoomId";
+
+    String GET_AMOUNT_OF_ALL_NOT_READ_MESSAGES =
+        "SELECT count(*) FROM (" +
+            "    SELECT *" +
+            "    FROM user__chat_room" +
+            "    WHERE user_id = :userId" +
+            "    ) as all_chatroom_ids" +
+            "    JOIN message m" +
+            "        ON m.chat_room_id = all_chatroom_ids.chat_room_id" +
+            "        AND m.user_id != :userId" +
+            "    LEFT JOIN read_message rm" +
+            "        ON rm.message_id = m.id " +
+            "WHERE rm.message_id IS NULL";
 }

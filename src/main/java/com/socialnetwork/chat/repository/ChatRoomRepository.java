@@ -57,6 +57,11 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
         nativeQuery = true)
     Integer getAmountOfNotReadMessages(@Param("chatRoomId") String chatRoomId);
 
+
+    @Query(value = ChatRoomQuery.GET_AMOUNT_OF_ALL_NOT_READ_MESSAGES,
+        nativeQuery = true)
+    Integer getAmountOfAllNotReadMessages(@Param("userId") String userId);
+
     @Query(value = ChatRoomQuery.FIND_CHAT_ROOM_BY_USERS,
         nativeQuery = true)
     Optional<ChatRoom> findChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
