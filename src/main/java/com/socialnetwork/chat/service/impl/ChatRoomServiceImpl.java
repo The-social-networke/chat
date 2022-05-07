@@ -61,13 +61,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public ChatRoom getChatRoomById(String userId, String chatId) {
+    public ChatRoomsMessageDto getChatRoomById(String userId, String chatId) {
         log.info("Find chat room with userId = {} and chatId = {}", userId, chatId);
 
         ChatRoom chat = chatRoomRepository.findById(chatId)
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chat, userId);
-        return chat;
+        return chatRoomRepository.findChatRoomMessageByUserIdAndChatId(userId, chatId)
+            .orElseThrow();
     }
 
     @Override
