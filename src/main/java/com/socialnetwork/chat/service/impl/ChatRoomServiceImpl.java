@@ -68,7 +68,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chat, userId);
         return chatRoomRepository.findChatRoomMessageByUserIdAndChatId(userId, chatId)
-            .orElseThrow();
+            .orElseThrow()
+            .toBuilder()
+            .userInfo(getUserInfoByUserId(userId))
+            .build();
     }
 
     @Override
