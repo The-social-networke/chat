@@ -61,14 +61,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
 
     @Override
-    public ChatRoomsMessageDto getChatRoomById(String userId, String chatId) {
+    public ChatRoomMessageDto getChatRoomById(String userId, String chatId) {
         log.info("Find chat room with userId = {} and chatId = {}", userId, chatId);
 
         ChatRoom chat = chatRoomRepository.findById(chatId)
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chat, userId);
-        return chatRoomRepository.findChatRoomMessageByUserIdAndChatId(userId, chatId)
-            .orElseThrow()
+
+        return chatRoomRepository.getChatRoomMessageByUserIdAndChatId(userId, chatId)
             .toBuilder()
             .userInfo(getUserInfoByUserId(userId))
             .build();
@@ -78,6 +78,10 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto) {
         log.info("getChatRoomByUsersOrElseCreate by users with currentUserId = {}, and userId = {}", dto.getCurrentUserId(), dto.getUserId());
+
+        if(dto.getCurrentUserId().equals(dto.getUserId())) {
+            throw new ChatException(ErrorCodeException.USER_CANNOT_CREATE_CHAT_WITH_HIMSELF);
+        }
 
         Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId());
         if(chat.isEmpty()) {
@@ -124,6 +128,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    public Integer getAmountOfAllNotReadMessages(String userId) {
+        Integer result = chatRoomRepository.getAmountOfAllNotReadMessages(userId);
+        return result == null ? 0 : result;
+    }
+
+    @Override
     public Page<Message> findMessagesByChatId(String userId, String chatId, Pageable pageable) {
         log.info("Find chat room");
 
@@ -134,7 +144,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
+    public Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
         log.info("Find chat room message by user id");
 
         var result = chatRoomRepository.findChatRoomsMessageByUserId(userId, pageable);
@@ -150,6 +160,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public ChatRoom createChatRoom(ChatRoomCreateDto dto) {
         log.info("Create chat room");
 
+        if(dto.getCurrentUserId().equals(dto.getUserId())) {
+            throw new ChatException(ErrorCodeException.USER_CANNOT_CREATE_CHAT_WITH_HIMSELF);
+        }
         if(chatRoomRepository.existsChatRoomByUsers(dto.getCurrentUserId(), dto.getUserId())) {
             throw new ChatException(ErrorCodeException.CHAT_WITH_THESE_USERS_ALREADY_EXISTS);
         }
@@ -267,13 +280,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
 
         return changedMessage;
-    }
-
-    @Override
-    //todo add test
-    public Integer getAmountOfAllNotReadMessages(String userId) {
-        Integer result = chatRoomRepository.getAmountOfAllNotReadMessages(userId);
-        return result == null ? 0 : result;
     }
 
 

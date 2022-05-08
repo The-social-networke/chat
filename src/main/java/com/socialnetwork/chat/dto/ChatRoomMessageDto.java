@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @ApiModel(description = "dto to show chatRoom")
-public class ChatRoomsMessageDto {
+public class ChatRoomMessageDto {
 
     @ApiModelProperty(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",

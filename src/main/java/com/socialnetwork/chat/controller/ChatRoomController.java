@@ -40,7 +40,7 @@ public class ChatRoomController {
         @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
     })
-    public ChatRoomsMessageDto getChatRoomById(
+    public ChatRoomMessageDto getChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId,
         @ApiIgnore
@@ -51,7 +51,7 @@ public class ChatRoomController {
 
     @GetMapping("/find-chats")
     @ApiOperation(value = "Find chatRooms with message by user id")
-    public Page<ChatRoomsMessageDto> findChatRoomsMessage(
+    public Page<ChatRoomMessageDto> findChatRoomsMessage(
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity,
         CustomPageable pageable

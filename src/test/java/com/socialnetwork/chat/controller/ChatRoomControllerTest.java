@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.TestUtils;
 import com.socialnetwork.chat.dto.ChatRoomCreateDto;
 import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
-import com.socialnetwork.chat.dto.ChatRoomsMessageDto;
+import com.socialnetwork.chat.dto.ChatRoomMessageDto;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
@@ -86,18 +86,19 @@ class ChatRoomControllerTest {
     void testGetChatRoomById_success() throws Exception {
         String anotherUserId = "55ab96d7-8a93-4ea3-9d9d-77500018ad4e";
         var chatId = "350c19d5-2905-4c6e-9e60-4bb74a53745e";
-
         mockMvc.perform(get("/chat")
                 .param("chatId", chatId))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(chatId))
-            .andExpect(jsonPath("$.createdAt").isNotEmpty())
-            .andExpect(jsonPath("$.users").isArray())
-            .andExpect(jsonPath("$.users", hasSize(2)))
-            .andExpect(jsonPath("$.users", hasItem(anotherUserId)))
-            .andExpect(jsonPath("$.users", hasItem(authorizedUserId)))
-            .andExpect(jsonPath("$.*", hasSize(3)));
+            .andExpect(jsonPath("$.chatRoomId").value(chatId))
+            .andExpect(jsonPath("$.anotherUserId").value("55ab96d7-8a93-4ea3-9d9d-77500018ad4e"))
+            .andExpect(jsonPath("$.userId").value("55ab96d7-8a93-4ea3-9d9d-77500018ad4e"))
+            .andExpect(jsonPath("$.messageId").value("50f43dd9-35e4-4c00-bd3a-c7b26575b153"))
+            .andExpect(jsonPath("$.text").value("great!"))
+            .andExpect(jsonPath("$.sentAt").isNotEmpty())
+            .andExpect(jsonPath("$.amountOfNotReadMessages").value(1))
+            .andExpect(jsonPath("$.userInfo", Matchers.nullValue()))
+            .andExpect(jsonPath("$.*", hasSize(8)));
     }
 
     @Test
@@ -167,8 +168,8 @@ class ChatRoomControllerTest {
 
     @Test
     void testFindChatRoomsMessage_success() throws Exception {
-        var messagesExpect = new ChatRoomsMessageDto[]{
-            new ChatRoomsMessageDto()
+        var messagesExpect = new ChatRoomMessageDto[]{
+            new ChatRoomMessageDto()
                 .toBuilder()
                 .messageId("69be2df7-0c33-4112-8ea7-e226f9fb1887")
                 .chatRoomId("3157333e-d7b2-4735-9069-fbd2cbf8e9f1")
@@ -177,7 +178,7 @@ class ChatRoomControllerTest {
                 .sentAt(LocalDateTime.of(2022, 4, 1, 20, 20, 7, 220500))
                 .amountOfNotReadMessages(1)
                 .build(),
-            new ChatRoomsMessageDto()
+            new ChatRoomMessageDto()
                 .toBuilder()
                 .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
                 .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a53745e")
@@ -188,7 +189,6 @@ class ChatRoomControllerTest {
                 .build(),
         };
 
-        //todo change it
         mockMvc.perform(get("/chat/find-chats"))
             .andDo(print())
             .andExpect(status().isOk())

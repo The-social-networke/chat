@@ -8,15 +8,17 @@ import org.springframework.data.domain.Pageable;
 
 public interface ChatRoomService {
 
-    ChatRoomsMessageDto getChatRoomById(String userId, String chatId);
+    ChatRoomMessageDto getChatRoomById(String userId, String chatId);
 
     ChatRoomInfoDto getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
 
     ChatRoom getSystemChatRoomByUserOrElseCreate(String userId);
 
+    Integer getAmountOfAllNotReadMessages(String userId);
+
     Page<Message> findMessagesByChatId(String userId, String chatId, Pageable pageable);
 
-    Page<ChatRoomsMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable);
+    Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable);
 
     ChatRoom createChatRoom(ChatRoomCreateDto dto);
 
@@ -31,6 +33,4 @@ public interface ChatRoomService {
     Message toggleLikeMessage(MessageLikeDto dto);
 
     Message readMessage(MessageReadDto dto);
-
-    Integer getAmountOfAllNotReadMessages(String userId);
 }
