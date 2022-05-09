@@ -70,7 +70,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         return chatRoomRepository.getChatRoomMessageByUserIdAndChatId(userId, chatId)
             .toBuilder()
-            .userInfo(getUserInfoByUserId(userId))
+            .userInfo(getUserInfoByUserId(getAnotherUserIdFromChat(chat, userId)))
             .build();
     }
 
