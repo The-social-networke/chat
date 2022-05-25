@@ -801,7 +801,14 @@ class ChatRoomServiceTest {
             .currentUserId(userId)
             .messageId(messageId)
             .build();
-        var chatRoomsMessageStatusExpect = TestUtils.convertToChatRoomsMessageStatusDto(chatRoomFound.getId(), null);
+        var chatRoomsMessageStatusExpect = TestUtils.convertToChatRoomsMessageStatusDto(chatRoomFound.getId(),
+            new Message()
+                .toBuilder()
+                .chatRoom(chatRoomFound)
+                .userId(dto.getCurrentUserId())
+                .messageStatus(MessageStatus.DELETED)
+                .build()
+        );
 
         when(repository.findChatRoomByMessageId(messageId)).thenReturn(Optional.of(chatRoomFound));
         when(repository.isLastMessageInChatRoom(chatRoomFound.getId(), dto.getMessageId())).thenReturn(true);

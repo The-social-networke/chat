@@ -221,8 +221,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         if(isLastMessage) {
             var lastMessage = messageRepository.findLastMessageInChat(chatRoom.getId())
-                .map(m -> m.toBuilder().messageStatus(MessageStatus.DELETED).build());
-            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage.orElse(null));
+                .orElse(new Message()
+                    .toBuilder()
+                    .chatRoom(chatRoom)
+                    .userId(dto.getCurrentUserId())
+                    .build())
+                .toBuilder()
+                .messageStatus(MessageStatus.DELETED)
+                .build();
+            var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage);
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
         }
         template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), deletedMessage);
@@ -321,12 +328,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         return new ChatRoomMessageStatusDto()
             .toBuilder()
             .chatRoomId(chatRoomId)
-            .messageId(message == null ? null : message.getId())
-            .text(message == null ? null : message.getText())
-            .sentAt(message == null ? null : message.getSentAt())
-            .userId(message == null ? null : message.getUserId())
-            .messageStatus(message == null ? null :  message.getMessageStatus())
-            .userInfo(message == null ? null : getUserInfoByUserId(message.getUserId()))
+            .messageId(message.getId())
+            .text(message.getText())
+            .sentAt(message.getSentAt())
+            .userId(message.getUserId())
+            .messageStatus(message.getMessageStatus())
+            .userInfo(getUserInfoByUserId(message.getUserId()))
             .build();
     }
 
