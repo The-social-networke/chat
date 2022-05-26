@@ -386,7 +386,7 @@ class ChatRoomServiceTest {
     void textGetAmountOfAllNotReadMessages_thereAreNoNotReadMessages() {
         String userId = users.get(0);
 
-        when(repository.getAmountOfAllNotReadMessages(userId)).thenReturn(null);
+        when(repository.getAmountOfAllNotReadMessages(userId)).thenReturn(0);
 
         Integer result = service.getAmountOfAllNotReadMessages(userId);
 

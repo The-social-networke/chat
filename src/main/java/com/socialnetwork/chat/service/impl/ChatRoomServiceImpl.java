@@ -129,8 +129,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public Integer getAmountOfAllNotReadMessages(String userId) {
-        Integer result = chatRoomRepository.getAmountOfAllNotReadMessages(userId);
-        return result == null ? 0 : result;
+        return chatRoomRepository.getAmountOfAllNotReadMessages(userId);
     }
 
     @Override

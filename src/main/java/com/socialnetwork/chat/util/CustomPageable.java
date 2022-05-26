@@ -7,13 +7,11 @@ import org.springframework.data.domain.Pageable;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
 @Data
 public class CustomPageable {
 
-    @Positive(message = "Size should be positive")
     @Min(value = 5, message = "The number of items per page should be in the range of 5 to 50")
     @Max(value = 50, message = "The number of items per page should be in the range of 5 to 50")
     @ApiParam(value = "Amount of items per page is in the range of 5 to 20", defaultValue = "10")
