@@ -2,6 +2,9 @@ package com.socialnetwork.chat.service.impl;
 
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.entity.MessageLikes;
+import com.socialnetwork.chat.entity.MessageReaders;
+import com.socialnetwork.chat.entity.MessageUserPk;
 import com.socialnetwork.chat.exception.ChatException;
 import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.MessageRepository;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,15 +28,17 @@ public class MessageService {
 
     private final MessageRepository messageRepository;
 
-    private final MessageMapper messageMapper;
-
 
     public Page<Message> findMessagesByChatId(String chatId, Pageable pageable) {
         return messageRepository.findAllByChatRoomId(chatId, pageable);
     }
 
     public Message sendMessage(MessageCreateDto dto) {
-        var entity = messageMapper.toEntity(dto)
+        if (dto.getText().trim().equals("")) {
+            throw new ChatException(ErrorCodeException.MESSAGE_CANNOT_BE_EMPTY);
+        }
+
+        var entity = MessageMapper.toEntity(dto)
             .toBuilder()
             .id(UUID.randomUUID().toString())
             .sentAt(LocalDateTime.now())
@@ -63,11 +69,13 @@ public class MessageService {
             throw new ChatException(ErrorCodeException.USER_CANNOT_READ_HIS_MESSAGE);
         }
 
-        boolean isAlreadyRead = message.getMessageReads().contains(dto.getCurrentUserId());
+        boolean isAlreadyRead = message.getMessageReads()
+            .stream()
+            .anyMatch(obj -> obj.getId().getUserId().equals(dto.getCurrentUserId()));
         if(isAlreadyRead) {
             return message;
         }
-        message.getMessageReads().add(dto.getCurrentUserId());
+        message.getMessageReads().add(new MessageReaders(new MessageUserPk(dto.getCurrentUserId(), message.getId()), message));
         return messageRepository.save(message)
                 .toBuilder()
                 .messageStatus(MessageStatus.UPDATED)
@@ -79,6 +87,10 @@ public class MessageService {
 
         if(!message.getUserId().equals(dto.getCurrentUserId())) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_UPDATE_NOT_OWN_MESSAGE);
+        }
+
+        if (dto.getText().trim().equals("")) {
+            throw new ChatException(ErrorCodeException.MESSAGE_CANNOT_BE_EMPTY);
         }
 
         message = message.toBuilder()
@@ -100,16 +112,24 @@ public class MessageService {
             throw new ChatException(ErrorCodeException.USER_CANNOT_LIKE_HIS_MESSAGE);
         }
 
-        boolean isAlreadyLiked = message.getMessageLikes().contains(dto.getCurrentUserId());
+        boolean isAlreadyLiked = message.getMessageLikes()
+            .stream()
+            .anyMatch(obj -> obj.getId().getUserId().equals(dto.getCurrentUserId()));
         boolean isLikeDto = Boolean.TRUE.equals(dto.getIsLike());
         if(isLikeDto == isAlreadyLiked) {
             return message;
         }
         if(isLikeDto) {
-            message.getMessageLikes().add(dto.getCurrentUserId());
+            message.getMessageLikes().add(
+                new MessageLikes(new MessageUserPk(dto.getCurrentUserId(), message.getId()), message)
+            );
         }
         else {
-            message.getMessageLikes().remove(dto.getCurrentUserId());
+            message.setMessageLikes(
+                message.getMessageLikes().stream()
+                .filter(m -> !m.getId().getUserId().equals(dto.getCurrentUserId()))
+                .collect(Collectors.toSet())
+            );
         }
         return messageRepository.save(message)
             .toBuilder()

@@ -22,7 +22,8 @@ public enum ErrorCodeException {
     USER_CANNOT_READ_HIS_MESSAGE(1005, "user cannot read his message"),
     USER_CANNOT_DELETE_NOT_OWN_MESSAGE(1006, "user cannot delete not own message"),
     USER_CANNOT_UPDATE_NOT_OWN_MESSAGE(1007, "user cannot update not own message"),
-    USER_CANNOT_CREATE_CHAT_WITH_HIMSELF(1008, "user cannot create chat with himself");
+    USER_CANNOT_CREATE_CHAT_WITH_HIMSELF(1008, "user cannot create chat with himself"),
+    MESSAGE_CANNOT_BE_EMPTY(1008, "message cannot be empty");
 
     @JsonValue
     private final int code;

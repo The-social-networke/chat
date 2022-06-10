@@ -3,15 +3,16 @@ package com.socialnetwork.chat.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.TestUtils;
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.entity.ChatRoom;
-import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.entity.*;
 import com.socialnetwork.chat.exception.ChatException;
+import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
 import com.socialnetwork.chat.service.impl.MessageService;
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import com.socialnetwork.chat.util.enums.MessageStatus;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,10 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -92,7 +91,6 @@ class ChatRoomServiceTest {
                         .id("288f7ad6-7d88-4a1e-8c5c-ebfcdcc58847")
                         .build()
                 )
-                .messageLikes(Set.of(users.get(1)))
                 .build(),
             new Message()
                 .toBuilder()
@@ -105,7 +103,6 @@ class ChatRoomServiceTest {
                         .id("288f7ad6-7d88-4a1e-8c5c-ebfcdcc58847")
                         .build()
                 )
-                .messageLikes(Set.of(users.get(0)))
                 .build(),
             new Message()
                 .toBuilder()
@@ -118,7 +115,6 @@ class ChatRoomServiceTest {
                         .id("09706be4-8462-4ddc-be31-5a8321fdc485")
                         .build()
                 )
-                .messageLikes(Set.of(users.get(2)))
                 .build(),
             new Message()
                 .toBuilder()
@@ -131,7 +127,6 @@ class ChatRoomServiceTest {
                         .id("09706be4-8462-4ddc-be31-5a8321fdc485")
                         .build()
                 )
-                .messageLikes(Set.of(users.get(1)))
                 .build(),
             new Message()
                 .toBuilder()
@@ -144,7 +139,6 @@ class ChatRoomServiceTest {
                         .id("19706be4-8499-4ddc-ab77-3w8321djc005")
                         .build()
                 )
-                .messageLikes(Set.of(TestUtils.SYSTEM_USER_ID))
                 .build(),
             new Message()
                 .toBuilder()
@@ -157,15 +151,33 @@ class ChatRoomServiceTest {
                         .id("19706be4-8499-4ddc-ab77-3w8321djc005")
                         .build()
                 )
-                .messageLikes(Set.of(users.get(0)))
                 .build()
         );
+
+        messages.get(0).getMessageLikes().add(
+          new MessageLikes(new MessageUserPk(users.get(1), messages.get(0).getId()), messages.get(0))
+        );
+        messages.get(1).getMessageLikes().add(
+            new MessageLikes(new MessageUserPk(users.get(2), messages.get(1).getId()), messages.get(1))
+        );
+        messages.get(2).getMessageLikes().add(
+            new MessageLikes(new MessageUserPk(users.get(0), messages.get(2).getId()), messages.get(2))
+        );
+        messages.get(3).getMessageLikes().add(
+            new MessageLikes(new MessageUserPk(users.get(1), messages.get(3).getId()), messages.get(3))
+        );
+        messages.get(4).getMessageLikes().add(
+            new MessageLikes(new MessageUserPk(users.get(2), messages.get(4).getId()), messages.get(4))
+        );
+        messages.get(5).getMessageLikes().add(
+            new MessageLikes(new MessageUserPk(users.get(0), messages.get(5).getId()), messages.get(5))
+        );
+
         chatRooms = List.of(
             new ChatRoom()
                 .toBuilder()
                 .id("288f7ad6-7d88-4a1e-8c5c-ebfcdcc58847")
                 .createdAt(LocalDateTime.now())
-                .users(Set.of(users.get(0), users.get(1)))
                 .messages(Set.of(
                     messages.get(0),
                     messages.get(1)
@@ -175,7 +187,6 @@ class ChatRoomServiceTest {
                 .toBuilder()
                 .id("09706be4-8462-4ddc-be31-5a8321fdc485")
                 .createdAt(LocalDateTime.now())
-                .users(Set.of(users.get(1), users.get(2)))
                 .messages(Set.of(
                     messages.get(2),
                     messages.get(3)
@@ -185,12 +196,38 @@ class ChatRoomServiceTest {
                 .toBuilder()
                 .id("19706be4-8499-4ddc-ab77-3w8321djc005")
                 .createdAt(LocalDateTime.now())
-                .users(Set.of(users.get(0), TestUtils.SYSTEM_USER_ID))
                 .messages(Set.of(
                     messages.get(4),
                     messages.get(5)
                 ))
                 .build()
+        );
+
+        chatRooms.get(0).setUsers(
+            new HashSet<>(
+                Lists.newArrayList(
+                    new ChatRoomUser(new ChatRoomUserPk(users.get(0), chatRooms.get(0).getId()), chatRooms.get(0)),
+                    new ChatRoomUser(new ChatRoomUserPk(users.get(1), chatRooms.get(0).getId()), chatRooms.get(0))
+                )
+            )
+        );
+
+        chatRooms.get(1).setUsers(
+            new HashSet<>(
+                Lists.newArrayList(
+                    new ChatRoomUser(new ChatRoomUserPk(users.get(1), chatRooms.get(1).getId()), chatRooms.get(1)),
+                    new ChatRoomUser(new ChatRoomUserPk(users.get(2), chatRooms.get(1).getId()), chatRooms.get(1))
+                    )
+            )
+        );
+
+        chatRooms.get(2).setUsers(
+            new HashSet<>(
+                Lists.newArrayList(
+                    new ChatRoomUser(new ChatRoomUserPk(users.get(1), chatRooms.get(2).getId()), chatRooms.get(2)),
+                    new ChatRoomUser(new ChatRoomUserPk(TestUtils.SYSTEM_USER_ID, chatRooms.get(2).getId()), chatRooms.get(2))
+                    )
+            )
         );
     }
 
@@ -269,7 +306,12 @@ class ChatRoomServiceTest {
         ChatRoomInfoDto expectChatRoom = new ChatRoomInfoDto()
             .toBuilder()
             .id(foundChatRoom.getId())
-            .users(foundChatRoom.getUsers())
+            .users(
+                foundChatRoom.getUsers()
+                    .stream()
+                    .map(u -> u.getId().getUserId())
+                    .collect(Collectors.toUnmodifiableSet())
+            )
             .createdAt(foundChatRoom.getCreatedAt())
             .amountOfNotReadMessages(0)
             .build();
@@ -313,7 +355,12 @@ class ChatRoomServiceTest {
         ChatRoomInfoDto expectChatRoom = new ChatRoomInfoDto()
             .toBuilder()
             .id(foundChatRoom.getId())
-            .users(foundChatRoom.getUsers())
+            .users(
+                foundChatRoom.getUsers()
+                    .stream()
+                    .map(u -> u.getId().getUserId())
+                    .collect(Collectors.toUnmodifiableSet())
+            )
             .createdAt(foundChatRoom.getCreatedAt())
             .amountOfNotReadMessages(0)
             .build();
@@ -662,7 +709,7 @@ class ChatRoomServiceTest {
         verify(repository).findById(chatId);
         verify(messageService).sendMessage(messageCreateDto);
         verify(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
-        verify(template).convertAndSend("/chat/messages/" + messageCreateDto.getChatRoomId(), messageSaved);
+        verify(template).convertAndSend("/chat/messages/" + messageCreateDto.getChatRoomId(), MessageMapper.toMessageDto(messageSaved));
     }
 
     @Test
@@ -729,12 +776,13 @@ class ChatRoomServiceTest {
             .currentUserId(userId)
             .messageId(messageId)
             .build();
+        MessageDto messageDtoSend = MessageMapper.toMessageDto(messageDeleted);
 
         when(repository.findChatRoomByMessageId(messageId)).thenReturn(Optional.of(chatRoomFound));
         when(repository.isLastMessageInChatRoom(chatRoomFound.getId(), dto.getMessageId())).thenReturn(false);
         when(messageService.deleteMessage(dto)).thenReturn(messageDeleted);
         doNothing().when(template).convertAndSend(eq("/users/" + users.get(1)), any(Object.class));
-        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDtoSend);
 
         Message messageResult = service.deleteMessage(dto);
 
@@ -744,7 +792,7 @@ class ChatRoomServiceTest {
         verify(repository).isLastMessageInChatRoom(chatRoomFound.getId(), dto.getMessageId());
         verify(messageService).deleteMessage(dto);
         verify(template, never()).convertAndSend(eq("/users/" + users.get(1)), any(Object.class));
-        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDtoSend);
     }
 
     @Test
@@ -773,7 +821,7 @@ class ChatRoomServiceTest {
         when(messageService.deleteMessage(dto)).thenReturn(messageDeleted);
         when(messageRepository.findLastMessageInChat(chatRoomFound.getId())).thenReturn(Optional.of(messages.get(1)));
         doNothing().when(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
-        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageDeleted));
 
         Message messageResult = service.deleteMessage(dto);
 
@@ -784,7 +832,7 @@ class ChatRoomServiceTest {
         verify(messageService).deleteMessage(dto);
         verify(messageRepository).findLastMessageInChat(chatRoomFound.getId());
         verify(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
-        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageDeleted));
     }
 
     @Test
@@ -815,7 +863,7 @@ class ChatRoomServiceTest {
         when(messageService.deleteMessage(dto)).thenReturn(messageDeleted);
         when(messageRepository.findLastMessageInChat(chatRoomFound.getId())).thenReturn(Optional.empty());
         doNothing().when(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
-        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageDeleted));
 
         Message messageResult = service.deleteMessage(dto);
 
@@ -826,7 +874,7 @@ class ChatRoomServiceTest {
         verify(messageService).deleteMessage(dto);
         verify(messageRepository).findLastMessageInChat(chatRoomFound.getId());
         verify(template).convertAndSend("/users/" + users.get(1), chatRoomsMessageStatusExpect);
-        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageDeleted);
+        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageDeleted));
     }
 
     @Test
@@ -902,7 +950,7 @@ class ChatRoomServiceTest {
         verify(repository).findChatRoomByMessageId(message.getId());
         verify(messageService).updateMessage(dto);
         verify(template, never()).convertAndSend(eq("/users/" + users.get(1)), any(Object.class));
-        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageSaved);
+        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageSaved));
     }
 
     @Test
@@ -927,7 +975,7 @@ class ChatRoomServiceTest {
         when(messageService.updateMessage(dto)).thenReturn(messageSaved);
         when(repository.isLastMessageInChatRoom(chatRoomFound.getId(), dto.getMessageId())).thenReturn(true);
         doNothing().when(template).convertAndSend("/users/" + users.get(1), chatRoomMessageDto);
-        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageSaved);
+        doNothing().when(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageSaved));
 
 
         Message messageResult = service.updateMessage(dto);
@@ -937,7 +985,7 @@ class ChatRoomServiceTest {
         verify(messageService).updateMessage(dto);
         verify(repository).isLastMessageInChatRoom(chatRoomFound.getId(), dto.getMessageId());
         verify(template).convertAndSend("/users/" + users.get(1), chatRoomMessageDto);
-        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), messageSaved);
+        verify(template).convertAndSend("/chat/messages/" + chatRoomFound.getId(), MessageMapper.toMessageDto(messageSaved));
     }
 
     @Test
@@ -993,7 +1041,7 @@ class ChatRoomServiceTest {
         ChatRoom chatRoomFound = chatRooms.get(0);
         Message messageSaved = message
             .toBuilder()
-            .messageLikes(Set.of())
+            .messageLikes(new HashSet<>())
             .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageLikeDto dto = new MessageLikeDto()
@@ -1066,7 +1114,9 @@ class ChatRoomServiceTest {
         ChatRoom chatRoomFound = chatRooms.get(0);
         Message messageSaved = message
             .toBuilder()
-            .messageReads(Set.of(users.get(1)))
+            .messageReads(new HashSet<>(Lists.newArrayList(
+                new MessageReaders(new MessageUserPk(userId, messages.get(1).getId()), message)
+            )))
             .messageStatus(MessageStatus.UPDATED)
             .build();
         MessageReadDto dto = new MessageReadDto()

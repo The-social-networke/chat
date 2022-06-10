@@ -3,8 +3,8 @@ package com.socialnetwork.chat.controller;
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.entity.ChatRoom;
-import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.mapper.ChatRoomMapper;
+import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
 import io.swagger.annotations.Api;
@@ -76,11 +76,11 @@ public class ChatRoomController {
 
     @PostMapping("/get-system-chat")
     @ApiOperation(value = "Get system chatRooms by user id or else create")
-    public ChatRoom getSystemChatRoomByUserOrElseCreate(
+    public ChatRoomDto getSystemChatRoomByUserOrElseCreate(
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
+        return ChatRoomMapper.toChatRoomDto(chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId()));
     }
 
     @PostMapping
@@ -89,14 +89,14 @@ public class ChatRoomController {
         @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class),
         @ApiResponse(code = 1003, message = "chat with these users already exits", response = ErrorDto.class),
     })
-    public ChatRoom createChatRoom(
+    public ChatRoomDto createChatRoom(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.createChatRoom(dto);
+        return ChatRoomMapper.toChatRoomDto(chatRoomService.createChatRoom(dto));
     }
 
     @DeleteMapping
@@ -123,14 +123,15 @@ public class ChatRoomController {
         @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class)
     })
-    public Page<Message> findAllMessageByChatRoomId(
+    public Page<MessageDto> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
         CustomPageable pageable,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable());
+        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable())
+            .map(MessageMapper::toMessageDto);
     }
 
     @GetMapping("/not-read-messages-amount")

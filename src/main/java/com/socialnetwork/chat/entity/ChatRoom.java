@@ -27,10 +27,8 @@ public class ChatRoom implements Serializable {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name="user__chat_room", joinColumns=@JoinColumn(name="chat_room_id"))
-    @Column(name="user_id", nullable = false)
-    private Set<String> users;
+    @OneToMany(mappedBy = "chatRoom", fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    private Set<ChatRoomUser> users;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude

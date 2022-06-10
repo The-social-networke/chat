@@ -8,7 +8,6 @@
 
 	<properties>
 		<java.version>11</java.version>
-		<org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
 		<powermock.version>2.0.0-beta.5</powermock.version>
 		<swagger.version>2.9.2</swagger.version>
 	</properties>
@@ -160,11 +159,6 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>org.mapstruct</groupId>
-			<artifactId>mapstruct</artifactId>
-			<version>${org.mapstruct.version}</version>
-		</dependency>
 	</dependencies>
 
 	<build>
@@ -186,16 +180,6 @@
 								<groupId>org.projectlombok</groupId>
 								<artifactId>lombok</artifactId>
 								<version>1.18.22</version>
-							</path>
-							<path>
-								<groupId>org.projectlombok</groupId>
-								<artifactId>lombok-mapstruct-binding</artifactId>
-								<version>0.2.0</version>
-							</path>
-							<path>
-								<groupId>org.mapstruct</groupId>
-								<artifactId>mapstruct-processor</artifactId>
-								<version>${org.mapstruct.version}</version>
 							</path>
 						</annotationProcessorPaths>
 					</configuration>

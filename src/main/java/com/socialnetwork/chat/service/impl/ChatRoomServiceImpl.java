@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.entity.ChatRoom;
+import com.socialnetwork.chat.entity.ChatRoomUser;
+import com.socialnetwork.chat.entity.ChatRoomUserPk;
 import com.socialnetwork.chat.entity.Message;
 import com.socialnetwork.chat.exception.ChatException;
+import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
@@ -28,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -88,23 +92,39 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             checkIfUserExists(dto.getUserId());
             ChatRoom entity = new ChatRoom()
                 .toBuilder()
-                .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
                 .id(UUID.randomUUID().toString())
                 .build();
+
+            entity.setUsers(
+                Set.of(
+                    new ChatRoomUser(new ChatRoomUserPk(dto.getUserId(), entity.getId()), entity)
+                )
+            );
             ChatRoom savedChatRoom = chatRoomRepository.save(entity);
             return new ChatRoomInfoDto()
                 .toBuilder()
                 .id(savedChatRoom.getId())
-                .users(savedChatRoom.getUsers())
+                .users(
+                    savedChatRoom.getUsers()
+                        .stream()
+                        .map(obj -> obj.getId().getUserId())
+                        .collect(Collectors.toUnmodifiableSet())
+                )
                 .createdAt(savedChatRoom.getCreatedAt())
                 .amountOfNotReadMessages(0)
                 .build();
         }
         ChatRoom foundChatRoom = chat.get();
+
         return new ChatRoomInfoDto()
             .toBuilder()
             .id(foundChatRoom.getId())
-            .users(foundChatRoom.getUsers())
+            .users(
+                foundChatRoom.getUsers()
+                    .stream()
+                    .map(obj -> obj.getId().getUserId())
+                    .collect(Collectors.toUnmodifiableSet())
+            )
             .createdAt(foundChatRoom.getCreatedAt())
             .amountOfNotReadMessages(chatRoomRepository.getAmountOfNotReadMessages(foundChatRoom.getId()))
             .build();
@@ -117,11 +137,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Optional<ChatRoom> chat = chatRoomRepository.findChatRoomByUsers(userId, systemUserId);
         if(chat.isEmpty()) {
-            ChatRoom newChatRoom = new ChatRoom()
-                .toBuilder()
-                .id(UUID.randomUUID().toString())
-                .users(Set.of(userId, systemUserId))
-                .build();
+            String chatId = UUID.randomUUID().toString();
+            ChatRoom newChatRoom = new ChatRoom();
+            newChatRoom.setId(chatId);
+            newChatRoom.setUsers(Set.of(
+                    new ChatRoomUser(new ChatRoomUserPk(userId, chatId), newChatRoom),
+                    new ChatRoomUser(new ChatRoomUserPk(systemUserId, chatId), newChatRoom)
+            ));
             return chatRoomRepository.save(newChatRoom);
         }
         return chat.get();
@@ -167,12 +189,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         }
         checkIfUserExists(dto.getUserId());
 
-        ChatRoom entity = new ChatRoom()
-            .toBuilder()
-            .users(Set.of(dto.getCurrentUserId(), dto.getUserId()))
-            .id(UUID.randomUUID().toString())
-            .build();
-        return chatRoomRepository.save(entity);
+        String chatId = UUID.randomUUID().toString();
+        ChatRoom newChatRoom = new ChatRoom();
+        newChatRoom.setId(chatId);
+        newChatRoom.setUsers(Set.of(
+            new ChatRoomUser(new ChatRoomUserPk(dto.getCurrentUserId(), chatId), newChatRoom),
+            new ChatRoomUser(new ChatRoomUserPk(dto.getUserId(), chatId), newChatRoom)
+        ));
+        return chatRoomRepository.save(newChatRoom);
     }
 
     @Override
@@ -200,7 +224,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         String anotherUserId = getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId());
         template.convertAndSend(USER_SOCKET_NOTIFICATION + anotherUserId, convertToChatRoomMessageStatusDto(chatRoom.getId(), savedMessage));
-        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + dto.getChatRoomId(), savedMessage);
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + dto.getChatRoomId(), MessageMapper.toMessageDto(savedMessage));
 
         return savedMessage;
     }
@@ -231,7 +255,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), lastMessage);
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
         }
-        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), deletedMessage);
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(),  MessageMapper.toMessageDto(deletedMessage));
 
         return deletedMessage;
     }
@@ -252,7 +276,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, dto.getCurrentUserId()), messageStatusDto);
         }
 
-        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), updatedMessage);
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(),  MessageMapper.toMessageDto(updatedMessage));
         return  updatedMessage;
     }
 
@@ -267,7 +291,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Message changedMessage = messageService.toggleLikeMessage(dto);
 
-        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(),  MessageMapper.toMessageDto(changedMessage));
 
         return changedMessage;
     }
@@ -283,7 +307,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Message changedMessage = messageService.readMessage(dto);
 
-        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(), changedMessage);
+        template.convertAndSend(CHAT_SOCKET_NOTIFICATION + chatRoom.getId(),  MessageMapper.toMessageDto(changedMessage));
 
         return changedMessage;
     }
@@ -292,7 +316,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private static void checkIfUserMemberOfChat(ChatRoom chatRoom, String userId) throws ChatException {
         boolean isMemberOfChat = chatRoom.getUsers()
             .stream()
-            .anyMatch(u -> u.equals(userId));
+            .anyMatch(u -> u.getId().getUserId().equals(userId));
         if(!isMemberOfChat) {
             throw new ChatException(ErrorCodeException.NOT_MEMBER_OF_CHAT);
         }
@@ -318,6 +342,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private String getAnotherUserIdFromChat(ChatRoom chatRoom, String userId) throws ChatException {
         return chatRoom.getUsers()
             .stream()
+            .map(u -> u.getId().getUserId())
             .filter(u -> !u.equals(userId))
             .findFirst()
             .orElseThrow();

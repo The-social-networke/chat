@@ -3,7 +3,7 @@ package com.socialnetwork.chat.controller;
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.service.ChatRoomService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,14 +36,14 @@ public class ChatRoomSocketController {
         @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
     })
-    public Message sendMessage(
+    public MessageDto sendMessage(
         @Valid
         @RequestBody MessageCreateDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.sendMessage(dto);
+        return MessageMapper.toMessageDto(chatRoomService.sendMessage(dto));
     }
 
     @DeleteMapping("/chat/deleteMessage")
@@ -53,14 +53,14 @@ public class ChatRoomSocketController {
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
         @ApiResponse(code = 1006, message = "user cannot delete not own message", response = ErrorDto.class),
     })
-    public Message deleteMessage(
+    public MessageDto deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.deleteMessage(dto);
+        return MessageMapper.toMessageDto(chatRoomService.deleteMessage(dto));
     }
 
     @PostMapping("/chat/updateMessage")
@@ -70,14 +70,14 @@ public class ChatRoomSocketController {
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
         @ApiResponse(code = 1007, message = "user cannot update not own message", response = ErrorDto.class),
     })
-    public Message updateMessage(
+    public MessageDto updateMessage(
         @Valid
         @RequestBody MessageUpdateDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.updateMessage(dto);
+        return MessageMapper.toMessageDto(chatRoomService.updateMessage(dto));
     }
 
     @PostMapping("/chat/likeMessage")
@@ -87,14 +87,14 @@ public class ChatRoomSocketController {
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
         @ApiResponse(code = 1004, message = "user cannot like his message", response = ErrorDto.class),
     })
-    public Message likeMessage(
+    public MessageDto likeMessage(
         @Valid
         @RequestBody MessageLikeDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.toggleLikeMessage(dto);
+        return MessageMapper.toMessageDto(chatRoomService.toggleLikeMessage(dto));
     }
 
     @PostMapping("/chat/readMessage")
@@ -104,13 +104,13 @@ public class ChatRoomSocketController {
         @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
         @ApiResponse(code = 1005, message = "user cannot read his message", response = ErrorDto.class),
     })
-    public Message readMessage(
+    public MessageDto readMessage(
         @Valid
         @RequestBody MessageReadDto dto,
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.readMessage(dto);
+        return MessageMapper.toMessageDto(chatRoomService.readMessage(dto));
     }
 }
