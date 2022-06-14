@@ -49,10 +49,20 @@ public class ChatRoomMessageDto {
     @ApiModelProperty(
         example = "2022-03-26T02:02:42.774980",
         notes = "Amount of not read messages")
-    private Integer amountOfNotReadMessages;
+    private Long amountOfNotReadMessages;
 
     @ApiModelProperty(
         example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
         notes = "User information")
     private Object userInfo;
+
+    public ChatRoomMessageDto(String chatRoomId, String anotherUserId, String userId, String messageId, String text, LocalDateTime sentAt) {
+        this.chatRoomId = chatRoomId;
+        this.anotherUserId = anotherUserId;
+        this.userId = userId;
+        this.messageId = messageId;
+        this.text = text;
+        this.sentAt = sentAt;
+        //this.amountOfNotReadMessages = amountOfNotReadMessages;
+    }
 }

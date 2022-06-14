@@ -17,7 +17,7 @@ public class ChatRoomUser {
 
     @EmbeddedId
     @JsonUnwrapped
-    private ChatRoomUserPk id;
+    private ChatRoomUserPk chatRoomUserPk;
 
     @JsonIgnore
     @MapsId("chatRoomId")

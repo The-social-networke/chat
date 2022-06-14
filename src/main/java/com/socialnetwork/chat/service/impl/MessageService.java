@@ -30,7 +30,7 @@ public class MessageService {
 
 
     public Page<Message> findMessagesByChatId(String chatId, Pageable pageable) {
-        return messageRepository.findAllByChatRoomId(chatId, pageable);
+        return messageRepository.findAllByChatRoomIdOrderBySentAtDesc(chatId, pageable);
     }
 
     public Message sendMessage(MessageCreateDto dto) {

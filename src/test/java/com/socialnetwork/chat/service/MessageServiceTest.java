@@ -86,12 +86,12 @@ class MessageServiceTest {
     void testFindAllByChatId() {
         Page<Message> messagesPage = new PageImpl<>(messages);
 
-        when(repository.findAllByChatRoomId(eq(chatId), any(Pageable.class))).thenReturn(messagesPage);
+        when(repository.findAllByChatRoomIdOrderBySentAtDesc(eq(chatId), any(Pageable.class))).thenReturn(messagesPage);
 
         Page<Message> messagesResult = service.findMessagesByChatId(chatId, Pageable.ofSize(4));
 
         Assertions.assertEquals(messagesResult.getContent(), messagesPage.getContent());
-        verify(repository).findAllByChatRoomId(eq(chatId), any(Pageable.class));
+        verify(repository).findAllByChatRoomIdOrderBySentAtDesc(eq(chatId), any(Pageable.class));
     }
 
 

@@ -3,7 +3,6 @@ package com.socialnetwork.chat.controller;
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.service.ChatRoomService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,7 +42,7 @@ public class ChatRoomSocketController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return MessageMapper.toMessageDto(chatRoomService.sendMessage(dto));
+        return chatRoomService.sendMessage(dto);
     }
 
     @DeleteMapping("/chat/deleteMessage")
@@ -60,7 +59,7 @@ public class ChatRoomSocketController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return MessageMapper.toMessageDto(chatRoomService.deleteMessage(dto));
+        return chatRoomService.deleteMessage(dto);
     }
 
     @PostMapping("/chat/updateMessage")
@@ -77,7 +76,7 @@ public class ChatRoomSocketController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return MessageMapper.toMessageDto(chatRoomService.updateMessage(dto));
+        return chatRoomService.updateMessage(dto);
     }
 
     @PostMapping("/chat/likeMessage")
@@ -94,7 +93,7 @@ public class ChatRoomSocketController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return MessageMapper.toMessageDto(chatRoomService.toggleLikeMessage(dto));
+        return chatRoomService.toggleLikeMessage(dto);
     }
 
     @PostMapping("/chat/readMessage")
@@ -111,6 +110,6 @@ public class ChatRoomSocketController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return MessageMapper.toMessageDto(chatRoomService.readMessage(dto));
+        return chatRoomService.readMessage(dto);
     }
 }

@@ -36,8 +36,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
         nativeQuery = true)
     List<Map<String, Object>> findChatRoomsMessageByUserIdMap(@Param("userId") String userId, @Param("limit") int limit, @Param("offset") int offset);
 
-    @Query(value = ChatRoomQuery.FIND_CHAT_ROOMS_COUNT_FOR_USER,
-        nativeQuery = true)
+    @Query(value =
+        "SELECT COUNT(chatUser) " +
+            " FROM ChatRoomUser chatUser" +
+            " WHERE chatUser.chatRoomUserPk.userId like :userId")
     int findChatRoomsCount(@Param("userId") String userId);
 
     default Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
@@ -56,21 +58,32 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
         nativeQuery = true)
     boolean isLastMessageInChatRoom(@Param("chatRoomId") String chatRoomId, @Param("messageId") String messageId);
 
-    @Query(value = ChatRoomQuery.GET_AMOUNT_OF_NOT_READ_MESSAGE,
-        nativeQuery = true)
+    @Query(value =
+        "SELECT COUNT(notReadMessages)" +
+            " FROM ChatRoom chat" +
+            " JOIN chat.messages notReadMessages " +
+            "   ON SIZE(notReadMessages.messageReads) = 0" +
+            " WHERE chat.id = :chatRoomId")
     Integer getAmountOfNotReadMessages(@Param("chatRoomId") String chatRoomId);
 
-
-    @Query(value = ChatRoomQuery.GET_AMOUNT_OF_ALL_NOT_READ_MESSAGES,
-        nativeQuery = true)
+    @Query(value =
+        "SELECT COUNT(notReadMessages)" +
+            " FROM ChatRoom chat" +
+            " JOIN chat.messages notReadMessages " +
+            "   ON SIZE(notReadMessages.messageReads) = 0" +
+            "   AND notReadMessages.userId <> :userId" +
+            " WHERE :userId MEMBER OF chat.users")
     Integer getAmountOfAllNotReadMessages(@Param("userId") String userId);
 
     @Query(value = ChatRoomQuery.FIND_CHAT_ROOM_BY_USERS,
         nativeQuery = true)
     Optional<ChatRoom> findChatRoomByUsers(@Param("userOne") String userOne, @Param("userTwo") String userTwo);
 
-    @Query(value = ChatRoomQuery.FIND_CHAT_ROOM_BY_MESSAGE_ID,
-        nativeQuery = true)
+    @Query(value =
+        "SELECT chat " +
+        " FROM ChatRoom chat" +
+        " JOIN chat.messages messages" +
+        "   ON messages.id = :messageId")
     Optional<ChatRoom> findChatRoomByMessageId(@Param("messageId") String messageId);
 
     private ChatRoomMessageDto getChatRoomMessageFromMap(Map<String, Object> map) {
@@ -82,7 +95,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
             .messageId(map.get("messageId") == null ? null : (String) map.get("messageId"))
             .text(map.get("text") == null ? null : (String) map.get("text"))
             .sentAt(map.get("sentAt") == null ? null : ((Timestamp) map.get("sentAt")).toLocalDateTime())
-            .amountOfNotReadMessages(map.get("amountOfNotReadMessages") == null ? 0 : ((BigInteger) map.get("amountOfNotReadMessages")).intValue())
+            .amountOfNotReadMessages(map.get("amountOfNotReadMessages") == null ? 0 : ((BigInteger) map.get("amountOfNotReadMessages")).longValue())
             .build();
     }
 }

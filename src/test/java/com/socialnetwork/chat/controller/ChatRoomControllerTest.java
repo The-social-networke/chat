@@ -176,7 +176,7 @@ class ChatRoomControllerTest {
                 .userId("f510077c-144d-4ade-bec6-6c8fd6913544")
                 .text("test message")
                 .sentAt(LocalDateTime.of(2022, 4, 1, 20, 20, 7, 220500))
-                .amountOfNotReadMessages(1)
+                .amountOfNotReadMessages(1L)
                 .build(),
             new ChatRoomMessageDto()
                 .toBuilder()
@@ -185,7 +185,7 @@ class ChatRoomControllerTest {
                 .userId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e")
                 .text("great!")
                 .sentAt(LocalDateTime.of(2022, 3, 23, 10, 10, 7, 220500))
-                .amountOfNotReadMessages(1)
+                .amountOfNotReadMessages(1L)
                 .build(),
         };
 

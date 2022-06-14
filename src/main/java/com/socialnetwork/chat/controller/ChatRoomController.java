@@ -3,8 +3,6 @@ package com.socialnetwork.chat.controller;
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.mapper.ChatRoomMapper;
-import com.socialnetwork.chat.mapper.MessageMapper;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
 import io.swagger.annotations.Api;
@@ -80,7 +78,7 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return ChatRoomMapper.toChatRoomDto(chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId()));
+        return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
     @PostMapping
@@ -96,7 +94,7 @@ public class ChatRoomController {
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
-        return ChatRoomMapper.toChatRoomDto(chatRoomService.createChatRoom(dto));
+        return chatRoomService.createChatRoom(dto);
     }
 
     @DeleteMapping
@@ -130,8 +128,7 @@ public class ChatRoomController {
         @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
-        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable())
-            .map(MessageMapper::toMessageDto);
+        return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable());
     }
 
     @GetMapping("/not-read-messages-amount")
