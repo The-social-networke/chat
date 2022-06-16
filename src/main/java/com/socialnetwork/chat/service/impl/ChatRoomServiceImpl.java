@@ -97,7 +97,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
             entity.setUsers(
                 Set.of(
-                    new ChatRoomUser(new ChatRoomUserPk(dto.getUserId(), entity.getId()), entity)
+                    new ChatRoomUser(new ChatRoomUserPk(dto.getUserId(), entity.getId()), entity),
+                    new ChatRoomUser(new ChatRoomUserPk(dto.getCurrentUserId(), entity.getId()), entity)
                 )
             );
             ChatRoom savedChatRoom = chatRoomRepository.save(entity);

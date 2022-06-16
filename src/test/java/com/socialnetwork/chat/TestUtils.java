@@ -21,12 +21,15 @@ public class TestUtils {
 
     public static String USER_ID_BY_TOKEN_ENDPOINT = "/user/id";
 
+    public static String GET_INFO_BY_USER_ID_ENDPOINT = "/user/get_info_by_user_id?userId=";
+
     public static String SYSTEM_USER_ID = "38bcd488-2d2b-4f50-976b-cae650f6a3f0";
 
 
     public static void setFieldsFromPropertiesFile(ChatRoomService service) {
         ReflectionTestUtils.setField(service, "url", BASE_URL);
         ReflectionTestUtils.setField(service, "systemUserId", TestUtils.SYSTEM_USER_ID);
+        ReflectionTestUtils.setField(service, "endpointGetInfoByUserId", TestUtils.GET_INFO_BY_USER_ID_ENDPOINT);
     }
 
     public static ChatRoomMessageStatusDto convertToChatRoomsMessageStatusDto(String chatRoomId, Message message) {

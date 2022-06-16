@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -65,6 +67,9 @@ class ChatRoomServiceTest {
     @InjectMocks
     private ChatRoomServiceImpl service;
 
+    @Captor
+    ArgumentCaptor<ChatRoom> chatRoomCaptor;
+    
     private List<String> users;
 
     private List<ChatRoom> chatRooms;
@@ -249,8 +254,11 @@ class ChatRoomServiceTest {
             .amountOfNotReadMessages(1L)
             .build();
 
+        String anotherUserId = users.get(1);
+        String url = TestUtils.BASE_URL + TestUtils.GET_INFO_BY_USER_ID_ENDPOINT + anotherUserId;
+
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomFound));
-        when(restTemplate.getForObject(anyString(), eq(String.class)))
+        when(restTemplate.getForObject(url, String.class))
             .thenReturn(null);
         when(repository.getChatRoomMessageByUserIdAndChatId(userId, chatId)).thenReturn(chatRoomMessageDtoExpect);
 
@@ -258,7 +266,7 @@ class ChatRoomServiceTest {
 
         Assertions.assertEquals(chatRoomMessageDtoResult, chatRoomMessageDtoExpect);
         verify(repository).findById(chatId);
-        verify(restTemplate).getForObject(anyString(), eq(String.class));
+        verify(restTemplate).getForObject(url, String.class);
     }
 
     @Test
@@ -341,17 +349,10 @@ class ChatRoomServiceTest {
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_CREATE_CHAT_WITH_HIMSELF, thrown.getErrorCodeException());
-        verify(repository, never()).findChatRoomByUsers(any(), any());
-        verify(repository, never()).getAmountOfNotReadMessages(any());
     }
 
     @Test
-    void testGetChatRoomByUsersOrElseCreate_ifChatRoomIsNotExistAndUserExists() {
-        ChatRoomCreateDto dto = new ChatRoomCreateDto()
-            .toBuilder()
-            .currentUserId(users.get(0))
-            .userId(users.get(1))
-            .build();
+    void testGetChatRoomByUsersOrElseCreate_ifChatRoomIsNotExistAndUserExists() throws Exception {
         ChatRoom foundChatRoom = chatRooms.get(0);
         ChatRoomInfoDto expectChatRoom = new ChatRoomInfoDto()
             .toBuilder()
@@ -360,12 +361,18 @@ class ChatRoomServiceTest {
                 foundChatRoom.getUsers()
                     .stream()
                     .map(u -> u.getChatRoomUserPk().getUserId())
-                    .collect(Collectors.toUnmodifiableSet())
+                    .collect(Collectors.toSet())
             )
             .createdAt(foundChatRoom.getCreatedAt())
             .amountOfNotReadMessages(0)
             .build();
 
+        ChatRoomCreateDto dto = new ChatRoomCreateDto()
+            .toBuilder()
+            .currentUserId(users.get(0))
+            .userId(users.get(1))
+            .build();
+        
         when(repository.findChatRoomByUsers(users.get(0), users.get(1))).thenReturn(Optional.empty());
         when(restTemplate.exchange(TestUtils.getUrlToCheckIfUserExists(users.get(1)), HttpMethod.GET, null, Boolean.class)).thenReturn(TestUtils.getResponseEntityBoolean(true));
         when(repository.save(any(ChatRoom.class))).thenReturn(foundChatRoom);
@@ -375,7 +382,16 @@ class ChatRoomServiceTest {
         Assertions.assertEquals(expectChatRoom, chatRoomResult);
         verify(repository).findChatRoomByUsers(users.get(0), users.get(1));
         verify(restTemplate).exchange(TestUtils.getUrlToCheckIfUserExists(users.get(1)), HttpMethod.GET, null, Boolean.class);
-        verify(repository).save(any(ChatRoom.class));
+        verify(repository).save(chatRoomCaptor.capture());
+        
+        ChatRoom chatRoomForSave = chatRoomCaptor.getValue();
+        boolean isContainUsers = chatRoomForSave.getUsers().stream()
+            .filter(obj -> obj.getChatRoomUserPk().getUserId().equals(users.get(0))
+                || obj.getChatRoomUserPk().getUserId().equals(users.get(1))).count() == 2;
+
+        Assertions.assertTrue(isContainUsers);
+        Assertions.assertNull(chatRoomForSave.getCreatedAt());
+        Assertions.assertNull(chatRoomForSave.getMessages());
     }
 
     @Test
@@ -417,7 +433,7 @@ class ChatRoomServiceTest {
 
     @Test
     void testGetSystemChatRoomByUsersOrElseCreate_ifChatRoomIsNotExistAndUserExists() {
-        String userId = users.get(0);
+        String userId = users.get(1);
         ChatRoom chatRoomSave = chatRooms.get(2);
         ChatRoomDto chatRoomExpect = ChatRoomMapper.toChatRoomDto(chatRoomSave);
 
@@ -428,7 +444,16 @@ class ChatRoomServiceTest {
 
         Assertions.assertEquals(chatRoomExpect, chatRoomResult);
         verify(repository).findChatRoomByUsers(userId, TestUtils.SYSTEM_USER_ID);
-        verify(repository).save(any(ChatRoom.class));
+        verify(repository).save(chatRoomCaptor.capture());
+
+        ChatRoom chatRoomForSave = chatRoomCaptor.getValue();
+        boolean isContainUsers = chatRoomForSave.getUsers().stream()
+            .filter(obj -> obj.getChatRoomUserPk().getUserId().equals(TestUtils.SYSTEM_USER_ID)
+                || obj.getChatRoomUserPk().getUserId().equals(users.get(1))).count() == 2;
+
+        Assertions.assertTrue(isContainUsers);
+        Assertions.assertNull(chatRoomForSave.getCreatedAt());
+        Assertions.assertNull(chatRoomForSave.getMessages());
     }
 
 
@@ -514,10 +539,14 @@ class ChatRoomServiceTest {
     @Test
     void testFindChatRoomsMessageByUserId() {
         String userId = users.get(0);
+        String anotherUserId = users.get(1);
         var chatRoom = chatRooms.get(0);
         var messageFromChatRoom = messages.get(0);
         var value = new ChatRoomMessageDto()
             .toBuilder()
+            .anotherUserId(anotherUserId)
+            .sentAt(LocalDateTime.now())
+            .amountOfNotReadMessages(0L)
             .chatRoomId(chatRoom.getId())
             .userId(userId)
             .messageId(messageFromChatRoom.getId())
@@ -525,16 +554,18 @@ class ChatRoomServiceTest {
             .build();
         Page<ChatRoomMessageDto> expectedResult = new PageImpl<>(List.of(value));
 
+        String url = TestUtils.BASE_URL + TestUtils.GET_INFO_BY_USER_ID_ENDPOINT + anotherUserId;
+
         var pageable = Pageable.ofSize(4);
         when(repository.findChatRoomsMessageByUserId(userId, Pageable.ofSize(4))).thenReturn(expectedResult);
-        when(restTemplate.getForObject(anyString(), eq(String.class)))
+        when(restTemplate.getForObject(url, String.class))
             .thenReturn("[]");
 
         Page<ChatRoomMessageDto> chatRoomsMessageDtos = service.findChatRoomsMessageByUserId(userId, pageable);
 
         assertEquals(chatRoomsMessageDtos, expectedResult);
         verify(repository).findChatRoomsMessageByUserId(userId, pageable);
-        verify(restTemplate).getForObject(anyString(), eq(String.class));
+        verify(restTemplate).getForObject(url, String.class);
     }
 
 
@@ -558,7 +589,16 @@ class ChatRoomServiceTest {
         Assertions.assertEquals(chatRoomExpect, chatRoomResult);
         verify(repository).existsChatRoomByUsers(users.get(0), users.get(1));
         verify(restTemplate).exchange(TestUtils.getUrlToCheckIfUserExists(users.get(1)), HttpMethod.GET, null, Boolean.class);
-        verify(repository).save(any(ChatRoom.class));
+        verify(repository).save(chatRoomCaptor.capture());
+
+        ChatRoom chatRoomForSave = chatRoomCaptor.getValue();
+        boolean isContainUsers = chatRoomForSave.getUsers().stream()
+            .filter(obj -> obj.getChatRoomUserPk().getUserId().equals(users.get(0))
+                || obj.getChatRoomUserPk().getUserId().equals(users.get(1))).count() == 2;
+
+        Assertions.assertTrue(isContainUsers);
+        Assertions.assertNull(chatRoomForSave.getCreatedAt());
+        Assertions.assertNull(chatRoomForSave.getMessages());
     }
 
     @Test
@@ -575,8 +615,6 @@ class ChatRoomServiceTest {
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_CREATE_CHAT_WITH_HIMSELF, thrown.getErrorCodeException());
-        verify(repository, never()).existsChatRoomByUsers(any(), any());
-        verify(restTemplate, never()).exchange(anyString(), eq(HttpMethod.GET), any(), eq(Boolean.class));
     }
 
     @Test
@@ -594,7 +632,7 @@ class ChatRoomServiceTest {
         ChatException thrown = assertThrows(
             ChatException.class,
             () -> service.createChatRoom(dto)
-            );
+        );
 
         Assertions.assertEquals(ErrorCodeException.USER_NOT_FOUND, thrown.getErrorCodeException());
         verify(repository).existsChatRoomByUsers(users.get(0), users.get(1));
@@ -732,14 +770,12 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findById(chatId)).thenReturn(Optional.of(chatRoomExpect));
-        doNothing().when(template).convertAndSend(anyString(), any(Object.class));
 
         ChatException thrown = assertThrows(
             ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 
-        verify(template, never()).convertAndSend(anyString(), any(Object.class));
         Assertions.assertEquals(ErrorCodeException.NOT_MEMBER_OF_CHAT, thrown.getErrorCodeException());
         verify(repository).findById(chatId);
     }
@@ -756,14 +792,12 @@ class ChatRoomServiceTest {
             .build();
 
         when(repository.findById(chatId)).thenReturn(Optional.empty());
-        doNothing().when(template).convertAndSend(anyString(), any(Object.class));
 
         ChatException thrown = assertThrows(
             ChatException.class,
             () -> service.sendMessage(messageCreateDto)
         );
 
-        verify(template, never()).convertAndSend(anyString(), any(Object.class));
         Assertions.assertEquals(ErrorCodeException.CHAT_NOT_FOUND, thrown.getErrorCodeException());
         verify(repository).findById(chatId);
     }
