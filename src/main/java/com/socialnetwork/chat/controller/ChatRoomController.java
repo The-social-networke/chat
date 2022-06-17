@@ -5,17 +5,19 @@ import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.annotations.ApiIgnore;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -26,31 +28,35 @@ import javax.validation.constraints.NotNull;
 @RequestMapping("/chat")
 @CrossOrigin(origins = "http://localhost:3000", exposedHeaders = "Authorization")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Api(tags = "Chat API", description = "Rest chat methods")
+@Tag(name = "Chat API", description = "Rest chat methods")
 public class ChatRoomController {
 
     private final ChatRoomService chatRoomService;
 
     @Validated
     @GetMapping
-    @ApiOperation(value = "Get chatRoom by id")
+    @Operation(description = "Get chatRoom by id", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
-        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
+        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
+        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
     })
     public ChatRoomMessageDto getChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId,
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.getChatRoomById(userSecurity.getUserId(), chatId);
     }
 
     @GetMapping("/find-chats")
-    @ApiOperation(value = "Find chatRooms with message by user id")
+    @Operation(description = "Find chatRooms with message by user id", security = @SecurityRequirement(name = "bearerAuth"))
     public Page<ChatRoomMessageDto> findChatRoomsMessage(
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity,
         CustomPageable pageable
     ) {
@@ -58,14 +64,16 @@ public class ChatRoomController {
     }
 
     @PostMapping("/get-chat")
-    @ApiOperation(value = "Get chatRooms by user id or else create")
+    @Operation(description = "Get chatRooms by user id or else create", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-        @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class)
+        @ApiResponse(responseCode = "1000", description = "user not found", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
     })
     public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
@@ -73,24 +81,28 @@ public class ChatRoomController {
     }
 
     @PostMapping("/get-system-chat")
-    @ApiOperation(value = "Get system chatRooms by user id or else create")
+    @Operation(description = "Get system chatRooms by user id or else create")
     public ChatRoomDto getSystemChatRoomByUserOrElseCreate(
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
     }
 
     @PostMapping
-    @ApiOperation(value = "Create chatRoom")
+    @Operation(description = "Create chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-        @ApiResponse(code = 1000, message = "user not found", response = ErrorDto.class),
-        @ApiResponse(code = 1003, message = "chat with these users already exits", response = ErrorDto.class),
+        @ApiResponse(responseCode = "1000", description = "user not found", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
+        @ApiResponse(responseCode = "1003", description = "chat with these users already exits", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
     })
     public ChatRoomDto createChatRoom(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
@@ -98,16 +110,21 @@ public class ChatRoomController {
     }
 
     @DeleteMapping
-    @ApiOperation(value = "Delete chatRoom")
+    @Operation(description = "Delete chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
-        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class),
+        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
+        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
     })
     public boolean deleteChatRoom(
         @Valid
         @NotNull(message = "Id of chat should be not null")
         @RequestBody ChatRoomDeleteDto dto,
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         dto.setCurrentUserId(userSecurity.getUserId());
@@ -116,25 +133,29 @@ public class ChatRoomController {
 
     @Validated
     @GetMapping("/all-messages")
-    @ApiOperation(value = "Find all message by chat root")
+    @Operation(description = "Find all message by chat root", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
-        @ApiResponse(code = 1001, message = "chat not found", response = ErrorDto.class),
-        @ApiResponse(code = 1002, message = "not member of chat", response = ErrorDto.class)
+        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        )),
+        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ErrorDto.class)
+        ))
     })
     public Page<MessageDto> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
         CustomPageable pageable,
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.findMessagesByChatId(userSecurity.getUserId(), chatId, pageable.toPageable());
     }
 
     @GetMapping("/not-read-messages-amount")
-    @ApiOperation(value = "Amount of all not read message")
+    @Operation(description = "Amount of all not read message", security = @SecurityRequirement(name = "bearerAuth"))
     public Integer amountOfAllNotReadMessages(
-        @ApiIgnore
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.getAmountOfAllNotReadMessages(userSecurity.getUserId());

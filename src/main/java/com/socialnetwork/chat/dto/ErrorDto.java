@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.dto;
 
 import com.socialnetwork.chat.util.enums.ErrorCodeException;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -11,13 +11,13 @@ import lombok.extern.jackson.Jacksonized;
 @Jacksonized
 public class ErrorDto {
 
-    @ApiModelProperty(
+    @Schema(
         example = "Chat room exists",
-        notes = "Explanation of the error")
+        description = "Explanation of the error")
     private String message;
 
-    @ApiModelProperty(
+    @Schema(
         example = "1026",
-        notes = "Some unique reserved code")
+        description = "Some unique reserved code")
     private ErrorCodeException errorCode;
 }

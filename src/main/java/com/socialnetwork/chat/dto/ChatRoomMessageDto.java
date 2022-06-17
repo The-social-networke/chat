@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.dto;
 
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,47 +13,47 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@ApiModel(description = "dto to show chatRoom")
+@Tag(name = "", description = "dto to show chatRoom")
 public class ChatRoomMessageDto {
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Another user in chat room")
+        description = "Another user in chat room")
     private String chatRoomId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Another user in this chat")
+        description = "Another user in this chat")
     private String anotherUserId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Author of message")
+        description = "Author of message")
     private String userId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Last message id")
+        description = "Last message id")
     private String messageId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "some text",
-        notes = "Text of last message")
+        description = "Text of last message")
     private String text;
 
-    @ApiModelProperty(
+    @Schema(
         example = "2022-03-26T02:02:42.774980",
-        notes = "Last message sent time")
+        description = "Last message sent time")
     private LocalDateTime sentAt;
 
-    @ApiModelProperty(
+    @Schema(
         example = "2022-03-26T02:02:42.774980",
-        notes = "Amount of not read messages")
+        description = "Amount of not read messages")
     private Long amountOfNotReadMessages;
 
-    @ApiModelProperty(
+    @Schema(
         example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
-        notes = "User information")
+        description = "User information")
     private Object userInfo;
 
     public ChatRoomMessageDto(String chatRoomId, String anotherUserId, String userId, String messageId, String text, LocalDateTime sentAt) {

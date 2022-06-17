@@ -1,8 +1,8 @@
 package com.socialnetwork.chat.dto;
 
 import com.socialnetwork.chat.util.enums.MessageStatus;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,41 +14,41 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@ApiModel(description = "dto to show chatRoom")
+@Tag(name = "ChatRoomMessageStatusDto", description = "dto to show chatRoom")
 public class ChatRoomMessageStatusDto {
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Another user in chat room")
+        description = "Another user in chat room")
     private String chatRoomId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Sent by user in chat room")
+        description = "Sent by user in chat room")
     private String userId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Last message id")
+        description = "Last message id")
     private String messageId;
 
-    @ApiModelProperty(
+    @Schema(
         example = "some text",
-        notes = "Text of last message")
+        description = "Text of last message")
     private String text;
 
-    @ApiModelProperty(
+    @Schema(
         example = "2022-03-26T02:02:42.774980",
-        notes = "Last message sent time")
+        description = "Last message sent time")
     private LocalDateTime sentAt;
 
-    @ApiModelProperty(
+    @Schema(
         example = "2022-03-26T02:02:42.774980",
-        notes = "Status of last message")
+        description = "Status of last message")
     private MessageStatus messageStatus;
 
-    @ApiModelProperty(
+    @Schema(
         example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
-        notes = "User information")
+        description = "User information")
     private Object userInfo;
 }

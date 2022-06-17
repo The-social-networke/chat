@@ -2,8 +2,8 @@ package com.socialnetwork.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.socialnetwork.chat.util.enums.ForwardType;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -12,18 +12,18 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@ApiModel(description = "dto to update message")
+@Tag(name = "", description = "dto to update message")
 public class MessageUpdateDto {
 
-    @ApiModelProperty(required = true,
+    @Schema(required = true,
         example = "some text",
-        notes = "text of message")
+        description = "text of message")
     private String text;
 
     @NotNull(message = "message id should not be null")
-    @ApiModelProperty(required = true,
+    @Schema(required = true,
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "Message that should be deleted")
+        description = "Message that should be deleted")
     private String messageId;
 
     @JsonIgnore

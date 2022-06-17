@@ -1,6 +1,6 @@
 package com.socialnetwork.chat.dto;
 
-import io.swagger.annotations.ApiModel;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -10,7 +10,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@ApiModel(description = "dto to info about chatRoom")
+@Tag(name = "", description = "dto to info about chatRoom")
 public class ChatRoomInfoDto {
 
     private String id;

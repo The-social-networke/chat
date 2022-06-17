@@ -1,8 +1,8 @@
 package com.socialnetwork.chat.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
 
 import javax.validation.constraints.NotNull;
@@ -11,13 +11,13 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@ApiModel(description = "dto to read message")
+@Tag(name = "", description = "dto to read message")
 public class MessageReadDto {
 
     @NotNull(message = "message id should not be null")
-    @ApiModelProperty(
+    @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        notes = "message that should be read")
+        description = "message that should be read")
     private String messageId;
 
     @JsonIgnore
