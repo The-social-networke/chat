@@ -5,11 +5,8 @@ import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
+import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -35,17 +32,8 @@ public class ChatRoomController {
 
     @Validated
     @GetMapping
-    @Operation(description = "Get chatRoom by id", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-    })
+    @Timed(value = "getChatRoomById.time")
+    @Operation(summary = "Get chatRoom by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomMessageDto getChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId,
@@ -55,7 +43,8 @@ public class ChatRoomController {
     }
 
     @GetMapping("/find-chats")
-    @Operation(description = "Find chatRooms with message by user id", security = @SecurityRequirement(name = "bearerAuth"))
+    @Timed(value = "findChatRoomsMessage.time")
+    @Operation(summary = "Find chatRooms with message by user id", security = @SecurityRequirement(name = "bearerAuth"))
     public Page<ChatRoomMessageDto> findChatRoomsMessage(
         @CurrentUser UserSecurity userSecurity,
         CustomPageable pageable
@@ -64,13 +53,8 @@ public class ChatRoomController {
     }
 
     @PostMapping("/get-chat")
-    @Operation(description = "Get chatRooms by user id or else create", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1000", description = "user not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-    })
+    @Timed(value = "getChatRoomByUsersOrElseCreate.time")
+    @Operation(summary = "Get chatRooms by user id or else create", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
@@ -81,7 +65,8 @@ public class ChatRoomController {
     }
 
     @PostMapping("/get-system-chat")
-    @Operation(description = "Get system chatRooms by user id or else create")
+    @Timed(value = "getSystemChatRoomByUserOrElseCreate.time")
+    @Operation(summary = "Get system chatRooms by user id or else create")
     public ChatRoomDto getSystemChatRoomByUserOrElseCreate(
         @CurrentUser UserSecurity userSecurity
     ) {
@@ -89,17 +74,8 @@ public class ChatRoomController {
     }
 
     @PostMapping
-    @Operation(description = "Create chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1000", description = "user not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1003", description = "chat with these users already exits", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-    })
+    @Timed(value = "createChatRoom.time")
+    @Operation(summary = "Create chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomDto createChatRoom(
         @Valid
         @RequestBody ChatRoomCreateDto dto,
@@ -110,17 +86,8 @@ public class ChatRoomController {
     }
 
     @DeleteMapping
-    @Operation(description = "Delete chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-    })
+    @Timed(value = "deleteChatRoom.time")
+    @Operation(summary = "Delete chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     public boolean deleteChatRoom(
         @Valid
         @NotNull(message = "Id of chat should be not null")
@@ -132,18 +99,9 @@ public class ChatRoomController {
     }
 
     @Validated
+    @Timed(value = "findAllMessageByChatRoomId.time")
     @GetMapping("/all-messages")
-    @Operation(description = "Find all message by chat root", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Operation(summary = "Find all message by chat root", security = @SecurityRequirement(name = "bearerAuth"))
     public Page<MessageDto> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
@@ -154,7 +112,8 @@ public class ChatRoomController {
     }
 
     @GetMapping("/not-read-messages-amount")
-    @Operation(description = "Amount of all not read message", security = @SecurityRequirement(name = "bearerAuth"))
+    @Timed(value = "findAllMessageByChatRoomId.time")
+    @Operation(summary = "Amount of all not read message", security = @SecurityRequirement(name = "bearerAuth"))
     public Integer amountOfAllNotReadMessages(
         @CurrentUser UserSecurity userSecurity
     ) {

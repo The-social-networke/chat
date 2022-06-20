@@ -6,10 +6,6 @@ import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.service.ChatRoomService;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -33,18 +29,8 @@ public class ChatRoomSocketController {
     private final ChatRoomService chatRoomService;
 
     @PostMapping("/chat/sendMessage")
-    @Timed(value = "greeting.time", description = "Time taken to return greeting")
-    @Operation(description = "This method send notification for chat and for user", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Timed(value = "sendMessage.time")
+    @Operation(summary = "send message", description = "This method send notification for chat and for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto sendMessage(
         @Valid
         @RequestBody MessageCreateDto dto,
@@ -55,21 +41,8 @@ public class ChatRoomSocketController {
     }
 
     @DeleteMapping("/chat/deleteMessage")
-    @Operation(description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1006", description = "user cannot delete not own message", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Timed(value = "deleteMessage.time")
+    @Operation(summary = "delete message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto deleteMessage(
         @Valid
         @RequestBody MessageDeleteDto dto,
@@ -80,21 +53,8 @@ public class ChatRoomSocketController {
     }
 
     @PostMapping("/chat/updateMessage")
-    @Operation(description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1007", description = "user cannot update not own message", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Timed(value = "updateMessage.time")
+    @Operation(summary = "update message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto updateMessage(
         @Valid
         @RequestBody MessageUpdateDto dto,
@@ -105,21 +65,8 @@ public class ChatRoomSocketController {
     }
 
     @PostMapping("/chat/likeMessage")
-    @Operation(description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1004", description = "user cannot like his message", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Timed(value = "likeMessage.time")
+    @Operation(summary = "like message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto likeMessage(
         @Valid
         @RequestBody MessageLikeDto dto,
@@ -130,21 +77,8 @@ public class ChatRoomSocketController {
     }
 
     @PostMapping("/chat/readMessage")
-    @Operation(description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "1001", description = "chat not found", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1002", description = "not member of chat", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        )),
-        @ApiResponse(responseCode = "1005", description = "user cannot read his message", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ErrorDto.class)
-        ))
-    })
+    @Timed(value = "readMessage.time")
+    @Operation(summary = "read message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto readMessage(
         @Valid
         @RequestBody MessageReadDto dto,
