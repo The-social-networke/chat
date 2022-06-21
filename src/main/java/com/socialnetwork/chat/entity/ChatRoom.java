@@ -13,8 +13,6 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@ToString
-@EqualsAndHashCode
 @NoArgsConstructor
 @Table(name = "chat_room")
 @Builder(toBuilder = true)

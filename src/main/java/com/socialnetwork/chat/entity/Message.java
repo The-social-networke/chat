@@ -19,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "message")
 @Builder(toBuilder = true)
-@EqualsAndHashCode
 @EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Message implements Serializable {
