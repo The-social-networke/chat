@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
@@ -20,11 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-@Slf4j
 @Validated
 @RestController
 @RequestMapping("/chat")
-@CrossOrigin(origins = "http://localhost:3000", exposedHeaders = "Authorization")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Tag(name = "Chat API", description = "Rest chat methods")
 public class ChatRoomController {
