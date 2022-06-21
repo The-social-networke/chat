@@ -1,5 +1,6 @@
 package com.socialnetwork.chat;
 
+import io.micrometer.core.aop.CountedAspect;
 import io.micrometer.core.aop.TimedAspect;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.boot.SpringApplication;
@@ -24,5 +25,10 @@ public class SocialNetworkApplication {
 	@Bean
 	public TimedAspect timedAspect(MeterRegistry registry) {
 		return new TimedAspect(registry);
+	}
+
+	@Bean
+	CountedAspect countedAspect(MeterRegistry registry) {
+		return new CountedAspect(registry);
 	}
 }

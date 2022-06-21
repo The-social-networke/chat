@@ -4,6 +4,7 @@ import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.service.ChatRoomService;
+import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -30,6 +31,7 @@ public class ChatRoomSocketController {
 
     @PostMapping("/chat/sendMessage")
     @Timed(value = "sendMessage.time")
+    @Counted(value = "sendMessage.count")
     @Operation(summary = "send message", description = "This method send notification for chat and for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto sendMessage(
         @Valid
@@ -42,6 +44,7 @@ public class ChatRoomSocketController {
 
     @DeleteMapping("/chat/deleteMessage")
     @Timed(value = "deleteMessage.time")
+    @Counted(value = "deleteMessage.count")
     @Operation(summary = "delete message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto deleteMessage(
         @Valid
@@ -54,6 +57,7 @@ public class ChatRoomSocketController {
 
     @PostMapping("/chat/updateMessage")
     @Timed(value = "updateMessage.time")
+    @Counted(value = "updateMessage.count")
     @Operation(summary = "update message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto updateMessage(
         @Valid
@@ -66,6 +70,7 @@ public class ChatRoomSocketController {
 
     @PostMapping("/chat/likeMessage")
     @Timed(value = "likeMessage.time")
+    @Counted(value = "likeMessage.count")
     @Operation(summary = "like message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto likeMessage(
         @Valid
@@ -78,6 +83,7 @@ public class ChatRoomSocketController {
 
     @PostMapping("/chat/readMessage")
     @Timed(value = "readMessage.time")
+    @Counted(value = "readMessage.count")
     @Operation(summary = "read message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
     public MessageDto readMessage(
         @Valid

@@ -5,6 +5,7 @@ import com.socialnetwork.chat.config.security.UserSecurity;
 import com.socialnetwork.chat.dto.*;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
+import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -33,6 +34,7 @@ public class ChatRoomController {
     @Validated
     @GetMapping
     @Timed(value = "getChatRoomById.time")
+    @Counted(value = "getChatRoomById.count")
     @Operation(summary = "Get chatRoom by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomMessageDto getChatRoomById(
         @NotNull(message = "chat id should not be null")
@@ -44,6 +46,7 @@ public class ChatRoomController {
 
     @GetMapping("/find-chats")
     @Timed(value = "findChatRoomsMessage.time")
+    @Counted(value = "findChatRoomsMessage.count")
     @Operation(summary = "Find chatRooms with message by user id", security = @SecurityRequirement(name = "bearerAuth"))
     public Page<ChatRoomMessageDto> findChatRoomsMessage(
         @CurrentUser UserSecurity userSecurity,
@@ -54,6 +57,7 @@ public class ChatRoomController {
 
     @PostMapping("/get-chat")
     @Timed(value = "getChatRoomByUsersOrElseCreate.time")
+    @Counted(value = "getChatRoomByUsersOrElseCreate.count")
     @Operation(summary = "Get chatRooms by user id or else create", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(
         @Valid
@@ -66,6 +70,7 @@ public class ChatRoomController {
 
     @PostMapping("/get-system-chat")
     @Timed(value = "getSystemChatRoomByUserOrElseCreate.time")
+    @Counted(value = "getSystemChatRoomByUserOrElseCreate.count")
     @Operation(summary = "Get system chatRooms by user id or else create")
     public ChatRoomDto getSystemChatRoomByUserOrElseCreate(
         @CurrentUser UserSecurity userSecurity
@@ -75,6 +80,7 @@ public class ChatRoomController {
 
     @PostMapping
     @Timed(value = "createChatRoom.time")
+    @Counted(value = "createChatRoom.count")
     @Operation(summary = "Create chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     public ChatRoomDto createChatRoom(
         @Valid
@@ -87,6 +93,7 @@ public class ChatRoomController {
 
     @DeleteMapping
     @Timed(value = "deleteChatRoom.time")
+    @Counted(value = "deleteChatRoom.count")
     @Operation(summary = "Delete chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
     public boolean deleteChatRoom(
         @Valid
@@ -100,6 +107,7 @@ public class ChatRoomController {
 
     @Validated
     @Timed(value = "findAllMessageByChatRoomId.time")
+    @Counted(value = "findAllMessageByChatRoomId.count")
     @GetMapping("/all-messages")
     @Operation(summary = "Find all message by chat root", security = @SecurityRequirement(name = "bearerAuth"))
     public Page<MessageDto> findAllMessageByChatRoomId(
@@ -113,6 +121,7 @@ public class ChatRoomController {
 
     @GetMapping("/not-read-messages-amount")
     @Timed(value = "findAllMessageByChatRoomId.time")
+    @Counted(value = "findAllMessageByChatRoomId.count")
     @Operation(summary = "Amount of all not read message", security = @SecurityRequirement(name = "bearerAuth"))
     public Integer amountOfAllNotReadMessages(
         @CurrentUser UserSecurity userSecurity
