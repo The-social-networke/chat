@@ -2,10 +2,10 @@ package com.socialnetwork.chat.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.TestUtils;
-import com.socialnetwork.chat.dto.ChatRoomCreateDto;
-import com.socialnetwork.chat.dto.ChatRoomDeleteDto;
-import com.socialnetwork.chat.dto.ChatRoomMessageDto;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.model.request.ChatRoomDeleteRequest;
+import com.socialnetwork.chat.model.request.chatRoomCreateRequest;
+import com.socialnetwork.chat.model.response.ChatRoomMessageRequest;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
@@ -118,7 +118,7 @@ class ChatRoomControllerTest {
     @Test
     void testCreateChatRoom_success() throws Exception {
         String anotherUserId = "88e6b54b-dcbd-4d3d-a633-f013fadbe25b";
-        var dto = new ChatRoomCreateDto()
+        var dto = new chatRoomCreateRequest()
             .toBuilder()
             .userId(anotherUserId)
             .build();
@@ -145,7 +145,7 @@ class ChatRoomControllerTest {
     @Test
     void testCreateChatRoom_unsuccess() throws Exception {
         String anotherUserId = "55ab96d7-8a93-4ea3-9d9d-77500018ad4e";
-        var dto = new ChatRoomCreateDto()
+        var dto = new chatRoomCreateRequest()
             .toBuilder()
             .userId(anotherUserId)
             .build();
@@ -168,8 +168,8 @@ class ChatRoomControllerTest {
 
     @Test
     void testFindChatRoomsMessage_success() throws Exception {
-        var messagesExpect = new ChatRoomMessageDto[]{
-            new ChatRoomMessageDto()
+        var messagesExpect = new ChatRoomMessageRequest[]{
+            new ChatRoomMessageRequest()
                 .toBuilder()
                 .messageId("69be2df7-0c33-4112-8ea7-e226f9fb1887")
                 .chatRoomId("3157333e-d7b2-4735-9069-fbd2cbf8e9f1")
@@ -178,7 +178,7 @@ class ChatRoomControllerTest {
                 .sentAt(LocalDateTime.of(2022, 4, 1, 20, 20, 7, 220500))
                 .amountOfNotReadMessages(1L)
                 .build(),
-            new ChatRoomMessageDto()
+            new ChatRoomMessageRequest()
                 .toBuilder()
                 .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
                 .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a53745e")
@@ -209,7 +209,7 @@ class ChatRoomControllerTest {
 
     @Test
     void testGetChatRoomByUsersOrElseCreate_success() throws Exception {
-        var dto = new ChatRoomCreateDto()
+        var dto = new chatRoomCreateRequest()
             .toBuilder()
             .userId("55ab96d7-8a93-4ea3-9d9d-77500018ad4e")
             .build();
@@ -223,7 +223,7 @@ class ChatRoomControllerTest {
     @Test
     void testGetChatRoomByUsersOrElseCreate_unsuccess() throws Exception {
         var anotherUserId = "91091319-77de-4985-a7fc-37db9b828493";
-        var dto = new ChatRoomCreateDto()
+        var dto = new chatRoomCreateRequest()
             .toBuilder()
             .userId(anotherUserId)
             .build();
@@ -257,7 +257,7 @@ class ChatRoomControllerTest {
 
     @Test
     void testDeleteChatRoom_success() throws Exception {
-        var dto = new ChatRoomDeleteDto()
+        var dto = new ChatRoomDeleteRequest()
             .toBuilder()
             .chatId("350c19d5-2905-4c6e-9e60-4bb74a53745e")
             .build();
@@ -273,7 +273,7 @@ class ChatRoomControllerTest {
 
     @Test
     void testDeleteChatRoom_unsuccess() throws Exception {
-        var dto = new ChatRoomDeleteDto()
+        var dto = new ChatRoomDeleteRequest()
             .toBuilder()
             .chatId("d438bcc2-7622-4c18-96ea-2b250082ecbb")
             .build();

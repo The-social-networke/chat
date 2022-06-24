@@ -1,10 +1,10 @@
 package com.socialnetwork.chat.controller;
 
-import com.socialnetwork.chat.dto.ErrorDto;
-import com.socialnetwork.chat.dto.ErrorViolationDto;
 import com.socialnetwork.chat.exception.ChatException;
+import com.socialnetwork.chat.model.enums.ErrorCodeException;
+import com.socialnetwork.chat.model.response.ErrorResponse;
+import com.socialnetwork.chat.model.response.ErrorViolationRequest;
 import com.socialnetwork.chat.util.FieldViolationsError;
-import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -23,7 +23,7 @@ public class ControllerAdvice {
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorViolationDto handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ErrorViolationRequest handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         var violations = new HashMap<String, List<FieldViolationsError>>();
         for (FieldError fieldError : ex.getBindingResult().getFieldErrors()) {
             String field = fieldError.getField();
@@ -41,7 +41,7 @@ public class ControllerAdvice {
             });
         }
 
-        return ErrorViolationDto.builder()
+        return ErrorViolationRequest.builder()
             .message("Unable to process entity")
             .errorCode(ErrorCodeException.NOT_VALID_PARAM)
             .violations(violations)
@@ -50,9 +50,9 @@ public class ControllerAdvice {
 
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ErrorDto handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
+    public ErrorResponse handleMissingServletRequestParameterException(MissingServletRequestParameterException ex) {
 
-        return ErrorDto.builder()
+        return ErrorResponse.builder()
             .message(ex.getMessage())
             .errorCode(ErrorCodeException.MISSING_ARGUMENT)
             .build();
@@ -66,7 +66,7 @@ public class ControllerAdvice {
         if(ex.getErrorCodeException().equals(ErrorCodeException.FORBIDDEN)) {
             return new ResponseEntity<>("forbidden", HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(ErrorDto.builder()
+        return new ResponseEntity<>(ErrorResponse.builder()
             .message(ex.getMessage())
             .errorCode(ex.getErrorCodeException())
             .build(), HttpStatus.BAD_REQUEST);

@@ -1,8 +1,8 @@
 package com.socialnetwork.chat.controller;
 
 
-import com.socialnetwork.chat.dto.MessageCreateDto;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.model.request.MessageCreateRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,7 +69,7 @@ class SocketTest {
             .connect(URL + port + CONNECT_SOCKET_ENDPOINT, headers, stompHeaders, new StompSessionHandlerAdapter() {})
             .get(3, SECONDS);
         var ww = session.subscribe(SUBSCRIBE_CHAT_MESSAGES_ENDPOINT + chatId, new DefaultStompFrameHandler());
-        var obj = new MessageCreateDto()
+        var obj = new MessageCreateRequest()
             .toBuilder()
             .text("12312312")
             .chatRoomId(chatId)

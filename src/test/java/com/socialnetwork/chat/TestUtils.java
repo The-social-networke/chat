@@ -1,8 +1,8 @@
 package com.socialnetwork.chat;
 
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.ChatRoomMessageStatusDto;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.model.response.ChatRoomMessageStatusRequest;
 import com.socialnetwork.chat.service.ChatRoomService;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -32,8 +32,8 @@ public class TestUtils {
         ReflectionTestUtils.setField(service, "endpointGetInfoByUserId", TestUtils.GET_INFO_BY_USER_ID_ENDPOINT);
     }
 
-    public static ChatRoomMessageStatusDto convertToChatRoomsMessageStatusDto(String chatRoomId, Message message) {
-        return new ChatRoomMessageStatusDto()
+    public static ChatRoomMessageStatusRequest convertToChatRoomsMessageStatusDto(String chatRoomId, Message message) {
+        return new ChatRoomMessageStatusRequest()
             .toBuilder()
             .chatRoomId(chatRoomId)
             .messageId(message == null ? null : message.getId())

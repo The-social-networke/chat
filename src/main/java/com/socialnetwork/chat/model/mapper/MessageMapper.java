@@ -1,28 +1,33 @@
-package com.socialnetwork.chat.mapper;
+package com.socialnetwork.chat.model.mapper;
 
-import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.dto.MessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.entity.MessageLike;
+import com.socialnetwork.chat.entity.MessageReaders;
+import com.socialnetwork.chat.model.request.MessageCreateRequest;
+import com.socialnetwork.chat.model.response.MessageRequest;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.stream.Collectors;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MessageMapper {
 
-    public static Message toEntity(MessageCreateDto dto) {
+    public static Message toEntity(MessageCreateRequest dto, String currentUserId) {
         return new Message()
             .toBuilder()
             .text(dto.getText())
             .chatRoom(new ChatRoom().toBuilder().id(dto.getChatRoomId()).build())
-            .userId(dto.getCurrentUserId())
+            .userId(currentUserId)
             .photo(dto.getPhoto())
             .forwardType(dto.getForwardType())
             .forwardId(dto.getForwardId())
             .build();
     }
 
-    public static MessageDto toMessageDto(Message message) {
-        return new MessageDto()
+    public static MessageRequest toMessageDto(Message message) {
+        return new MessageRequest()
             .toBuilder()
             .id(message.getId())
             .text(message.getText())
@@ -31,8 +36,8 @@ public class MessageMapper {
             .isUpdated(message.isUpdated())
             .forwardType(message.getForwardType())
             .forwardId(message.getForwardId())
-            .messageLikes(message.getMessageLikes().stream().map(like -> like.getId().getUserId()).collect(Collectors.toUnmodifiableSet()))
-            .messageReads(message.getMessageReads().stream().map(read -> read.getId().getUserId()).collect(Collectors.toUnmodifiableSet()))
+            .messageLikes(message.getMessageLikes().stream().map(MessageLike::getUserId).collect(Collectors.toSet()))
+            .messageReads(message.getMessageReads().stream().map(MessageReaders::getUserId).collect(Collectors.toSet()))
             .messageStatus(message.getMessageStatus())
             .photo(message.getPhoto())
             .build();

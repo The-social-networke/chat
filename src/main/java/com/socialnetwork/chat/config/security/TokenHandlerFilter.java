@@ -1,8 +1,8 @@
 package com.socialnetwork.chat.config.security;
 
 import com.socialnetwork.chat.exception.ChatException;
+import com.socialnetwork.chat.model.enums.ErrorCodeException;
 import com.socialnetwork.chat.util.AuthModuleUtil;
-import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

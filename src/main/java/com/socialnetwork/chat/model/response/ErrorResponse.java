@@ -1,6 +1,6 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
-import com.socialnetwork.chat.util.enums.ErrorCodeException;
+import com.socialnetwork.chat.model.enums.ErrorCodeException;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.extern.jackson.Jacksonized;
 @Data
 @Builder
 @Jacksonized
-public class ErrorDto {
+public class ErrorResponse {
 
     @Schema(
         example = "Chat room exists",

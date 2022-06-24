@@ -1,17 +1,22 @@
 package com.socialnetwork.chat.service;
 
-import com.socialnetwork.chat.dto.*;
-import com.socialnetwork.chat.entity.*;
+import com.socialnetwork.chat.entity.ChatRoom;
+import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.entity.MessageLike;
+import com.socialnetwork.chat.entity.MessageReaders;
 import com.socialnetwork.chat.exception.ChatException;
+import com.socialnetwork.chat.model.enums.ErrorCodeException;
+import com.socialnetwork.chat.model.enums.MessageStatus;
+import com.socialnetwork.chat.model.request.*;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.impl.MessageService;
-import com.socialnetwork.chat.util.enums.ErrorCodeException;
-import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -41,6 +46,9 @@ class MessageServiceTest {
 
     @InjectMocks
     private MessageService service;
+
+    @Captor
+    private ArgumentCaptor<Message> captor;
 
     private String chatId;
 
@@ -97,11 +105,12 @@ class MessageServiceTest {
 
     @Test
     void testSentMessage() {
+        String userId = "1";
         Message expectedResult = messages.get(0)
             .toBuilder()
             .messageStatus(MessageStatus.SENT)
             .build();
-        MessageCreateDto dto = new MessageCreateDto()
+        MessageCreateRequest dto = new MessageCreateRequest()
             .toBuilder()
             .chatRoomId(chatId)
             .text(expectedResult.getText())
@@ -109,27 +118,10 @@ class MessageServiceTest {
 
         when(repository.save(any(Message.class))).thenReturn(expectedResult);
 
-        Message messageResult = service.sendMessage(dto);
+        Message messageResult = service.sendMessage(dto, userId);
 
         Assertions.assertEquals(expectedResult, messageResult);
         verify(repository).save(any(Message.class));
-    }
-
-    @Test
-    void testSentMessage_ifTextIsEmpty() {
-        MessageCreateDto dto = new MessageCreateDto()
-            .toBuilder()
-            .chatRoomId(chatId)
-            .text("         ")
-            .build();
-
-        ChatException thrown = assertThrows(
-            ChatException.class,
-            () -> service.sendMessage(dto)
-        );
-
-        Assertions.assertEquals(ErrorCodeException.MESSAGE_CANNOT_BE_EMPTY, thrown.getErrorCodeException());
-        verify(repository, never()).save(any(Message.class));
     }
 
 
@@ -137,16 +129,15 @@ class MessageServiceTest {
     void testDeleteMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(0);
-        MessageDeleteDto dto = new MessageDeleteDto()
+        MessageDeleteRequest dto = new MessageDeleteRequest()
             .toBuilder()
             .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
         doNothing().when(repository).delete(messageFound);
 
-        service.deleteMessage(dto);
+        service.deleteMessage(dto, currentUser);
 
         verify(repository).findById(dto.getMessageId());
         verify(repository).delete(messageFound);
@@ -156,17 +147,16 @@ class MessageServiceTest {
     void testDeleteMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(1).getUserId();
         Message messageFound = messages.get(0);
-        MessageDeleteDto dto = new MessageDeleteDto()
+        MessageDeleteRequest dto = new MessageDeleteRequest()
             .toBuilder()
             .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.deleteMessage(dto)
+            () -> service.deleteMessage(dto, currentUser)
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE, thrown.getErrorCodeException());
@@ -181,22 +171,21 @@ class MessageServiceTest {
         Message messageSaved = messages.get(1)
             .toBuilder()
             .messageReads(new HashSet<>(Lists.newArrayList(
-                new MessageReaders(new MessageUserPk(currentUser, messages.get(1).getId()), messages.get(1))
+                new MessageReaders(currentUser, messages.get(1))
             )))
             .build();
         Message messageExpect = messageSaved.toBuilder()
             .messageStatus(MessageStatus.UPDATED)
             .build();
-        MessageReadDto dto = new MessageReadDto()
+        MessageReadRequest dto = new MessageReadRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
         when(repository.save(messageFound)).thenReturn(messageSaved);
 
-        Message returnedMessage = service.readMessage(dto);
+        Message returnedMessage = service.readMessage(dto, currentUser);
 
         Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
@@ -210,19 +199,18 @@ class MessageServiceTest {
             .toBuilder()
             .messageReads(
                 new HashSet<>(Lists.newArrayList(
-                    new MessageReaders(new MessageUserPk(currentUser, messages.get(1).getId()), messages.get(1))
+                    new MessageReaders(currentUser, messages.get(1))
                 )
             ))
             .build();
-        MessageReadDto dto = new MessageReadDto()
+        MessageReadRequest dto = new MessageReadRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
-        Message returnedMessage = service.readMessage(dto);
+        Message returnedMessage = service.readMessage(dto, currentUser);
 
         Assertions.assertEquals(returnedMessage, messageFound);
         verify(repository).findById(dto.getMessageId());
@@ -233,17 +221,16 @@ class MessageServiceTest {
     void testReadMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(0);
-        MessageReadDto dto = new MessageReadDto()
+        MessageReadRequest dto = new MessageReadRequest()
             .toBuilder()
             .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.readMessage(dto)
+            () -> service.readMessage(dto, currentUser)
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_READ_HIS_MESSAGE, thrown.getErrorCodeException());
@@ -255,10 +242,9 @@ class MessageServiceTest {
     void testUpdateMessage_ifMessageNotBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(1);
-        MessageUpdateDto dto = new MessageUpdateDto()
+        MessageUpdateRequest dto = new MessageUpdateRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .text("some new text")
             .build();
 
@@ -267,7 +253,7 @@ class MessageServiceTest {
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.updateMessage(dto)
+            () -> service.updateMessage(dto, currentUser)
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_UPDATE_NOT_OWN_MESSAGE, thrown.getErrorCodeException());
@@ -275,28 +261,6 @@ class MessageServiceTest {
         verify(repository, never()).save(any());
     }
 
-    @Test
-    void testUpdateMessage_ifMessageBelongToUserAndEmptyText() {
-        String currentUser = messages.get(0).getUserId();
-        Message messageFound = messages.get(0);
-        MessageUpdateDto dto = new MessageUpdateDto()
-            .toBuilder()
-            .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
-            .text("         ")
-            .build();
-
-        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
-
-        ChatException thrown = assertThrows(
-            ChatException.class,
-            () -> service.updateMessage(dto)
-        );
-
-        Assertions.assertEquals(ErrorCodeException.MESSAGE_CANNOT_BE_EMPTY, thrown.getErrorCodeException());
-        verify(repository).findById(dto.getMessageId());
-        verify(repository, never()).save(any(Message.class));
-    }
 
     @Test
     void testUpdateMessage_ifMessageBelongToUser() {
@@ -311,17 +275,16 @@ class MessageServiceTest {
             .toBuilder()
             .messageStatus(MessageStatus.UPDATED)
             .build();
-        MessageUpdateDto dto = new MessageUpdateDto()
+        MessageUpdateRequest dto = new MessageUpdateRequest()
             .toBuilder()
             .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
             .text("some new text")
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
         when(repository.save(messageSaved)).thenReturn(messageSaved);
 
-        Message messageResult = service.updateMessage(dto);
+        Message messageResult = service.updateMessage(dto, currentUser);
 
         Assertions.assertEquals(expectExpectResult, messageResult);
         verify(repository).findById(dto.getMessageId());
@@ -336,23 +299,22 @@ class MessageServiceTest {
         Message messageSaved = messages.get(1)
             .toBuilder()
             .messageLikes( new HashSet<>(Lists.newArrayList(
-                new MessageLikes(new MessageUserPk(currentUser, messageFound.getId()), messageFound)
+                new MessageLike(currentUser, messageFound)
             )))
             .build();
         Message messageExpect = messageSaved.toBuilder()
             .messageStatus(MessageStatus.UPDATED)
             .build();
-        MessageLikeDto dto = new MessageLikeDto()
+        MessageLikeRequest dto = new MessageLikeRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .isLike(true)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
-        when(repository.save(messageSaved)).thenReturn(messageSaved);
+        when(repository.save(any())).thenReturn(messageSaved);
 
-        Message returnedMessage = service.toggleLikeMessage(dto);
+        Message returnedMessage = service.toggleLikeMessage(dto, currentUser);
 
         Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
@@ -366,7 +328,7 @@ class MessageServiceTest {
             .toBuilder()
             .messageLikes(
                 new HashSet<>(Lists.newArrayList(
-                    new MessageLikes(new MessageUserPk(currentUser, messages.get(1).getId()), messages.get(1))
+                    new MessageLike(currentUser, messages.get(1))
                 )
             ))
             .build();
@@ -374,17 +336,16 @@ class MessageServiceTest {
         Message messageExpect = expectSavedMessage.toBuilder()
             .messageStatus(MessageStatus.UPDATED)
             .build();
-        MessageLikeDto dto = new MessageLikeDto()
+        MessageLikeRequest dto = new MessageLikeRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .isLike(false)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
         when(repository.save(expectSavedMessage)).thenReturn(expectSavedMessage);
 
-        Message returnedMessage = service.toggleLikeMessage(dto);
+        Message returnedMessage = service.toggleLikeMessage(dto, currentUser);
 
         Assertions.assertEquals(messageExpect, returnedMessage);
         verify(repository).findById(dto.getMessageId());
@@ -395,16 +356,15 @@ class MessageServiceTest {
     void testLikeMessage_ifMessageNotBelongToUserAndLikeTheSame() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(1);
-        MessageLikeDto dto = new MessageLikeDto()
+        MessageLikeRequest dto = new MessageLikeRequest()
             .toBuilder()
             .messageId(messages.get(1).getId())
-            .currentUserId(currentUser)
             .isLike(false)
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
 
-        Message returnedMessage = service.toggleLikeMessage(dto);
+        Message returnedMessage = service.toggleLikeMessage(dto, currentUser);
 
         Assertions.assertEquals(messageFound, returnedMessage);
         verify(repository).findById(dto.getMessageId());
@@ -415,10 +375,9 @@ class MessageServiceTest {
     void testLikeMessage_ifMessageBelongToUser() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(0);
-        MessageLikeDto dto = new MessageLikeDto()
+        MessageLikeRequest dto = new MessageLikeRequest()
             .toBuilder()
             .messageId(messages.get(0).getId())
-            .currentUserId(currentUser)
             .isLike(true)
             .build();
 
@@ -426,7 +385,7 @@ class MessageServiceTest {
 
         ChatException thrown = assertThrows(
             ChatException.class,
-            () -> service.toggleLikeMessage(dto)
+            () -> service.toggleLikeMessage(dto, currentUser)
         );
 
         Assertions.assertEquals(ErrorCodeException.USER_CANNOT_LIKE_HIS_MESSAGE, thrown.getErrorCodeException());

@@ -1,26 +1,28 @@
 package com.socialnetwork.chat.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "user__chat_room")
 public class ChatRoomUser {
 
-    @EmbeddedId
-    @JsonUnwrapped
-    private ChatRoomUserPk chatRoomUserPk;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @JsonIgnore
-    @MapsId("chatRoomId")
-    @EqualsAndHashCode.Exclude
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "user_id")
+    private String userId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private ChatRoom chatRoom;
+
+    public ChatRoomUser(String userId, ChatRoom chatRoom) {
+        this.userId = userId;
+        this.chatRoom = chatRoom;
+    }
 }

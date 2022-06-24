@@ -1,4 +1,4 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.*;
@@ -11,7 +11,7 @@ import java.util.Set;
 @Builder(toBuilder = true)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Tag(name = "", description = "dto to info about chatRoom")
-public class ChatRoomInfoDto {
+public class ChatRoomInfoRequest {
 
     private String id;
 

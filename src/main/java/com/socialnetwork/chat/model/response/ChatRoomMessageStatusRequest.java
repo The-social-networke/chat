@@ -1,5 +1,6 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
+import com.socialnetwork.chat.model.enums.MessageStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -13,8 +14,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Tag(name = "", description = "dto to show chatRoom")
-public class ChatRoomMessageDto {
+@Tag(name = "ChatRoomMessageStatusDto", description = "dto to show chatRoom")
+public class ChatRoomMessageStatusRequest {
 
     @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
@@ -23,12 +24,7 @@ public class ChatRoomMessageDto {
 
     @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        description = "Another user in this chat")
-    private String anotherUserId;
-
-    @Schema(
-        example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        description = "Author of message")
+        description = "Sent by user in chat room")
     private String userId;
 
     @Schema(
@@ -48,21 +44,11 @@ public class ChatRoomMessageDto {
 
     @Schema(
         example = "2022-03-26T02:02:42.774980",
-        description = "Amount of not read messages")
-    private Long amountOfNotReadMessages;
+        description = "Status of last message")
+    private MessageStatus messageStatus;
 
     @Schema(
         example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
         description = "User information")
     private Object userInfo;
-
-    public ChatRoomMessageDto(String chatRoomId, String anotherUserId, String userId, String messageId, String text, LocalDateTime sentAt) {
-        this.chatRoomId = chatRoomId;
-        this.anotherUserId = anotherUserId;
-        this.userId = userId;
-        this.messageId = messageId;
-        this.text = text;
-        this.sentAt = sentAt;
-        //this.amountOfNotReadMessages = amountOfNotReadMessages;
-    }
 }

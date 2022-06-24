@@ -2,7 +2,12 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.*;
+import com.socialnetwork.chat.model.request.ChatRoomDeleteRequest;
+import com.socialnetwork.chat.model.request.chatRoomCreateRequest;
+import com.socialnetwork.chat.model.response.ChatRoomInfoRequest;
+import com.socialnetwork.chat.model.response.ChatRoomMessageRequest;
+import com.socialnetwork.chat.model.response.ChatRoomResponse;
+import com.socialnetwork.chat.model.response.MessageRequest;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.util.CustomPageable;
 import io.micrometer.core.annotation.Counted;
@@ -33,7 +38,7 @@ public class ChatRoomController {
     @Timed(value = "getChatRoomById.time")
     @Counted(value = "getChatRoomById.count")
     @Operation(summary = "Get chatRoom by id", security = @SecurityRequirement(name = "bearerAuth"))
-    public ChatRoomMessageDto getChatRoomById(
+    public ChatRoomMessageRequest getChatRoomById(
         @NotNull(message = "chat id should not be null")
         @RequestParam String chatId,
         @CurrentUser UserSecurity userSecurity
@@ -45,7 +50,7 @@ public class ChatRoomController {
     @Timed(value = "findChatRoomsMessage.time")
     @Counted(value = "findChatRoomsMessage.count")
     @Operation(summary = "Find chatRooms with message by user id", security = @SecurityRequirement(name = "bearerAuth"))
-    public Page<ChatRoomMessageDto> findChatRoomsMessage(
+    public Page<ChatRoomMessageRequest> findChatRoomsMessage(
         @CurrentUser UserSecurity userSecurity,
         CustomPageable pageable
     ) {
@@ -56,20 +61,19 @@ public class ChatRoomController {
     @Timed(value = "getChatRoomByUsersOrElseCreate.time")
     @Counted(value = "getChatRoomByUsersOrElseCreate.count")
     @Operation(summary = "Get chatRooms by user id or else create", security = @SecurityRequirement(name = "bearerAuth"))
-    public ChatRoomInfoDto getChatRoomByUsersOrElseCreate(
+    public ChatRoomInfoRequest getChatRoomByUsersOrElseCreate(
         @Valid
-        @RequestBody ChatRoomCreateDto dto,
+        @RequestBody chatRoomCreateRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.getChatRoomByUsersOrElseCreate(dto);
+        return chatRoomService.getChatRoomByUsersOrElseCreate(dto, userSecurity.getUserId());
     }
 
     @PostMapping("/get-system-chat")
     @Timed(value = "getSystemChatRoomByUserOrElseCreate.time")
     @Counted(value = "getSystemChatRoomByUserOrElseCreate.count")
     @Operation(summary = "Get system chatRooms by user id or else create")
-    public ChatRoomDto getSystemChatRoomByUserOrElseCreate(
+    public ChatRoomResponse getSystemChatRoomByUserOrElseCreate(
         @CurrentUser UserSecurity userSecurity
     ) {
         return chatRoomService.getSystemChatRoomByUserOrElseCreate(userSecurity.getUserId());
@@ -79,13 +83,12 @@ public class ChatRoomController {
     @Timed(value = "createChatRoom.time")
     @Counted(value = "createChatRoom.count")
     @Operation(summary = "Create chatRoom", security = @SecurityRequirement(name = "bearerAuth"))
-    public ChatRoomDto createChatRoom(
+    public ChatRoomResponse createChatRoom(
         @Valid
-        @RequestBody ChatRoomCreateDto dto,
+        @RequestBody chatRoomCreateRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.createChatRoom(dto);
+        return chatRoomService.createChatRoom(dto, userSecurity.getUserId());
     }
 
     @DeleteMapping
@@ -95,11 +98,10 @@ public class ChatRoomController {
     public boolean deleteChatRoom(
         @Valid
         @NotNull(message = "Id of chat should be not null")
-        @RequestBody ChatRoomDeleteDto dto,
+        @RequestBody ChatRoomDeleteRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.deleteChatRoom(dto);
+        return chatRoomService.deleteChatRoom(dto, userSecurity.getUserId());
     }
 
     @Validated
@@ -107,7 +109,7 @@ public class ChatRoomController {
     @Counted(value = "findAllMessageByChatRoomId.count")
     @GetMapping("/all-messages")
     @Operation(summary = "Find all message by chat root", security = @SecurityRequirement(name = "bearerAuth"))
-    public Page<MessageDto> findAllMessageByChatRoomId(
+    public Page<MessageRequest> findAllMessageByChatRoomId(
         @NotNull(message = "Id of chat should be not null")
         @RequestParam String chatId,
         CustomPageable pageable,

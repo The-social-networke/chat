@@ -1,8 +1,8 @@
 package com.socialnetwork.chat.repository.impl;
 
-import com.socialnetwork.chat.dto.ChatRoomMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.model.response.ChatRoomMessageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +28,7 @@ public class ChatRoomRepositoryImpl {
 
 //    public ChatRoomMessageDto findChatRoomMessageByUserIdAndChatIdMap(String userId, String chatId) {
 //        String jpqlSql =
-//            "SELECT new com.socialnetwork.chat.dto.ChatRoomMessageDto(" +
+//            "SELECT new com.socialnetwork.chat.model.response.ChatRoomMessageDto(" +
 //            " chat.id, " + // chatId
 //            " chatAnotherUser.chatRoomUserPk.userId, " + // anotherUserId
 //            " chatUser.chatRoomUserPk.userId, " + // userId
@@ -164,7 +164,7 @@ public class ChatRoomRepositoryImpl {
             .stream().findFirst();
     }
 
-    public ChatRoomMessageDto getChatRoomMessageByUserIdAndChatId(String userId, String chatId) {
+    public ChatRoomMessageRequest getChatRoomMessageByUserIdAndChatId(String userId, String chatId) {
         String nativeSql =
         "SELECT chat.id chatRoomId, message.user_id userId, another_user.user_id anotherUserId, message.id messageId, message.text as text, message.sent_at sentAt, read_count.amountOfNotReadMessages" +
             " FROM chat_room chat" +
@@ -218,7 +218,7 @@ public class ChatRoomRepositoryImpl {
             .orElseThrow();
     }
 
-    public Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
+    public Page<ChatRoomMessageRequest> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
         String nativeSql =
         "SELECT chat.id chatRoomId, message.user_id userId, message.id messageId, message.text as text, message.sent_at sentAt, read_count.amountOfNotReadMessages, another_user.user_id anotherUserId " +
             //"-- SELECT ALL CHATS " +
@@ -276,8 +276,8 @@ public class ChatRoomRepositoryImpl {
         return new PageImpl<>(listResult, pageable, getChatRoomsCount(userId));
     }
 
-    private ChatRoomMessageDto getChatRoomMessageFromMap(Object[] objects) {
-        return new ChatRoomMessageDto()
+    private ChatRoomMessageRequest getChatRoomMessageFromMap(Object[] objects) {
+        return new ChatRoomMessageRequest()
             .toBuilder()
             .chatRoomId(objects[0] == null ? null : (String) objects[0])
             .userId(objects[1] == null ? null : (String) objects[1])

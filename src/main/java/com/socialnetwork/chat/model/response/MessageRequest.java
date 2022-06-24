@@ -1,11 +1,11 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.socialnetwork.chat.util.enums.ForwardType;
-import com.socialnetwork.chat.util.enums.MessageStatus;
+import com.socialnetwork.chat.model.enums.ForwardType;
+import com.socialnetwork.chat.model.enums.MessageStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,13 +16,13 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder(toBuilder = true)
-public class MessageDto {
+public class MessageRequest {
 
     private String id;
 
     private String userId;
 
-    private String text = "";
+    private String text;
 
     private Byte[] photo;
 

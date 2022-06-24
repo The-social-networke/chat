@@ -1,4 +1,4 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Builder(toBuilder = true)
-public class ChatRoomDto {
+public class ChatRoomResponse {
 
     private String id;
 

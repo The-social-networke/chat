@@ -1,7 +1,5 @@
 package com.socialnetwork.chat.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,14 +15,18 @@ import javax.persistence.*;
 @Table(name = "read_message")
 public class MessageReaders {
 
-    @EmbeddedId
-    @JsonUnwrapped
-    private MessageUserPk id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @JsonIgnore
-    @MapsId("messageId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "user_id")
+    private String userId;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Message message;
 
-
+    public MessageReaders(String userId, Message message) {
+        this.userId = userId;
+        this.message = message;
+    }
 }

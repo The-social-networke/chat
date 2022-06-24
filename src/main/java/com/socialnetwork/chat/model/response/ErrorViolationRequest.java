@@ -1,7 +1,7 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
+import com.socialnetwork.chat.model.enums.ErrorCodeException;
 import com.socialnetwork.chat.util.FieldViolationsError;
-import com.socialnetwork.chat.util.enums.ErrorCodeException;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.jackson.Jacksonized;
@@ -12,7 +12,7 @@ import java.util.Map;
 @Data
 @Jacksonized
 @Builder
-public class ErrorViolationDto {
+public class ErrorViolationRequest {
 
     private String message;
 

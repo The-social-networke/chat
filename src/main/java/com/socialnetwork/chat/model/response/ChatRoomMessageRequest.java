@@ -1,6 +1,5 @@
-package com.socialnetwork.chat.dto;
+package com.socialnetwork.chat.model.response;
 
-import com.socialnetwork.chat.util.enums.MessageStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -14,8 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@Tag(name = "ChatRoomMessageStatusDto", description = "dto to show chatRoom")
-public class ChatRoomMessageStatusDto {
+@Tag(name = "", description = "dto to show chatRoom")
+public class ChatRoomMessageRequest {
 
     @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
@@ -24,7 +23,12 @@ public class ChatRoomMessageStatusDto {
 
     @Schema(
         example = "cfdbefcb-012e-4901-97e1-c673335558d7",
-        description = "Sent by user in chat room")
+        description = "Another user in this chat")
+    private String anotherUserId;
+
+    @Schema(
+        example = "cfdbefcb-012e-4901-97e1-c673335558d7",
+        description = "Author of message")
     private String userId;
 
     @Schema(
@@ -44,11 +48,21 @@ public class ChatRoomMessageStatusDto {
 
     @Schema(
         example = "2022-03-26T02:02:42.774980",
-        description = "Status of last message")
-    private MessageStatus messageStatus;
+        description = "Amount of not read messages")
+    private Long amountOfNotReadMessages;
 
     @Schema(
         example = "{\"id\": \"123-123-123\", \"username\":\"some name\"}",
         description = "User information")
     private Object userInfo;
+
+    public ChatRoomMessageRequest(String chatRoomId, String anotherUserId, String userId, String messageId, String text, LocalDateTime sentAt) {
+        this.chatRoomId = chatRoomId;
+        this.anotherUserId = anotherUserId;
+        this.userId = userId;
+        this.messageId = messageId;
+        this.text = text;
+        this.sentAt = sentAt;
+        //this.amountOfNotReadMessages = amountOfNotReadMessages;
+    }
 }

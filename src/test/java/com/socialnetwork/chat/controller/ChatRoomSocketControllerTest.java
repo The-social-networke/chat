@@ -2,17 +2,17 @@ package com.socialnetwork.chat.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.socialnetwork.chat.TestUtils;
-import com.socialnetwork.chat.dto.MessageCreateDto;
-import com.socialnetwork.chat.dto.MessageDeleteDto;
-import com.socialnetwork.chat.dto.MessageLikeDto;
-import com.socialnetwork.chat.dto.MessageUpdateDto;
 import com.socialnetwork.chat.entity.Message;
+import com.socialnetwork.chat.model.enums.MessageStatus;
+import com.socialnetwork.chat.model.request.MessageCreateRequest;
+import com.socialnetwork.chat.model.request.MessageDeleteRequest;
+import com.socialnetwork.chat.model.request.MessageLikeRequest;
+import com.socialnetwork.chat.model.request.MessageUpdateRequest;
 import com.socialnetwork.chat.repository.ChatRoomRepository;
 import com.socialnetwork.chat.repository.MessageRepository;
 import com.socialnetwork.chat.service.ChatRoomService;
 import com.socialnetwork.chat.service.impl.ChatRoomServiceImpl;
 import com.socialnetwork.chat.service.impl.MessageService;
-import com.socialnetwork.chat.util.enums.MessageStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -83,7 +83,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testSendMessage_success() throws Exception {
-        var dto = new MessageCreateDto()
+        var dto = new MessageCreateRequest()
             .toBuilder()
             .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a53745e")
             .text("some new mesage")
@@ -109,7 +109,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testSendMessage_unsuccess() throws Exception {
-        var dto = new MessageCreateDto()
+        var dto = new MessageCreateRequest()
             .toBuilder()
             .chatRoomId("350c19d5-2905-4c6e-9e60-4bb74a537556")
             .text("some new mesage")
@@ -128,7 +128,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testDeleteMessage_success() throws Exception {
-        var dto = new MessageDeleteDto()
+        var dto = new MessageDeleteRequest()
             .toBuilder()
             .messageId("7c610c79-369c-42af-9d51-bb3bc0891065")
             .build();
@@ -154,7 +154,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testDeleteMessage_unsuccess() throws Exception {
-        var dto = new MessageDeleteDto()
+        var dto = new MessageDeleteRequest()
             .toBuilder()
             .messageId("7c610c79-369c-42af-9d51-bb3bc0891678")
             .build();
@@ -172,7 +172,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testUpdateMessage_success() throws Exception {
-        var dto = new MessageUpdateDto()
+        var dto = new MessageUpdateRequest()
             .toBuilder()
             .messageId("7c610c79-369c-42af-9d51-bb3bc0891065")
             .text("how r u?")
@@ -199,7 +199,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testUpdateMessage_unsuccess() throws Exception {
-        var dto = new MessageUpdateDto()
+        var dto = new MessageUpdateRequest()
             .toBuilder()
             .messageId("7c610c79-369c-42af-9d51-bb3bc0891678")
             .text("how r u?")
@@ -217,7 +217,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testLikeMessage_success() throws Exception {
-        var dto = new MessageLikeDto()
+        var dto = new MessageLikeRequest()
             .toBuilder()
             .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
             .isLike(true)
@@ -245,7 +245,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testLikeMessage_unsuccess() throws Exception {
-        var dto = new MessageLikeDto()
+        var dto = new MessageLikeRequest()
             .toBuilder()
             .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b123")
             .isLike(true)
@@ -263,7 +263,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testReadMessage_success() throws Exception {
-        var dto = new MessageLikeDto()
+        var dto = new MessageLikeRequest()
             .toBuilder()
             .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b153")
             .isLike(true)
@@ -291,7 +291,7 @@ class ChatRoomSocketControllerTest {
 
     @Test
     void testReadMessage_unsuccess() throws Exception {
-        var dto = new MessageLikeDto()
+        var dto = new MessageLikeRequest()
             .toBuilder()
             .messageId("50f43dd9-35e4-4c00-bd3a-c7b26575b123")
             .isLike(true)

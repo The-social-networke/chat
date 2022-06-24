@@ -1,34 +1,38 @@
 package com.socialnetwork.chat.service;
 
-import com.socialnetwork.chat.dto.*;
+import com.socialnetwork.chat.model.request.*;
+import com.socialnetwork.chat.model.response.ChatRoomInfoRequest;
+import com.socialnetwork.chat.model.response.ChatRoomMessageRequest;
+import com.socialnetwork.chat.model.response.ChatRoomResponse;
+import com.socialnetwork.chat.model.response.MessageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ChatRoomService {
 
-    ChatRoomMessageDto getChatRoomById(String userId, String chatId);
+    ChatRoomMessageRequest getChatRoomById(String userId, String chatId);
 
-    ChatRoomInfoDto getChatRoomByUsersOrElseCreate(ChatRoomCreateDto dto);
+    ChatRoomInfoRequest getChatRoomByUsersOrElseCreate(chatRoomCreateRequest dto, String currentUserId);
 
-    ChatRoomDto getSystemChatRoomByUserOrElseCreate(String userId);
+    ChatRoomResponse getSystemChatRoomByUserOrElseCreate(String userId);
 
     Integer getAmountOfAllNotReadMessages(String userId);
 
-    Page<MessageDto> findMessagesByChatId(String userId, String chatId, Pageable pageable);
+    Page<MessageRequest> findMessagesByChatId(String userId, String chatId, Pageable pageable);
 
-    Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable);
+    Page<ChatRoomMessageRequest> findChatRoomsMessageByUserId(String userId, Pageable pageable);
 
-    ChatRoomDto createChatRoom(ChatRoomCreateDto dto);
+    ChatRoomResponse createChatRoom(chatRoomCreateRequest dto, String currentUserId);
 
-    boolean deleteChatRoom(ChatRoomDeleteDto dto);
+    boolean deleteChatRoom(ChatRoomDeleteRequest dto, String currentUserId);
 
-    MessageDto updateMessage(MessageUpdateDto dto);
+    MessageRequest updateMessage(MessageUpdateRequest dto, String currentUserId);
 
-    MessageDto sendMessage(MessageCreateDto dto);
+    MessageRequest sendMessage(MessageCreateRequest dto, String currentUserId);
 
-    MessageDto deleteMessage(MessageDeleteDto dto);
+    MessageRequest deleteMessage(MessageDeleteRequest dto, String currentUserId);
 
-    MessageDto toggleLikeMessage(MessageLikeDto dto);
+    MessageRequest toggleLikeMessage(MessageLikeRequest dto, String currentUserId);
 
-    MessageDto readMessage(MessageReadDto dto);
+    MessageRequest readMessage(MessageReadRequest dto, String currentUserId);
 }

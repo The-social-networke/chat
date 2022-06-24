@@ -1,7 +1,7 @@
 package com.socialnetwork.chat.repository;
 
-import com.socialnetwork.chat.dto.ChatRoomMessageDto;
 import com.socialnetwork.chat.entity.ChatRoom;
+import com.socialnetwork.chat.model.response.ChatRoomMessageRequest;
 import com.socialnetwork.chat.repository.query.ChatRoomQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -23,7 +23,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
         nativeQuery = true)
     List<Map<String, Object>> findChatRoomMessageByUserIdAndChatIdMap(@Param("userId") String userId, @Param("chatId") String chatId);
 
-    default ChatRoomMessageDto getChatRoomMessageByUserIdAndChatId(String userId, String chatId) {
+    default ChatRoomMessageRequest getChatRoomMessageByUserIdAndChatId(String userId, String chatId) {
         var resultObjects = findChatRoomMessageByUserIdAndChatIdMap(userId, chatId);
         var content = resultObjects.stream()
             .map(this::getChatRoomMessageFromMap)
@@ -39,10 +39,10 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
     @Query(value =
         "SELECT COUNT(chatUser) " +
             " FROM ChatRoomUser chatUser" +
-            " WHERE chatUser.chatRoomUserPk.userId like :userId")
+            " WHERE chatUser.userId like :userId")
     int findChatRoomsCount(@Param("userId") String userId);
 
-    default Page<ChatRoomMessageDto> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
+    default Page<ChatRoomMessageRequest> findChatRoomsMessageByUserId(String userId, Pageable pageable) {
         var resultObjects = findChatRoomsMessageByUserIdMap(userId, pageable.getPageSize(), (int) pageable.getOffset());
         var content = resultObjects.stream()
             .map(this::getChatRoomMessageFromMap)
@@ -88,8 +88,8 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
         "   ON messages.id = :messageId")
     Optional<ChatRoom> findChatRoomByMessageId(@Param("messageId") String messageId);
 
-    private ChatRoomMessageDto getChatRoomMessageFromMap(Map<String, Object> map) {
-        return new ChatRoomMessageDto()
+    private ChatRoomMessageRequest getChatRoomMessageFromMap(Map<String, Object> map) {
+        return new ChatRoomMessageRequest()
             .toBuilder()
             .chatRoomId(map.get("chatRoomId") == null ? null : (String) map.get("chatRoomId"))
             .anotherUserId(map.get("anotherUserId") == null ? null : (String) map.get("anotherUserId"))

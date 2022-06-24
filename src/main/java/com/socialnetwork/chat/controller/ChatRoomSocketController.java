@@ -2,7 +2,8 @@ package com.socialnetwork.chat.controller;
 
 import com.socialnetwork.chat.config.security.CurrentUser;
 import com.socialnetwork.chat.config.security.UserSecurity;
-import com.socialnetwork.chat.dto.*;
+import com.socialnetwork.chat.model.request.*;
+import com.socialnetwork.chat.model.response.MessageRequest;
 import com.socialnetwork.chat.service.ChatRoomService;
 import io.micrometer.core.annotation.Counted;
 import io.micrometer.core.annotation.Timed;
@@ -31,64 +32,59 @@ public class ChatRoomSocketController {
     @Timed(value = "sendMessage.time")
     @Counted(value = "sendMessage.count")
     @Operation(summary = "send message", description = "This method send notification for chat and for user", security = @SecurityRequirement(name = "bearerAuth"))
-    public MessageDto sendMessage(
+    public MessageRequest sendMessage(
         @Valid
-        @RequestBody MessageCreateDto dto,
+        @RequestBody MessageCreateRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.sendMessage(dto);
+        return chatRoomService.sendMessage(dto, userSecurity.getUserId());
     }
 
     @DeleteMapping("/chat/deleteMessage")
     @Timed(value = "deleteMessage.time")
     @Counted(value = "deleteMessage.count")
     @Operation(summary = "delete message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
-    public MessageDto deleteMessage(
+    public MessageRequest deleteMessage(
         @Valid
-        @RequestBody MessageDeleteDto dto,
+        @RequestBody MessageDeleteRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.deleteMessage(dto);
+        return chatRoomService.deleteMessage(dto, userSecurity.getUserId());
     }
 
     @PostMapping("/chat/updateMessage")
     @Timed(value = "updateMessage.time")
     @Counted(value = "updateMessage.count")
     @Operation(summary = "update message", description = "This method send notification for chat and if it last message send for user", security = @SecurityRequirement(name = "bearerAuth"))
-    public MessageDto updateMessage(
+    public MessageRequest updateMessage(
         @Valid
-        @RequestBody MessageUpdateDto dto,
+        @RequestBody MessageUpdateRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.updateMessage(dto);
+        return chatRoomService.updateMessage(dto, userSecurity.getUserId());
     }
 
     @PostMapping("/chat/likeMessage")
     @Timed(value = "likeMessage.time")
     @Counted(value = "likeMessage.count")
     @Operation(summary = "like message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
-    public MessageDto likeMessage(
+    public MessageRequest likeMessage(
         @Valid
-        @RequestBody MessageLikeDto dto,
+        @RequestBody MessageLikeRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.toggleLikeMessage(dto);
+        return chatRoomService.toggleLikeMessage(dto, userSecurity.getUserId());
     }
 
     @PostMapping("/chat/readMessage")
     @Timed(value = "readMessage.time")
     @Counted(value = "readMessage.count")
     @Operation(summary = "read message", description = "This method send notification for chat", security = @SecurityRequirement(name = "bearerAuth"))
-    public MessageDto readMessage(
+    public MessageRequest readMessage(
         @Valid
-        @RequestBody MessageReadDto dto,
+        @RequestBody MessageReadRequest dto,
         @CurrentUser UserSecurity userSecurity
     ) {
-        dto.setCurrentUserId(userSecurity.getUserId());
-        return chatRoomService.readMessage(dto);
+        return chatRoomService.readMessage(dto, userSecurity.getUserId());
     }
 }
