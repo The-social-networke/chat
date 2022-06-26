@@ -16,7 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,18 @@ public class MessageService {
             .sentAt(LocalDateTime.now())
             .build();
 
+        if (messageRepository.getAmountOfMessagesInChatRoomByDate(dto.getChatRoomId(), LocalDate.now()) == 0) {
+            Message systemMessage = new Message()
+                .toBuilder()
+                .id(UUID.randomUUID().toString())
+                .chatRoom(entity.getChatRoom())
+                .userId("")
+                .isSystem(true)
+                .sentAt(LocalDateTime.of(LocalDate.now(), LocalTime.MIN))
+                .build();
+            messageRepository.save(systemMessage);
+        }
+
         return messageRepository.save(entity)
             .toBuilder()
             .messageStatus(MessageStatus.SENT)
@@ -48,8 +62,12 @@ public class MessageService {
     public Message deleteMessage(MessageDeleteRequest dto, String currentUserId) {
         Message message = messageRepository.findById(dto.getMessageId()).orElseThrow();
 
-        if(!message.getUserId().equals(currentUserId)) {
+        if (!message.getUserId().equals(currentUserId)) {
             throw new ChatException(ErrorCodeException.USER_CANNOT_DELETE_NOT_OWN_MESSAGE);
+        }
+
+        if (messageRepository.getAmountOfMessagesInChatRoomByDate(message.getChatRoom().getId(), LocalDate.now()) == 1) {
+            messageRepository.deleteSystemMessageByDate(message.getChatRoom().getId(), message.getSentAt().toLocalDate());
         }
 
         messageRepository.delete(message);

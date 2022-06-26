@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -97,12 +98,13 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 new ChatRoomUser(currentUserId, newChatRoom),
                 new ChatRoomUser(dto.getUserId(), newChatRoom)
             ));
+            newChatRoom.setCreatedAt(LocalDateTime.now());
             ChatRoom savedChatRoom = chatRoomRepository.save(newChatRoom);
             return ChatRoomMapper.toChatRoomInfoDto(savedChatRoom, 0);
         }
         ChatRoom foundChatRoom = chat.get();
 
-        return ChatRoomMapper.toChatRoomInfoDto(foundChatRoom, chatRoomRepository.getAmountOfNotReadMessages(foundChatRoom.getId()));
+        return ChatRoomMapper.toChatRoomInfoDto(foundChatRoom, chatRoomRepository.getAmountOfNotReadMessages(foundChatRoom.getId(), currentUserId));
     }
 
     @Override
@@ -119,6 +121,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 new ChatRoomUser(systemUserId, newChatRoom),
                 new ChatRoomUser(userId, newChatRoom)
             ));
+            newChatRoom.setCreatedAt(LocalDateTime.now());
             return ChatRoomMapper.toChatRoomDto(chatRoomRepository.save(newChatRoom));
         }
         return ChatRoomMapper.toChatRoomDto(chat.get());
@@ -172,6 +175,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             new ChatRoomUser(dto.getUserId(), newChatRoom),
             new ChatRoomUser(currentUserId, newChatRoom)
         ));
+        newChatRoom.setCreatedAt(LocalDateTime.now());
         return ChatRoomMapper.toChatRoomDto(chatRoomRepository.save(newChatRoom));
     }
 
@@ -214,7 +218,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             .orElseThrow(() -> new ChatException(ErrorCodeException.CHAT_NOT_FOUND));
         checkIfUserMemberOfChat(chatRoom, currentUserId);
 
-        boolean isLastMessage = chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId());
+        boolean isLastMessage = messageRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId());
 
         Message deletedMessage = messageService.deleteMessage(dto, currentUserId);
 
@@ -247,7 +251,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
         Message updatedMessage = messageService.updateMessage(dto, currentUserId);
 
-        if(chatRoomRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId())) {
+        if(messageRepository.isLastMessageInChatRoom(chatRoom.getId(), dto.getMessageId())) {
             var messageStatusDto = convertToChatRoomMessageStatusDto(chatRoom.getId(), updatedMessage);
             template.convertAndSend(USER_SOCKET_NOTIFICATION + getAnotherUserIdFromChat(chatRoom, currentUserId), messageStatusDto);
         }

@@ -1,8 +1,6 @@
 package com.socialnetwork.chat.entity;
 
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -14,7 +12,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "chat_room")
 @Builder(toBuilder = true)
-@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatRoom {
 
@@ -28,7 +25,6 @@ public class ChatRoom {
     @OneToMany(mappedBy="chatRoom", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Set<Message> messages;
 
-    @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     protected LocalDateTime createdAt;
 }

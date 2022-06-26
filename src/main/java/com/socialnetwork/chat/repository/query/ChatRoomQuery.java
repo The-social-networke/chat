@@ -37,6 +37,7 @@ public interface ChatRoomQuery {
             "                ON user__chat_room.user_id = :userId" +
             "                AND user__chat_room.chat_room_id = message.chat_room_id" +
             "                AND message.user_id != :userId" +
+            "                AND message.is_system = false" +
             //"            -- JOIN ALL READ MESSAGE" +
             "            LEFT JOIN read_message" +
             "                ON read_message.message_id = message.id" +
@@ -117,21 +118,6 @@ public interface ChatRoomQuery {
             "       JOIN user__chat_room ucr2 " +
             "           ON ucr1.chat_room_id = ucr2.chat_room_id" +
             "           AND (ucr1.user_id, ucr2.user_id) = (:userOne, :userTwo)" +
-            ")";
-
-    String IS_LAST_MESSAGE_IN_CHAT_ROOM =
-        "SELECT EXISTS(" +
-            "    SELECT *" +
-            "    FROM (" +
-            "        SELECT message.id" +
-            "        FROM chat_room" +
-            "        JOIN message" +
-            "            ON message.chat_room_id = :chatRoomId" +
-            "            AND chat_room.id = message.chat_room_id" +
-            "        ORDER BY message.sent_at DESC" +
-            "        LIMIT 1" +
-            "    ) AS last_message" +
-            "    WHERE last_message.id = :messageId" +
             ")";
 
     String GET_AMOUNT_OF_NOT_READ_MESSAGE =

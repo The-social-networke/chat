@@ -3,11 +3,8 @@ package com.socialnetwork.chat.entity;
 import com.socialnetwork.chat.model.enums.ForwardType;
 import com.socialnetwork.chat.model.enums.MessageStatus;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -21,11 +18,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "message")
 @Builder(toBuilder = true)
-@EntityListeners(AuditingEntityListener.class)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Message implements Serializable {
-
-    private static final long serialVersionUID = 4093469586290478383L;
+public class Message {
 
     @Id
     @Column(updatable = false)
@@ -45,12 +39,14 @@ public class Message implements Serializable {
     @Column(name = "forward_type")
     private ForwardType forwardType;
 
-    @CreationTimestamp
     @Column(name = "sent_at", nullable = false, updatable = false)
     private LocalDateTime sentAt;
 
-    @Column(name = "is_updated", columnDefinition = "boolean default false")
+    @Column(name = "is_updated")
     private boolean isUpdated;
+
+    @Column(name = "is_system")
+    private boolean isSystem;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     private ChatRoom chatRoom;

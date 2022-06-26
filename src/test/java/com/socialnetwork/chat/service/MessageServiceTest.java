@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -104,7 +105,7 @@ class MessageServiceTest {
 
 
     @Test
-    void testSentMessage() {
+    void testSentMessage_ifMessageTodayIsNotFirst() {
         String userId = "1";
         Message expectedResult = messages.get(0)
             .toBuilder()
@@ -116,17 +117,42 @@ class MessageServiceTest {
             .text(expectedResult.getText())
             .build();
 
+        when(repository.getAmountOfMessagesInChatRoomByDate(eq(expectedResult.getChatRoom().getId()), any(LocalDate.class))).thenReturn(2);
         when(repository.save(any(Message.class))).thenReturn(expectedResult);
 
         Message messageResult = service.sendMessage(dto, userId);
 
         Assertions.assertEquals(expectedResult, messageResult);
         verify(repository).save(any(Message.class));
+        verify(repository).getAmountOfMessagesInChatRoomByDate(eq(expectedResult.getChatRoom().getId()), any(LocalDate.class));
+    }
+
+    @Test
+    void testSentMessage_ifFirst() {
+        String userId = "1";
+        Message expectedResult = messages.get(0)
+            .toBuilder()
+            .messageStatus(MessageStatus.SENT)
+            .build();
+        MessageCreateRequest dto = new MessageCreateRequest()
+            .toBuilder()
+            .chatRoomId(chatId)
+            .text(expectedResult.getText())
+            .build();
+
+        when(repository.getAmountOfMessagesInChatRoomByDate(eq(expectedResult.getChatRoom().getId()), any(LocalDate.class))).thenReturn(0);
+        when(repository.save(any(Message.class))).thenReturn(expectedResult);
+
+        Message messageResult = service.sendMessage(dto, userId);
+
+        Assertions.assertEquals(expectedResult, messageResult);
+        verify(repository, times(2)).save(any(Message.class));
+        verify(repository).getAmountOfMessagesInChatRoomByDate(eq(expectedResult.getChatRoom().getId()), any(LocalDate.class));
     }
 
 
     @Test
-    void testDeleteMessage_ifMessageBelongToUser() {
+    void testDeleteMessage_ifMessageBelongToUserAndNotLastByDay() {
         String currentUser = messages.get(0).getUserId();
         Message messageFound = messages.get(0);
         MessageDeleteRequest dto = new MessageDeleteRequest()
@@ -135,11 +161,35 @@ class MessageServiceTest {
             .build();
 
         when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        when(repository.getAmountOfMessagesInChatRoomByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class))).thenReturn(2);
         doNothing().when(repository).delete(messageFound);
 
         service.deleteMessage(dto, currentUser);
 
         verify(repository).findById(dto.getMessageId());
+        verify(repository).delete(messageFound);
+        verify(repository).getAmountOfMessagesInChatRoomByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class));
+    }
+
+    @Test
+    void testDeleteMessage_ifMessageBelongToUserAndLastByDay() {
+        String currentUser = messages.get(0).getUserId();
+        Message messageFound = messages.get(0);
+        MessageDeleteRequest dto = new MessageDeleteRequest()
+            .toBuilder()
+            .messageId(messages.get(0).getId())
+            .build();
+
+        when(repository.findById(dto.getMessageId())).thenReturn(Optional.of(messageFound));
+        when(repository.getAmountOfMessagesInChatRoomByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class))).thenReturn(1);
+        doNothing().when(repository).deleteSystemMessageByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class));
+        doNothing().when(repository).delete(messageFound);
+
+        service.deleteMessage(dto, currentUser);
+
+        verify(repository).findById(dto.getMessageId());
+        verify(repository).getAmountOfMessagesInChatRoomByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class));
+        verify(repository).deleteSystemMessageByDate(eq(messageFound.getChatRoom().getId()), any(LocalDate.class));
         verify(repository).delete(messageFound);
     }
 
