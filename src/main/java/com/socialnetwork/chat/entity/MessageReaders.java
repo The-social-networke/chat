@@ -1,17 +1,8 @@
 package com.socialnetwork.chat.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "read_message")
 public class MessageReaders {
 
@@ -25,8 +16,36 @@ public class MessageReaders {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Message message;
 
+
+    public MessageReaders() {
+    }
+
     public MessageReaders(String userId, Message message) {
         this.userId = userId;
+        this.message = message;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public void setMessage(Message message) {
         this.message = message;
     }
 }

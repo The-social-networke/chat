@@ -1,16 +1,9 @@
 package com.socialnetwork.chat.entity;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
 @Table(name = "liked_message")
 public class MessageLike {
 
@@ -29,6 +22,33 @@ public class MessageLike {
         this.message = message;
     }
 
+
+    public MessageLike() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Message getMessage() {
+        return message;
+    }
+
+    public void setMessage(Message message) {
+        this.message = message;
+    }
 
     @Override
     public boolean equals(Object o) {

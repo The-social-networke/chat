@@ -92,6 +92,7 @@ class ChatRoomServiceTest {
         messages = List.of(
             new Message()
                 .toBuilder()
+                .id("1")
                 .text("message 1 from user 1")
                 .userId(users.get(0))
                 .sentAt(LocalDateTime.now())
@@ -104,6 +105,7 @@ class ChatRoomServiceTest {
                 .build(),
             new Message()
                 .toBuilder()
+                .id("2")
                 .text("message 2 from user 2")
                 .userId(users.get(1))
                 .sentAt(LocalDateTime.now())
@@ -116,6 +118,7 @@ class ChatRoomServiceTest {
                 .build(),
             new Message()
                 .toBuilder()
+                .id("3")
                 .text("message 1 from user 2")
                 .userId(users.get(1))
                 .sentAt(LocalDateTime.now())
@@ -128,6 +131,7 @@ class ChatRoomServiceTest {
                 .build(),
             new Message()
                 .toBuilder()
+                .id("4")
                 .text("message 2 from user 3")
                 .userId(users.get(2))
                 .sentAt(LocalDateTime.now())
